@@ -133,13 +133,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         email: newClientData.email,
         phone: newClientData.phone || null,
         address: newClientData.address || null,
-        city: newClientData.city || null,
-        country: newClientData.country || "Sénégal",
-        tax_id: newClientData.taxId || null,
-        initials,
-        color,
-        total_invoices: 0,
-        total_paid: 0,
+        ninea: newClientData.taxId || null,
       })
       .select()
       .single();
