@@ -128,7 +128,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase
       .from("clients")
       .insert({
-        user_id: session!.user.id,
+        profile_id: session!.user.id,
         name: newClientData.name,
         email: newClientData.email,
         phone: newClientData.phone || null,
@@ -153,7 +153,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     const { data, error } = await supabase
       .from("invoices")
       .insert({
-        user_id: session!.user.id,
+        profile_id: session!.user.id,
         number: newInvoiceData.number,
         client_id: newInvoiceData.clientId || null,
         client_name: newInvoiceData.client,
