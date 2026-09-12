@@ -3,14 +3,15 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "./AuthContext";
-import type { Client, Invoice, InvoiceStatus, InvoiceItem } from "@/lib/data";
+import type { Client, Invoice, InvoiceStatus, InvoiceItem, Payment, PaymentStatus } from "@/lib/data";
 
 // Re-export types for convenience
-export type { Client, Invoice, InvoiceStatus };
+export type { Client, Invoice, InvoiceStatus, Payment, PaymentStatus };
 
 interface AppDataContextProps {
   clientsList: Client[];
   invoicesList: Invoice[];
+  transactionsList: Payment[];
   loading: boolean;
   addClient: (client: Omit<Client, "id" | "totalInvoices" | "totalPaid" | "createdAt" | "initials" | "color">) => Promise<void>;
   addInvoice: (invoice: Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }) => Promise<void>;
@@ -79,6 +80,25 @@ function rowToInvoice(row: Record<string, unknown>): Invoice {
   };
 }
 
+// Map Supabase row → Payment
+function rowToPayment(row: Record<string, unknown>): Payment {
+  const invoiceData = row.invoices as Record<string, unknown> | undefined;
+  const clientData = invoiceData?.clients as { name?: string; id?: string } | undefined;
+  
+  return {
+    id: row.id as string,
+    invoiceId: row.invoice_id as string,
+    invoiceNumber: (invoiceData?.invoice_number as string) || "N/A",
+    clientId: (clientData?.id as string) || "",
+    clientName: (clientData?.name as string) || "Client inconnu",
+    amount: row.amount as number,
+    paymentMethod: (row.payment_method as string) || "Non spécifié",
+    transactionId: (row.transaction_id as string) || "",
+    paymentDate: row.payment_date ? new Date(row.payment_date as string).toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "",
+    status: (row.status as PaymentStatus) || "completed",
+  };
+}
+
 // Parse DD/MM/YYYY → YYYY-MM-DD for Supabase
 function parseDateForDB(dateStr: string): string {
   if (!dateStr) return new Date().toISOString().split("T")[0];
@@ -93,6 +113,7 @@ function parseDateForDB(dateStr: string): string {
 export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
+  const [transactionsList, setTransactionsList] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
   const { session } = useAuth();
   const supabase = createClient();
@@ -106,12 +127,14 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
     setLoading(true);
     try {
-      const [{ data: clientsData }, { data: invoicesData }] = await Promise.all([
+      const [{ data: clientsData }, { data: invoicesData }, { data: paymentsData }] = await Promise.all([
         supabase.from("clients").select("*").order("created_at", { ascending: false }),
         supabase.from("invoices").select("*, clients(name, email)").order("created_at", { ascending: false }),
+        supabase.from("payments").select("*, invoices(invoice_number, clients(id, name))").order("created_at", { ascending: false }),
       ]);
       setClientsList((clientsData || []).map(rowToClient));
       setInvoicesList((invoicesData || []).map(rowToInvoice));
+      setTransactionsList((paymentsData || []).map(rowToPayment));
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -217,6 +240,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
       value={{
         clientsList,
         invoicesList,
+        transactionsList,
         loading,
         addClient,
         addInvoice,

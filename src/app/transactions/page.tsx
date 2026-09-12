@@ -3,31 +3,14 @@
 import { useState } from "react";
 import { ArrowDownRight, ArrowUpRight, Search, Filter, CreditCard } from "lucide-react";
 import { formatFCFA } from "@/lib/utils";
+import { useAppData } from "@/context/AppDataContext";
+import { Payment } from "@/lib/data";
 
-type PaymentMethod = "all" | "wave" | "orange-money" | "bank";
+type PaymentMethod = "all" | "wave" | "orange-money" | "bank" | string;
 
-interface Transaction {
-  id: string;
-  type: "income" | "expense";
-  title: string;
-  client: string;
-  date: string;
-  amount: number;
-  status: "completed" | "pending";
-  method: "wave" | "orange-money" | "bank";
-}
-
-const transactions: Transaction[] = [
-  { id: "1", type: "income", title: "Paiement Facture #INV-2026-001", client: "Cansaas Agency", date: "02 Sept 2026", amount: 2500000, status: "completed", method: "wave" },
-  { id: "2", type: "income", title: "Paiement Facture #INV-2026-005", client: "Africorp Solutions", date: "28 Août 2026", amount: 3200000, status: "completed", method: "orange-money" },
-  { id: "3", type: "expense", title: "Abonnement Serveur AWS", client: "Amazon Web Services", date: "25 Août 2026", amount: 45000, status: "completed", method: "bank" },
-  { id: "4", type: "income", title: "Paiement Facture #INV-2026-007", client: "Cansaas Agency", date: "20 Août 2026", amount: 950000, status: "completed", method: "wave" },
-  { id: "5", type: "expense", title: "Frais bancaires", client: "Banque Atlantique", date: "15 Août 2026", amount: 15000, status: "completed", method: "bank" },
-  { id: "6", type: "income", title: "Paiement Facture #INV-2026-009", client: "SeneService SARL", date: "10 Août 2026", amount: 480000, status: "completed", method: "orange-money" },
-];
-
-function MethodBadge({ method }: { method: "wave" | "orange-money" | "bank" }) {
-  if (method === "wave") {
+function MethodBadge({ method }: { method: string }) {
+  const m = method.toLowerCase();
+  if (m === "wave") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#1dc3f7]/15 text-[#008db9] dark:text-[#38bdf8] border border-[#1dc3f7]/30">
         <img src="/Wave.webp" alt="Wave" className="w-4 h-4 rounded-full object-cover" />
@@ -35,7 +18,7 @@ function MethodBadge({ method }: { method: "wave" | "orange-money" | "bank" }) {
       </span>
     );
   }
-  if (method === "orange-money") {
+  if (m === "orange-money" || m === "om") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#ff6600]/15 text-[#d95700] dark:text-[#ff8533] border border-[#ff6600]/30">
         <img src="/om.webp" alt="Orange Money" className="w-4 h-4 rounded-full object-cover" />
@@ -52,13 +35,15 @@ function MethodBadge({ method }: { method: "wave" | "orange-money" | "bank" }) {
 }
 
 export default function TransactionsPage() {
+  const { transactionsList } = useAppData();
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTransactions = transactions.filter((tx) => {
-    const matchesMethod = selectedMethod === "all" || tx.method === selectedMethod;
-    const matchesSearch = tx.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          tx.client.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredTransactions = transactionsList.filter((tx) => {
+    const m = tx.paymentMethod.toLowerCase();
+    const matchesMethod = selectedMethod === "all" || m === selectedMethod || (selectedMethod === "orange-money" && m === "om");
+    const matchesSearch = tx.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          tx.clientName.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesMethod && matchesSearch;
   });
 
@@ -140,26 +125,26 @@ export default function TransactionsPage() {
                   <tr key={tx.id} className="hover:bg-accent/40 transition-colors">
                     <td className="pl-6 pr-3 py-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${tx.type === 'income' ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/15 text-rose-600 dark:text-rose-400'}`}>
-                          {tx.type === 'income' ? <ArrowDownRight className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+                          <ArrowDownRight className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="font-semibold text-sm text-foreground">{tx.title}</p>
-                          <p className="text-xs text-muted-foreground">{tx.client}</p>
+                          <p className="font-semibold text-sm text-foreground">Paiement Facture #{tx.invoiceNumber}</p>
+                          <p className="text-xs text-muted-foreground">{tx.clientName}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-4 text-sm whitespace-nowrap">
-                      <MethodBadge method={tx.method} />
+                      <MethodBadge method={tx.paymentMethod} />
                     </td>
-                    <td className="px-3 py-4 text-sm text-muted-foreground whitespace-nowrap">{tx.date}</td>
+                    <td className="px-3 py-4 text-sm text-muted-foreground whitespace-nowrap">{tx.paymentDate}</td>
                     <td className="px-3 py-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
-                        Terminé
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${tx.status === 'completed' ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-700 dark:text-amber-400'}`}>
+                        {tx.status === 'completed' ? 'Terminé' : 'En attente'}
                       </span>
                     </td>
-                    <td className={`pr-6 py-4 text-right font-mono font-bold whitespace-nowrap ${tx.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                      {tx.type === 'income' ? '+' : '-'}{formatFCFA(tx.amount)}
+                    <td className="pr-6 py-4 text-right font-mono font-bold whitespace-nowrap text-emerald-600 dark:text-emerald-400">
+                      +{formatFCFA(tx.amount)}
                     </td>
                   </tr>
                 ))

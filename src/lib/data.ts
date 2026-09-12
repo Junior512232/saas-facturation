@@ -40,6 +40,21 @@ export interface Invoice {
   notes?: string;
 }
 
+export type PaymentStatus = "completed" | "pending" | "failed";
+
+export interface Payment {
+  id: string;
+  invoiceId: string;
+  invoiceNumber: string; // resolved from relation
+  clientId: string; // resolved from relation
+  clientName: string; // resolved from relation
+  amount: number;
+  paymentMethod: string;
+  transactionId: string;
+  paymentDate: string;
+  status: PaymentStatus;
+}
+
 // ─── Mock Clients ────────────────────────────────────────────────────────────
 
 export const clients: Client[] = [

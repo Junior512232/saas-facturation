@@ -18,6 +18,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import { formatFCFA } from "@/lib/utils";
+import { useAppData } from "@/context/AppDataContext";
 
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-10 h-10" }: { className?: string }) {
@@ -92,7 +93,15 @@ function QrCodeSVG({ value = "wave-om-pay" }: { value?: string }) {
 }
 
 export default function WalletPage() {
-  const [balance, setBalance] = useState(4850000);
+  const { transactionsList } = useAppData();
+  
+  // Real balance from transactions
+  const totalIncome = transactionsList.reduce((acc, tx) => acc + (tx.status === 'completed' ? tx.amount : 0), 0);
+  
+  // Mock withdrawals state to keep the UI interactive
+  const [mockWithdrawals, setMockWithdrawals] = useState(0);
+  const balance = Math.max(0, totalIncome - mockWithdrawals);
+
   const [modalType, setModalType] = useState<"withdraw" | "recharge" | "bank" | "add_account" | "qr" | null>(null);
   const [copied, setCopied] = useState(false);
   const [amountInput, setAmountInput] = useState("");
@@ -113,7 +122,7 @@ export default function WalletPage() {
     e.preventDefault();
     const val = Number(amountInput);
     if (val > 0 && val <= balance) {
-      setBalance((prev) => prev - val);
+      setMockWithdrawals((prev) => prev + val);
       setSuccessMessage(`Retrait de ${formatFCFA(val)} via ${selectedProvider === 'wave' ? 'Wave' : selectedProvider === 'orange-money' ? 'Orange Money' : 'Virement'} effectué avec succès !`);
       setModalType(null);
       setAmountInput("");
@@ -125,7 +134,7 @@ export default function WalletPage() {
     e.preventDefault();
     const val = Number(amountInput);
     if (val > 0) {
-      setBalance((prev) => prev + val);
+      setMockWithdrawals((prev) => prev - val); // Negative withdrawal = recharge
       setSuccessMessage(`Rechargement de ${formatFCFA(val)} via ${selectedProvider === 'wave' ? 'Wave' : 'Orange Money'} effectué avec succès !`);
       setModalType(null);
       setAmountInput("");
