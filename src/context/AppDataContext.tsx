@@ -173,7 +173,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
           description: item.description,
           quantity: item.quantity,
           unit_price: item.unitPrice,
-          amount: item.amount,
+          amount: item.quantity * item.unitPrice,
         }));
         await supabase.from("invoice_items").insert(itemsToInsert);
       }
