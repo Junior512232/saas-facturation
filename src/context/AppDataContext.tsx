@@ -62,15 +62,16 @@ function rowToClient(row: Record<string, unknown>): Client {
 function rowToInvoice(row: Record<string, unknown>): Invoice {
   const issueDate = row.issue_date as string;
   const dueDate = row.due_date as string;
+  const clientData = row.clients as { name?: string; email?: string } | undefined;
   return {
     id: row.id as string,
-    number: row.number as string,
+    number: (row.invoice_number as string) || (row.number as string) || "",
     clientId: (row.client_id as string) || "",
-    client: row.client_name as string,
-    clientEmail: row.client_email as string,
+    client: clientData?.name || (row.client_name as string) || "Client inconnu",
+    clientEmail: clientData?.email || (row.client_email as string) || "",
     issueDate: issueDate ? new Date(issueDate).toLocaleDateString("fr-FR") : "",
     dueDate: dueDate ? new Date(dueDate).toLocaleDateString("fr-FR") : "",
-    amount: (row.amount as number) || 0,
+    amount: (row.total as number) || (row.amount as number) || 0,
     taxRate: (row.tax_rate as number) || 18,
     status: (row.status as InvoiceStatus) || "draft",
     items: (row.items as InvoiceItem[]) || [],
@@ -107,7 +108,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       const [{ data: clientsData }, { data: invoicesData }] = await Promise.all([
         supabase.from("clients").select("*").order("created_at", { ascending: false }),
-        supabase.from("invoices").select("*").order("created_at", { ascending: false }),
+        supabase.from("invoices").select("*, clients(name, email)").order("created_at", { ascending: false }),
       ]);
       setClientsList((clientsData || []).map(rowToClient));
       setInvoicesList((invoicesData || []).map(rowToInvoice));
@@ -144,36 +145,40 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addInvoice = async (newInvoiceData: Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }) => {
+    const taxRate = newInvoiceData.taxRate || 18;
+    const subtotal = newInvoiceData.amount / (1 + taxRate / 100);
+    const taxAmount = newInvoiceData.amount - subtotal;
+
     const { data, error } = await supabase
       .from("invoices")
       .insert({
         profile_id: session!.user.id,
-        number: newInvoiceData.number,
+        invoice_number: newInvoiceData.number,
         client_id: newInvoiceData.clientId || null,
-        client_name: newInvoiceData.client,
-        client_email: newInvoiceData.clientEmail,
         issue_date: parseDateForDB(newInvoiceData.issueDate),
         due_date: parseDateForDB(newInvoiceData.dueDate),
-        amount: newInvoiceData.amount,
-        tax_rate: newInvoiceData.taxRate || 18,
+        subtotal: subtotal,
+        tax_amount: taxAmount,
+        total: newInvoiceData.amount,
         status: newInvoiceData.status || "draft",
-        items: newInvoiceData.items || [],
         notes: newInvoiceData.notes || null,
       })
-      .select()
+      .select("*, clients(name, email)")
       .single();
 
     if (!error && data) {
-      setInvoicesList((prev) => [rowToInvoice(data), ...prev]);
-      // Update client invoice count
-      if (newInvoiceData.clientId) {
-        await supabase.rpc("increment_client_invoices", { client_id_param: newInvoiceData.clientId });
-        setClientsList((prev) =>
-          prev.map((c) =>
-            c.id === newInvoiceData.clientId ? { ...c, totalInvoices: c.totalInvoices + 1 } : c
-          )
-        );
+      if (newInvoiceData.items && newInvoiceData.items.length > 0) {
+        const itemsToInsert = newInvoiceData.items.map((item) => ({
+          invoice_id: data.id,
+          description: item.description,
+          quantity: item.quantity,
+          unit_price: item.unitPrice,
+          amount: item.amount,
+        }));
+        await supabase.from("invoice_items").insert(itemsToInsert);
       }
+
+      setInvoicesList((prev) => [rowToInvoice(data), ...prev]);
     }
   };
 
