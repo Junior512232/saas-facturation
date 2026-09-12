@@ -46,6 +46,11 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
     }
   }, [loading, isAuthenticated, isPublicRoute, router]);
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   // Public pages (login/register): render without sidebar/header
   if (isPublicRoute) {
     return <>{children}</>;
