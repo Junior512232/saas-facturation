@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useAppStore } from "@/lib/store";
+import { useAppData } from "@/context/AppDataContext";
 import { formatFCFA } from "@/lib/utils";
 import { Invoice, InvoiceItem } from "@/lib/data";
 import { ArrowLeft, Plus, Trash2, GripVertical, AlertCircle } from "lucide-react";
@@ -17,7 +17,7 @@ interface LineItem {
 
 export default function NewInvoicePage() {
   const router = useRouter();
-  const { clients, invoices, addInvoice } = useAppStore();
+  const { clientsList: clients, invoicesList: invoices, addInvoice } = useAppData();
 
   const [clientId, setClientId] = useState("");
   const [issueDate, setIssueDate] = useState(
@@ -82,7 +82,12 @@ export default function NewInvoicePage() {
         unitPrice: item.unitPrice,
       })),
     };
-    addInvoice(newInvoice);
+    
+    // addInvoice in context takes an Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }
+    // It creates the id itself, so we don't need to pass it, but TS might complain if we defined newInvoice as Invoice.
+    // So we just omit id from the payload.
+    const { id, ...payload } = newInvoice;
+    addInvoice(payload);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

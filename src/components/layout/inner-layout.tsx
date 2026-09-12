@@ -82,7 +82,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
           breadcrumbs={getBreadcrumb(pathname)}
           onMenuClick={() => setIsMobileMenuOpen(true)}
         />
-        <div className="flex-1 overflow-y-auto bg-background/50">
+        <div className="flex-1 overflow-y-auto bg-background">
           {children}
         </div>
       </main>

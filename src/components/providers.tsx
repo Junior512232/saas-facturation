@@ -10,10 +10,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== "undefined") {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
   }, []);
 
   return (
