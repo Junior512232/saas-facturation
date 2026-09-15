@@ -59,7 +59,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
   // Show nothing while checking auth (avoid flash of sidebar)
   if (loading || !isAuthenticated) {
     return (
-      <div className="flex-1 flex items-center justify-center h-screen">
+      <div className="flex-1 flex items-center justify-center h-[100dvh]">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-sm text-muted-foreground">Chargement...</p>
@@ -76,7 +76,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
           <Sidebar isMobile />
         </SheetContent>
       </Sheet>
-      <main className="flex-1 flex flex-col h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden w-full max-w-full">
         <Header
           title={getPageTitle(pathname)}
           breadcrumbs={getBreadcrumb(pathname)}

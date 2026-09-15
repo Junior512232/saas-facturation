@@ -168,11 +168,11 @@ export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
         )}
         <div className="flex flex-col">
           {breadcrumbs && (
-            <span className="text-sm font-medium text-muted-foreground mb-0.5">
+            <span className="text-xs sm:text-sm font-medium text-muted-foreground mb-0.5 truncate max-w-[150px] sm:max-w-none">
               {breadcrumbs}
             </span>
           )}
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">{title}</h1>
+          <h1 className="text-lg sm:text-2xl font-semibold text-foreground tracking-tight truncate max-w-[200px] sm:max-w-none">{title}</h1>
         </div>
       </div>
 
@@ -195,7 +195,7 @@ export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
 
         {/* Notifications Dropdown Panel */}
         {showDropdown && (
-          <div className="absolute right-0 top-14 w-80 sm:w-96 bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="absolute right-0 top-14 w-[300px] sm:w-96 bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
             {/* Dropdown Header */}
             <div className="p-4 border-b border-border flex items-center justify-between bg-muted/30">
               <div className="flex items-center gap-2">

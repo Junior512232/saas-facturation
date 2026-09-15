@@ -54,7 +54,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
   ];
 
   return (
-    <aside className={`w-64 bg-sidebar border-r border-sidebar-border flex-col h-screen ${isMobile ? "flex" : "hidden md:flex"}`}>
+    <aside className={`w-64 bg-sidebar border-r border-sidebar-border flex-col h-[100dvh] ${isMobile ? "flex" : "hidden md:flex"}`}>
       {/* Logo */}
       <div className="p-6 pb-4">
         <Link href="/" className="flex items-center gap-2 text-xl font-bold text-sidebar-primary">
