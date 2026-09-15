@@ -8,6 +8,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
 const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_PREFIXES = ["/pay/"];
 
 function getPageTitle(pathname: string): string {
   if (pathname === "/") return "Dashboard";
@@ -37,7 +38,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
   const { isAuthenticated, loading } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+  const isPublicRoute = PUBLIC_ROUTES.includes(pathname) || PUBLIC_PREFIXES.some(prefix => pathname.startsWith(prefix));
 
   // Redirect unauthenticated users to /login
   useEffect(() => {
