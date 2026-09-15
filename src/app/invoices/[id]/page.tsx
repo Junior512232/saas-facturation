@@ -58,9 +58,9 @@ export default function InvoiceDetailPage() {
   };
 
   return (
-    <div className="p-6 lg:p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
+    <div className="p-6 lg:p-10 max-w-5xl mx-auto w-full flex flex-col gap-6 print:p-0 print:m-0 print:block">
       {/* Header & Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
         <div className="flex items-center gap-4">
           <Link href="/invoices">
             <Button variant="outline" size="icon" className="rounded-full w-10 h-10">
@@ -105,19 +105,19 @@ export default function InvoiceDetailPage() {
 
       {/* Invoice Document */}
       <div 
-        className="print-area bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-8 sm:p-12 mt-4"
+        className="print-area bg-card rounded-2xl border border-border shadow-sm overflow-hidden p-8 sm:p-12 mt-4 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white"
       >
         
         {/* Invoice Top */}
-        <div className="flex flex-col md:flex-row justify-between gap-8 mb-12">
+        <div className="flex flex-col md:flex-row print:flex-row justify-between gap-8 mb-12">
           <div>
             <div className="flex items-center gap-2 text-2xl font-bold text-primary mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white print:bg-blue-600">
                 <div className="w-4 h-4 border-2 border-white rounded-sm" />
               </div>
-              iziFacture
+              <span className="print:text-blue-600">iziFacture</span>
             </div>
-            <div className="text-sm text-muted-foreground flex flex-col gap-1">
+            <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600">
               <p>123 Rue de la République</p>
               <p>Dakar, Sénégal</p>
               <p>contact@izifacture.com</p>
@@ -125,48 +125,48 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
           
-          <div className="flex flex-col md:items-end">
-            <h1 className="text-4xl font-black text-muted-foreground/30 uppercase tracking-widest mb-4">Facture</h1>
+          <div className="flex flex-col md:items-end print:items-end">
+            <h1 className="text-4xl font-black text-muted-foreground/30 uppercase tracking-widest mb-4 print:text-gray-200">Facture</h1>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <span className="text-muted-foreground md:text-right">Numéro:</span>
+              <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Numéro:</span>
               <span className="font-semibold">{invoice.number}</span>
               
-              <span className="text-muted-foreground md:text-right">Date d'émission:</span>
+              <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Date d'émission:</span>
               <span className="font-semibold">{invoice.issueDate}</span>
               
-              <span className="text-muted-foreground md:text-right">Date d'échéance:</span>
+              <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Date d'échéance:</span>
               <span className="font-semibold">{invoice.dueDate}</span>
             </div>
           </div>
         </div>
 
         {/* Client Info */}
-        <div className="mb-12 p-6 bg-muted/30 rounded-xl border border-border/50">
-          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">Facturé à</p>
-          <div className="text-foreground">
+        <div className="mb-12 p-6 bg-muted/30 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200">
+          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 print:text-gray-500">Facturé à</p>
+          <div className="text-foreground print:text-black">
             <p className="text-xl font-bold mb-1">{invoice.client}</p>
-            <p className="text-muted-foreground">{invoice.clientEmail}</p>
+            <p className="text-muted-foreground print:text-gray-600">{invoice.clientEmail}</p>
           </div>
         </div>
 
         {/* Invoice Items */}
         <div className="mb-8">
           <Table>
-            <TableHeader className="bg-muted/50 rounded-t-xl">
-              <TableRow className="border-b-border hover:bg-transparent">
-                <TableHead className="font-semibold text-foreground">Description</TableHead>
-                <TableHead className="text-center font-semibold text-foreground w-24">Qté</TableHead>
-                <TableHead className="text-right font-semibold text-foreground w-40">Prix unitaire</TableHead>
-                <TableHead className="text-right font-semibold text-foreground w-40">Total</TableHead>
+            <TableHeader className="bg-muted/50 rounded-t-xl print:bg-gray-100">
+              <TableRow className="border-b-border hover:bg-transparent print:border-gray-200">
+                <TableHead className="font-semibold text-foreground print:text-black">Description</TableHead>
+                <TableHead className="text-center font-semibold text-foreground w-24 print:text-black">Qté</TableHead>
+                <TableHead className="text-right font-semibold text-foreground w-40 print:text-black">Prix unitaire</TableHead>
+                <TableHead className="text-right font-semibold text-foreground w-40 print:text-black">Total</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {invoice.items.map((item) => (
-                <TableRow key={item.id} className="border-b-border/50 hover:bg-transparent">
-                  <TableCell className="py-4 font-medium">{item.description}</TableCell>
-                  <TableCell className="py-4 text-center">{item.quantity}</TableCell>
-                  <TableCell className="py-4 text-right font-mono">{formatFCFA(item.unitPrice)}</TableCell>
-                  <TableCell className="py-4 text-right font-mono font-semibold">
+                <TableRow key={item.id} className="border-b-border/50 hover:bg-transparent print:border-gray-200">
+                  <TableCell className="py-4 font-medium print:text-black">{item.description}</TableCell>
+                  <TableCell className="py-4 text-center print:text-gray-700">{item.quantity}</TableCell>
+                  <TableCell className="py-4 text-right font-mono print:text-gray-700">{formatFCFA(item.unitPrice)}</TableCell>
+                  <TableCell className="py-4 text-right font-mono font-semibold print:text-black">
                     {formatFCFA(item.quantity * item.unitPrice)}
                   </TableCell>
                 </TableRow>
@@ -176,31 +176,31 @@ export default function InvoiceDetailPage() {
         </div>
 
         {/* Totals */}
-        <div className="flex flex-col md:flex-row justify-between items-start gap-8">
-          <div className="w-full md:w-1/2">
+        <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8">
+          <div className="w-full md:w-1/2 print:w-1/2">
             {invoice.notes && (
               <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-2">Notes</p>
-                <p className="text-sm text-foreground bg-muted/30 p-4 rounded-xl border border-border/50">
+                <p className="text-sm font-semibold text-muted-foreground mb-2 print:text-gray-500">Notes</p>
+                <p className="text-sm text-foreground bg-muted/30 p-4 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 print:text-black">
                   {invoice.notes}
                 </p>
               </div>
             )}
           </div>
           
-          <div className="w-full md:w-[350px]">
+          <div className="w-full md:w-[350px] print:w-[350px]">
             <div className="flex flex-col gap-3 text-sm">
-              <div className="flex justify-between items-center text-muted-foreground">
+              <div className="flex justify-between items-center text-muted-foreground print:text-gray-600">
                 <span>Sous-total</span>
-                <span className="font-mono text-foreground">{formatFCFA(subtotal)}</span>
+                <span className="font-mono text-foreground print:text-black">{formatFCFA(subtotal)}</span>
               </div>
-              <div className="flex justify-between items-center text-muted-foreground">
+              <div className="flex justify-between items-center text-muted-foreground print:text-gray-600">
                 <span>TVA ({invoice.taxRate}%)</span>
-                <span className="font-mono text-foreground">{formatFCFA(taxAmount)}</span>
+                <span className="font-mono text-foreground print:text-black">{formatFCFA(taxAmount)}</span>
               </div>
-              <div className="border-t border-border pt-3 mt-1 flex justify-between items-center">
-                <span className="text-lg font-bold">Total TTC</span>
-                <span className="text-2xl font-black font-mono text-primary">{formatFCFA(total)}</span>
+              <div className="border-t border-border pt-3 mt-1 flex justify-between items-center print:border-gray-300">
+                <span className="text-lg font-bold print:text-black">Total TTC</span>
+                <span className="text-2xl font-black font-mono text-primary print:text-blue-600">{formatFCFA(total)}</span>
               </div>
             </div>
           </div>

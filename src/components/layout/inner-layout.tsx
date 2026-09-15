@@ -70,19 +70,23 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <Sidebar />
+      <div className="print:hidden">
+        <Sidebar />
+      </div>
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
         <SheetContent side="left" className="p-0 w-64">
           <Sidebar isMobile />
         </SheetContent>
       </Sheet>
-      <main className="flex-1 flex flex-col h-[100dvh] overflow-hidden w-full max-w-full">
-        <Header
-          title={getPageTitle(pathname)}
-          breadcrumbs={getBreadcrumb(pathname)}
-          onMenuClick={() => setIsMobileMenuOpen(true)}
-        />
-        <div className="flex-1 overflow-y-auto bg-background">
+      <main className="flex-1 flex flex-col h-[100dvh] print:h-auto overflow-hidden print:overflow-visible w-full max-w-full">
+        <div className="print:hidden">
+          <Header
+            title={getPageTitle(pathname)}
+            breadcrumbs={getBreadcrumb(pathname)}
+            onMenuClick={() => setIsMobileMenuOpen(true)}
+          />
+        </div>
+        <div className="flex-1 overflow-y-auto print:overflow-visible bg-background print:bg-white print:text-black">
           {children}
         </div>
       </main>
