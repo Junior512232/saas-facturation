@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error.message.includes("Email not confirmed")) return { error: "Veuillez confirmer votre email avant de vous connecter." };
       return { error: error.message };
     }
-    router.push("/");
+    router.push("/dashboard");
     return {};
   };
 
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: "✅ Compte créé ! Veuillez vérifier votre boîte mail pour le lien de confirmation." };
     }
 
-    router.push("/");
+    router.push("/dashboard");
     return {};
   };
 

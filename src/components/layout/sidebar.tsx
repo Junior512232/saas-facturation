@@ -45,7 +45,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
     : "AD";
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
     { icon: FileText, label: "Factures", href: "/invoices" },
     { icon: Users, label: "Clients", href: "/clients" },
     { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },

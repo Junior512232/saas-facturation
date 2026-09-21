@@ -44,8 +44,29 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
   --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-3xl: 28px;
+  --radius-4xl: 36px;
+
+  /* Landing Page Custom Properties */
+  --color-brand-cream: #F7F5F0;
+  --color-brand-creamDark: #EFECE4;
+  --color-brand-red: #FF2A2A;
+  --color-brand-redDark: #E01E1E;
+  --color-brand-dark: #111111;
+  --color-brand-charcoal: #1E1E1E;
+  --color-brand-muted: #71717A;
+  --color-brand-border: #E8E5DD;
+
+  --shadow-soft: 0 20px 40px -15px rgba(0,0,0,0.05);
+  --shadow-card: 0 12px 30px -10px rgba(0, 0, 0, 0.04);
+  --shadow-red-glow: 0 20px 35px -10px rgba(255, 42, 42, 0.35);
+
+  --animate-spin-slow: spinSlow 35s linear infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 :root {

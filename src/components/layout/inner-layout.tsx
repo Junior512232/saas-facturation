@@ -7,11 +7,11 @@ import { useState, useEffect } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 
-const PUBLIC_ROUTES = ["/login", "/register"];
+const PUBLIC_ROUTES = ["/", "/login", "/register"];
 const PUBLIC_PREFIXES = ["/pay/"];
 
 function getPageTitle(pathname: string): string {
-  if (pathname === "/") return "Dashboard";
+  if (pathname === "/dashboard") return "Dashboard";
   if (pathname === "/invoices") return "Factures";
   if (pathname === "/invoices/new") return "Nouvelle facture";
   if (pathname.startsWith("/invoices/")) return "Détail de la facture";
