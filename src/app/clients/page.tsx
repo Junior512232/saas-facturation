@@ -16,16 +16,33 @@ import { Users, Search, Filter, MoreHorizontal, Mail, Phone } from "lucide-react
 import { Input } from "@/components/ui/input";
 import { CreateClientDialog } from "@/components/clients/create-client-dialog";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 
 export default function ClientsPage() {
   const { clientsList } = useAppData();
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("date");
 
-  const filteredClients = clientsList.filter((client) => 
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredClients = clientsList
+    .filter((client) => 
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      client.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === "revenue") return b.totalPaid - a.totalPaid;
+      const dateA = a.createdAt.split("/").reverse().join("");
+      const dateB = b.createdAt.split("/").reverse().join("");
+      return dateB.localeCompare(dateA);
+    });
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8">
@@ -49,10 +66,20 @@ export default function ClientsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="w-full sm:w-auto flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          Filtres
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" className="w-full sm:w-auto flex items-center gap-2" />}>
+            <Filter className="w-4 h-4" />
+            Trier
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+              <DropdownMenuRadioItem value="date">Plus récents</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="revenue">Chiffre d'affaires</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Clients Table */}

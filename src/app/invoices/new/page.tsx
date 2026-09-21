@@ -20,9 +20,7 @@ export default function NewInvoicePage() {
   const { clientsList: clients, invoicesList: invoices, addInvoice } = useAppData();
 
   const [clientId, setClientId] = useState("");
-  const [issueDate, setIssueDate] = useState(
-    new Date().toLocaleDateString("fr-FR")
-  );
+  const [issueDate, setIssueDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
@@ -52,7 +50,6 @@ export default function NewInvoicePage() {
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!clientId) newErrors.clientId = "Veuillez sélectionner un client.";
-    if (!dueDate) newErrors.dueDate = "La date d'échéance est requise.";
     items.forEach((item, idx) => {
       if (!item.description.trim()) newErrors[`desc_${idx}`] = "Description requise.";
     });
@@ -184,7 +181,7 @@ export default function NewInvoicePage() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-sm font-medium text-foreground">
-                    Date d&apos;échéance <span className="text-destructive">*</span>
+                    Date d&apos;échéance
                   </label>
                   <input
                     type="text"

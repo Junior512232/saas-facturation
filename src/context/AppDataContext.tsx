@@ -75,7 +75,12 @@ function rowToInvoice(row: Record<string, unknown>): Invoice {
     amount: (row.total as number) || (row.amount as number) || 0,
     taxRate: (row.tax_rate as number) || 18,
     status: (row.status as InvoiceStatus) || "draft",
-    items: (row.items as InvoiceItem[]) || [],
+    items: ((row.invoice_items || row.items) as any[])?.map((item: any) => ({
+      id: item.id,
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unit_price || item.unitPrice,
+    })) || [],
     notes: (row.notes as string) || undefined,
   };
 }
@@ -100,14 +105,14 @@ function rowToPayment(row: Record<string, unknown>): Payment {
 }
 
 // Parse DD/MM/YYYY → YYYY-MM-DD for Supabase
-function parseDateForDB(dateStr: string): string {
-  if (!dateStr) return new Date().toISOString().split("T")[0];
+function parseDateForDB(dateStr: string | undefined): string | null {
+  if (!dateStr) return null;
   // Already ISO format
   if (dateStr.includes("-") && dateStr.length === 10) return dateStr;
   // DD/MM/YYYY
   const [d, m, y] = dateStr.split("/");
   if (d && m && y) return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
-  return new Date().toISOString().split("T")[0];
+  return null;
 }
 
 export const AppDataProvider = ({ children }: { children: ReactNode }) => {
@@ -129,7 +134,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     try {
       const [{ data: clientsData }, { data: invoicesData }, { data: paymentsData }] = await Promise.all([
         supabase.from("clients").select("*").order("created_at", { ascending: false }),
-        supabase.from("invoices").select("*, clients(name, email)").order("created_at", { ascending: false }),
+        supabase.from("invoices").select("*, clients(name, email), invoice_items(*)").order("created_at", { ascending: false }),
         supabase.from("payments").select("*, invoices(invoice_number, clients(id, name))").order("created_at", { ascending: false }),
       ]);
       setClientsList((clientsData || []).map(rowToClient));
@@ -201,7 +206,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         await supabase.from("invoice_items").insert(itemsToInsert);
       }
 
-      setInvoicesList((prev) => [rowToInvoice(data), ...prev]);
+      setInvoicesList((prev) => [{ ...rowToInvoice(data), items: newInvoiceData.items || [] }, ...prev]);
     }
   };
 

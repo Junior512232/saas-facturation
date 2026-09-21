@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAppData } from "@/context/AppDataContext";
 import { useEffect, useState } from "react";
+import QRCode from "react-qr-code";
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -197,15 +198,26 @@ export default function InvoiceDetailPage() {
 
         {/* Totals */}
         <div className="flex flex-col md:flex-row print:flex-row justify-between items-start gap-8">
-          <div className="w-full md:w-1/2 print:w-1/2">
-            {invoice.notes && (
-              <div>
-                <p className="text-sm font-semibold text-muted-foreground mb-2 print:text-gray-500">Notes</p>
-                <p className="text-sm text-foreground bg-muted/30 p-4 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 print:text-black">
-                  {invoice.notes}
-                </p>
+          <div className="w-full md:w-1/2 print:w-1/2 flex flex-col justify-between">
+            <div>
+              {invoice.notes && (
+                <div className="mb-6">
+                  <p className="text-sm font-semibold text-muted-foreground mb-2 print:text-gray-500">Notes</p>
+                  <p className="text-sm text-foreground bg-muted/30 p-4 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 print:text-black">
+                    {invoice.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center gap-4 mt-auto">
+              <div className="bg-white p-2 rounded-lg border border-border/50 shadow-sm print:border-gray-300">
+                <QRCode value={typeof window !== 'undefined' ? `${window.location.origin}/pay/${id}` : `https://saas-facturation.vercel.app/pay/${id}`} size={70} />
               </div>
-            )}
+              <div className="text-xs text-muted-foreground print:text-gray-500 max-w-[200px]">
+                Scannez ce code QR pour vérifier l'authenticité de cette facture ou la régler en ligne.
+              </div>
+            </div>
           </div>
           
           <div className="w-full md:w-[350px] print:w-[350px]">

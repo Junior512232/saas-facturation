@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import QRCode from "react-qr-code";
 
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {

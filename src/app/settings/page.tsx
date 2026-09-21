@@ -108,6 +108,15 @@ export default function SettingsPage() {
               <h3 className="text-lg font-bold text-foreground">Profil de l'Entreprise</h3>
               <p className="text-xs text-muted-foreground">Ces informations apparaîtront sur vos factures imprimées et téléchargeables en PDF.</p>
             </div>
+            
+            <div>
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">Logo de l'entreprise (Optionnel)</label>
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full px-4 py-2 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+              />
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

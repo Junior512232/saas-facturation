@@ -17,17 +17,36 @@ import {
 import { FileText, Plus, Search, Filter } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 
 export default function InvoicesPage() {
   const { invoicesList, clientsList } = useAppData();
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("date");
 
-  const filteredInvoices = invoicesList.filter((invoice) => 
-    invoice.number.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice.clientEmail.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredInvoices = invoicesList
+    .filter((invoice) => 
+      (statusFilter === "all" || invoice.status === statusFilter) &&
+      (invoice.number.toLowerCase().includes(searchTerm.toLowerCase()) || 
+       invoice.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       invoice.clientEmail.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+    .sort((a, b) => {
+      if (sortBy === "amount") return b.amount - a.amount;
+      const dateA = a.issueDate.split("/").reverse().join("");
+      const dateB = b.issueDate.split("/").reverse().join("");
+      return dateB.localeCompare(dateA);
+    });
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8">
@@ -56,10 +75,31 @@ export default function InvoicesPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="w-full sm:w-auto flex items-center gap-2">
-          <Filter className="w-4 h-4" />
-          Filtres
-        </Button>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" className="w-full sm:w-auto flex items-center gap-2" />}>
+            <Filter className="w-4 h-4" />
+            Filtres
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" align="end">
+            <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+              <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="paid">Payée</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="sent">Envoyée</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="draft">Brouillon</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="overdue">En retard</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+              <DropdownMenuRadioItem value="date">Date d'émission</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="amount">Montant (Décroissant)</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Invoices Table */}
