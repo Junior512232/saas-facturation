@@ -144,14 +144,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Optimistic update
     setUser({ ...user, ...updates });
     
-    // DB update
-    await supabase.from("profiles").update({
-      company_name: updates.name,
-      ninea: updates.ninea,
-      rccm: updates.rccm,
-      logo_url: updates.logo_url,
-      phone: updates.phone
-    }).eq("id", user.id);
+    // DB update payload
+    const payload: any = {};
+    if (updates.name !== undefined) payload.company_name = updates.name;
+    if (updates.ninea !== undefined) payload.ninea = updates.ninea;
+    if (updates.rccm !== undefined) payload.rccm = updates.rccm;
+    if (updates.logo_url !== undefined) payload.logo_url = updates.logo_url;
+    if (updates.phone !== undefined) payload.phone = updates.phone;
+    if (updates.plan !== undefined) payload.plan = updates.plan;
+    if (updates.plan_expires_at !== undefined) payload.plan_expires_at = updates.plan_expires_at;
+
+    await supabase.from("profiles").update(payload).eq("id", user.id);
   };
 
   return (

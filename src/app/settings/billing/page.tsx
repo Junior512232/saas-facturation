@@ -6,17 +6,31 @@ import { CheckCircle2, ShieldCheck, AlertCircle, ArrowRight, Wallet, CreditCard 
 import { Button } from "@/components/ui/button";
 
 export default function BillingPage() {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
 
   const handleSubscribe = async (planName: string, amount: number) => {
     setLoadingPlan(planName);
-    // Simulate payment process (e.g. Wave / OM API Call)
-    setTimeout(() => {
-      setSuccess(`Félicitations ! Votre abonnement ${planName} a été activé avec succès.`);
-      setLoadingPlan(null);
-    }, 2000);
+    
+    // Simulate payment processing time (API Call to Wave/OM)
+    setTimeout(async () => {
+      try {
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        
+        await updateProfile({
+          plan: planName,
+          plan_expires_at: nextMonth.toISOString(),
+        });
+        
+        setSuccess(`Félicitations ! Votre abonnement ${planName} a été activé avec succès.`);
+      } catch (error) {
+        console.error("Failed to subscribe:", error);
+      } finally {
+        setLoadingPlan(null);
+      }
+    }, 1500);
   };
 
   const currentPlan = user?.plan || "gratuit";
