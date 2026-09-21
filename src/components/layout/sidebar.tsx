@@ -26,7 +26,19 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-const menuGroups = [
+type MenuItem = {
+  icon: any;
+  label: string;
+  href: string;
+  disabled?: boolean;
+};
+
+type MenuGroup = {
+  label: string;
+  items: MenuItem[];
+};
+
+const menuGroups: MenuGroup[] = [
   {
     label: "Général",
     items: [
