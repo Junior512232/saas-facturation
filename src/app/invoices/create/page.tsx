@@ -72,7 +72,7 @@ export default function CreateInvoicePage() {
       client: client.name,
       clientEmail: client.email,
       issueDate,
-      dueDate: dueDate || issueDate,
+      dueDate: dueDate || undefined, // Send undefined if empty so it remains optional
       amount: total,
       taxRate,
       items,

@@ -155,8 +155,12 @@ export default function InvoiceDetailPage() {
               <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Date d'émission:</span>
               <span className="font-semibold">{invoice.issueDate}</span>
               
-              <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Date d'échéance:</span>
-              <span className="font-semibold">{invoice.dueDate}</span>
+              {invoice.dueDate && (
+                <>
+                  <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Date d'échéance:</span>
+                  <span className="font-semibold">{invoice.dueDate}</span>
+                </>
+              )}
             </div>
           </div>
         </div>
