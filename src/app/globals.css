@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --color-background: var(--background);
+  --color-background: var(--bg-color);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
@@ -70,7 +70,7 @@
 }
 
 :root {
-  --background: #f9fafb;
+  --bg-color: #f9fafb;
   --foreground: #111827;
   --card: #ffffff;
   --card-foreground: #111827;
@@ -105,7 +105,7 @@
 }
 
 .dark {
-  --background: #090d16;
+  --bg-color: #090d16;
   --foreground: #f3f4f6;
   --card: #111827;
   --card-foreground: #f3f4f6;
@@ -157,7 +157,7 @@
   }
   
   :root, .dark {
-    --background: #ffffff !important;
+    --bg-color: #ffffff !important;
     --foreground: #000000 !important;
     --card: #ffffff !important;
     --card-foreground: #000000 !important;
