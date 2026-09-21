@@ -60,14 +60,14 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
       {/* Logo */}
       <div className="p-6 pb-4">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-brand-red flex items-center justify-center text-white shadow-red-glow/40 transition-transform group-hover:scale-95 duration-200">
+          <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white shadow-blue-glow/40 transition-transform group-hover:scale-95 duration-200">
             <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
             </svg>
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-extrabold tracking-tight text-sidebar-primary flex items-center">
-              izi<span className="text-brand-red">Facture</span>
+              izi<span className="text-brand-blue">Facture</span>
             </span>
             <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
           </div>

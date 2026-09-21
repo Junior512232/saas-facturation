@@ -13,20 +13,20 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="bg-brand-cream text-brand-dark min-h-[100dvh] selection:bg-brand-red selection:text-white antialiased font-sans">
+    <div className="bg-brand-cream text-brand-dark min-h-[100dvh] selection:bg-brand-blue selection:text-white antialiased font-sans">
       {/* BEGIN: MainHeader */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-brand-cream/90 border-b border-brand-border/60 transition-all duration-300">
         <div className="max-w-6xl mx-auto px-5 h-20 flex items-center justify-between">
           {/* Brand Logo */}
           <Link className="flex items-center gap-2.5 group" href="#">
-            <div className="w-10 h-10 rounded-2xl bg-brand-red flex items-center justify-center text-white shadow-red-glow/40 transition-transform group-hover:scale-95 duration-200">
+            <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white shadow-blue-glow/40 transition-transform group-hover:scale-95 duration-200">
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
               </svg>
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-extrabold tracking-tight text-brand-dark flex items-center">
-                izi<span className="text-brand-red">Facture</span>
+                izi<span className="text-brand-blue">Facture</span>
               </span>
               <span className="text-[9px] uppercase tracking-widest text-brand-muted font-bold -mt-1">Zone OHADA • UEMOA</span>
             </div>
@@ -43,7 +43,7 @@ export default function LandingPage() {
             ) : (
               <>
                 <Link
-                  className="text-xs font-semibold text-brand-dark hover:text-brand-red px-3 py-2 transition-colors"
+                  className="text-xs font-semibold text-brand-dark hover:text-brand-blue px-3 py-2 transition-colors"
                   href="/login"
                 >
                   Connexion
@@ -67,13 +67,13 @@ export default function LandingPage() {
           <div className="lg:w-1/2">
           {/* Minimalist Category Chip */}
           <div className="inline-flex items-center gap-2 bg-white/80 border border-brand-border px-3.5 py-1.5 rounded-full text-xs font-semibold text-brand-dark mb-6 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
+            <span className="w-2 h-2 rounded-full bg-brand-blue animate-pulse"></span>
             Solution Facturation FCFA &amp; UEMOA
           </div>
           {/* Main Headline in heavy typographic style */}
           <h1 className="text-4xl lg:text-5xl xl:text-6xl leading-[1.12] font-black tracking-tight text-brand-dark mb-5 text-balance">
             Fini les factures sur Word et Excel.<br />
-            <span className="text-brand-red">Facturez comme un pro.</span>
+            <span className="text-brand-blue">Facturez comme un pro.</span>
           </h1>
           <p className="text-base lg:text-lg text-brand-muted leading-relaxed font-normal mb-8 max-w-lg">
             La solution pensée pour les entrepreneurs en Côte d'Ivoire, au Sénégal, Cameroun et en Afrique. Créez des factures aux normes en 2 clics, calculez la TVA 18% et suivez vos encaissements.
@@ -85,7 +85,7 @@ export default function LandingPage() {
               href={mounted && !loading && isAuthenticated ? "/dashboard" : "/register"}
             >
               <span>Commencer gratuitement</span>
-              <svg className="w-4 h-4 text-brand-red" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-brand-blue" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"></path>
               </svg>
             </Link>
@@ -93,7 +93,7 @@ export default function LandingPage() {
               className="w-full bg-white border border-brand-border text-brand-dark font-bold text-center py-3.5 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-brand-creamDark transition-colors"
               href="#comment-ca-marche"
             >
-              <svg className="w-4 h-4 fill-brand-red" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 fill-brand-blue" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z"></path>
               </svg>
               <span>Voir la démo (1 min)</span>
@@ -120,22 +120,22 @@ export default function LandingPage() {
               </div>
             </div>
             {/* High-Impact Red Card (Inspired by SeePay's Red Action Card) */}
-            <div className="bg-brand-red rounded-3xl p-6 text-white shadow-red-glow relative overflow-hidden mb-6">
+            <div className="bg-brand-blue rounded-3xl p-6 text-white shadow-blue-glow relative overflow-hidden mb-6">
               {/* Background geometric flare */}
               <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
               {/* Stacked African Entrepreneurs Avatars */}
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex -space-x-2.5 overflow-hidden">
-                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-red bg-amber-200 flex items-center justify-center text-xs font-bold text-brand-dark">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-blue bg-amber-200 flex items-center justify-center text-xs font-bold text-brand-dark">
                     AD
                   </div>
-                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-red bg-rose-200 flex items-center justify-center text-xs font-bold text-brand-dark">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-blue bg-rose-200 flex items-center justify-center text-xs font-bold text-brand-dark">
                     MK
                   </div>
-                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-red bg-sky-200 flex items-center justify-center text-xs font-bold text-brand-dark">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-blue bg-sky-200 flex items-center justify-center text-xs font-bold text-brand-dark">
                     SN
                   </div>
-                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-red bg-white text-brand-red flex items-center justify-center text-[11px] font-black">
+                  <div className="w-9 h-9 rounded-full ring-2 ring-brand-blue bg-white text-brand-blue flex items-center justify-center text-[11px] font-black">
                     +2.5k
                   </div>
                 </div>
@@ -180,7 +180,7 @@ export default function LandingPage() {
                 </div>
                 <div className="pt-2 border-t border-dashed border-brand-border flex justify-between items-baseline">
                   <span className="text-sm font-bold text-brand-dark">Total TTC :</span>
-                  <span className="text-lg font-black text-brand-red">1 711 000 FCFA</span>
+                  <span className="text-lg font-black text-brand-blue">1 711 000 FCFA</span>
                 </div>
               </div>
               {/* Micro QR code verification indicator */}
@@ -203,7 +203,7 @@ export default function LandingPage() {
         <section className="py-14 lg:py-24 px-5 bg-white border-y border-brand-border/80">
           <div className="max-w-6xl mx-auto">
             <div className="text-left lg:text-center mb-12">
-              <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Le constat</span>
+              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider block mb-1">Le constat</span>
               <h2 className="text-2xl font-black text-brand-dark tracking-tight leading-tight">
                 Le cauchemar de la facturation manuelle
               </h2>
@@ -214,7 +214,7 @@ export default function LandingPage() {
             <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8">
               {/* Card 1 */}
               <div className="p-5 rounded-3xl bg-brand-cream border border-brand-border/90 flex flex-col gap-2">
-                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-red text-base font-black">
+                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-blue text-base font-black">
                   ✕
                 </div>
                 <h3 className="text-base font-bold text-brand-dark pt-1">Factures Word &amp; Excel bricolées</h3>
@@ -224,7 +224,7 @@ export default function LandingPage() {
               </div>
               {/* Card 2 */}
               <div className="p-5 rounded-3xl bg-brand-cream border border-brand-border/90 flex flex-col gap-2">
-                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-red text-base font-black">
+                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-blue text-base font-black">
                   %
                 </div>
                 <h3 className="text-base font-bold text-brand-dark pt-1">Erreurs de calcul de la TVA 18%</h3>
@@ -234,7 +234,7 @@ export default function LandingPage() {
               </div>
               {/* Card 3 */}
               <div className="p-5 rounded-3xl bg-brand-cream border border-brand-border/90 flex flex-col gap-2">
-                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-red text-base font-black">
+                <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-blue text-base font-black">
                   ⏳
                 </div>
                 <h3 className="text-base font-bold text-brand-dark pt-1">Relances WhatsApp oubliées</h3>
@@ -250,7 +250,7 @@ export default function LandingPage() {
         {/* BEGIN: FeaturesSection */}
         <section className="py-14 lg:py-24 px-5 max-w-6xl mx-auto">
           <div className="mb-12 lg:text-center">
-            <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Fonctionnalités</span>
+            <span className="text-xs font-bold text-brand-blue uppercase tracking-wider block mb-1">Fonctionnalités</span>
             <h2 className="text-2xl font-black text-brand-dark tracking-tight leading-tight">
               Tout pour accélérer vos encaissements
             </h2>
@@ -261,7 +261,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8">
             {/* Feature 1 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-red">
+              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-blue">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
                 </svg>
@@ -273,7 +273,7 @@ export default function LandingPage() {
             </div>
             {/* Feature 2 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-red">
+              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-blue">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                 </svg>
@@ -285,7 +285,7 @@ export default function LandingPage() {
             </div>
             {/* Feature 3 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-red">
+              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-blue">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
@@ -297,7 +297,7 @@ export default function LandingPage() {
             </div>
             {/* Feature 4 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-sm">
-              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-red">
+              <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-blue">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
@@ -315,7 +315,7 @@ export default function LandingPage() {
         <section className="py-14 lg:py-24 px-5 bg-brand-creamDark border-t border-brand-border/70" id="comment-ca-marche">
           <div className="max-w-6xl mx-auto">
             <div className="mb-12 lg:text-center">
-              <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Simple &amp; Rapide</span>
+              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider block mb-1">Simple &amp; Rapide</span>
               <h2 className="text-2xl lg:text-3xl font-black text-brand-dark tracking-tight">
                 3 étapes pour être payé plus vite
               </h2>
@@ -335,7 +335,7 @@ export default function LandingPage() {
               </div>
               {/* Step 2 */}
               <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-full bg-brand-red text-white font-bold flex items-center justify-center flex-shrink-0 text-sm">
+                <div className="w-10 h-10 rounded-full bg-brand-blue text-white font-bold flex items-center justify-center flex-shrink-0 text-sm">
                   02
                 </div>
                 <div>
@@ -365,7 +365,7 @@ export default function LandingPage() {
         {/* BEGIN: TestimonialsSection */}
         <section className="py-14 lg:py-24 px-5 max-w-6xl mx-auto">
           <div className="mb-12 lg:text-center">
-            <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Témoignages</span>
+            <span className="text-xs font-bold text-brand-blue uppercase tracking-wider block mb-1">Témoignages</span>
             <h2 className="text-2xl font-black text-brand-dark tracking-tight">
               Adopté par les entrepreneurs qui avancent
             </h2>
@@ -427,7 +427,7 @@ export default function LandingPage() {
         <section className="py-14 lg:py-24 px-5 bg-white border-y border-brand-border/80" id="tarification">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Tarifs transparents</span>
+              <span className="text-xs font-bold text-brand-blue uppercase tracking-wider block mb-1">Tarifs transparents</span>
               <h2 className="text-2xl font-black text-brand-dark tracking-tight">
                 Investissez dans votre sérénité
               </h2>
@@ -456,9 +456,9 @@ export default function LandingPage() {
                 </Link>
               </div>
               {/* Plan Pro (Highlighted SeePay-style) */}
-              <div className="p-6 rounded-3xl bg-brand-dark text-white relative shadow-soft border-2 border-brand-red">
+              <div className="p-6 rounded-3xl bg-brand-dark text-white relative shadow-soft border-2 border-brand-blue">
                 {/* Badge Recommandé */}
-                <div className="absolute -top-3.5 right-6 bg-brand-red text-white text-[10px] font-black tracking-wider uppercase px-3 py-1 rounded-full shadow-sm">
+                <div className="absolute -top-3.5 right-6 bg-brand-blue text-white text-[10px] font-black tracking-wider uppercase px-3 py-1 rounded-full shadow-sm">
                   Recommandé
                 </div>
                 <div className="flex justify-between items-start mb-3">
@@ -479,7 +479,7 @@ export default function LandingPage() {
                   <li className="flex items-center gap-2 font-medium">✓ <span className="text-white">Support WhatsApp prioritaire 7j/7</span></li>
                 </ul>
                 <Link
-                  className="block w-full py-3.5 text-center text-xs font-bold bg-brand-red text-white rounded-full hover:bg-brand-redDark shadow-red-glow transition-all active:scale-[0.98]"
+                  className="block w-full py-3.5 text-center text-xs font-bold bg-brand-blue text-white rounded-full hover:bg-brand-blueDark shadow-blue-glow transition-all active:scale-[0.98]"
                   href="/register?plan=pro"
                 >
                   Choisir l'offre Pro (Essai 14 jours)
@@ -517,7 +517,7 @@ export default function LandingPage() {
 
         {/* BEGIN: FinalCTASection */}
         <section className="py-14 lg:py-24 px-5 max-w-4xl mx-auto">
-          <div className="bg-brand-red rounded-4xl p-7 text-white text-center shadow-red-glow relative overflow-hidden">
+          <div className="bg-brand-blue rounded-4xl p-7 text-white text-center shadow-blue-glow relative overflow-hidden">
             {/* Graphic circle accents */}
             <div className="absolute -top-10 -left-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
             <span className="inline-block bg-white/20 text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full mb-3 backdrop-blur-sm">
@@ -547,10 +547,10 @@ export default function LandingPage() {
           {/* Brand & Mission */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-xl bg-brand-red flex items-center justify-center text-white font-bold text-sm">
+              <div className="w-8 h-8 rounded-xl bg-brand-blue flex items-center justify-center text-white font-bold text-sm">
                 iF
               </div>
-              <span className="text-xl font-black tracking-tight text-white">izi<span className="text-brand-red">Facture</span></span>
+              <span className="text-xl font-black tracking-tight text-white">izi<span className="text-brand-blue">Facture</span></span>
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed">
               Le logiciel de facturation moderne conçu pour libérer le potentiel des entrepreneurs en Afrique francophone.

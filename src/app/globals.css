@@ -50,8 +50,8 @@
   /* Landing Page Custom Properties */
   --color-brand-cream: #F7F5F0;
   --color-brand-creamDark: #EFECE4;
-  --color-brand-red: #FF2A2A;
-  --color-brand-redDark: #E01E1E;
+  --color-brand-blue: #2563eb;
+  --color-brand-blueDark: #1d4ed8;
   --color-brand-dark: #111111;
   --color-brand-charcoal: #1E1E1E;
   --color-brand-muted: #71717A;
@@ -59,7 +59,7 @@
 
   --shadow-soft: 0 20px 40px -15px rgba(0,0,0,0.05);
   --shadow-card: 0 12px 30px -10px rgba(0, 0, 0, 0.04);
-  --shadow-red-glow: 0 20px 35px -10px rgba(255, 42, 42, 0.35);
+  --shadow-blue-glow: 0 20px 35px -10px rgba(37, 99, 235, 0.35);
 
   --animate-spin-slow: spinSlow 35s linear infinite;
 }

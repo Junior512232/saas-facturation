@@ -42,7 +42,7 @@ export default function BillingPage() {
         <h3 className="text-xl font-bold mb-4">Votre forfait actuel</h3>
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-2xl bg-brand-cream flex items-center justify-center">
-            <ShieldCheck className="w-8 h-8 text-brand-red" />
+            <ShieldCheck className="w-8 h-8 text-brand-blue" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -60,9 +60,9 @@ export default function BillingPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
         {/* Pro Plan */}
-        <div className={`bg-card border rounded-3xl p-8 flex flex-col ${currentPlan === "pro" ? "border-brand-red ring-2 ring-brand-red/20 relative" : "border-border"}`}>
+        <div className={`bg-card border rounded-3xl p-8 flex flex-col ${currentPlan === "pro" ? "border-brand-blue ring-2 ring-brand-blue/20 relative" : "border-border"}`}>
           {currentPlan === "pro" && (
-            <div className="absolute -top-3 right-6 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+            <div className="absolute -top-3 right-6 bg-brand-blue text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
               Actuel
             </div>
           )}
@@ -72,12 +72,12 @@ export default function BillingPage() {
             <span className="text-sm text-muted-foreground font-medium mb-1">FCFA / mois</span>
           </div>
           <ul className="space-y-3 mb-8 flex-1 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Factures & Devis illimités</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Personnalisation de logo</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Relances automatiques</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Factures & Devis illimités</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Personnalisation de logo</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Relances automatiques</li>
           </ul>
           <Button 
-            className="w-full bg-brand-red hover:bg-brand-redDark text-white h-12 rounded-xl font-bold shadow-red-glow transition-all"
+            className="w-full bg-brand-blue hover:bg-brand-blueDark text-white h-12 rounded-xl font-bold shadow-blue-glow transition-all"
             onClick={() => handleSubscribe("pro", 5000)}
             disabled={loadingPlan !== null || currentPlan === "pro"}
           >
@@ -86,10 +86,10 @@ export default function BillingPage() {
         </div>
 
         {/* Business Plan */}
-        <div className={`bg-brand-dark text-white border rounded-3xl p-8 flex flex-col relative overflow-hidden ${currentPlan === "business" ? "border-brand-red ring-2 ring-brand-red/20" : "border-brand-dark"}`}>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-red/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+        <div className={`bg-brand-dark text-white border rounded-3xl p-8 flex flex-col relative overflow-hidden ${currentPlan === "business" ? "border-brand-blue ring-2 ring-brand-blue/20" : "border-brand-dark"}`}>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-brand-blue/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
           {currentPlan === "business" && (
-            <div className="absolute -top-3 right-6 bg-brand-red text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full z-10">
+            <div className="absolute -top-3 right-6 bg-brand-blue text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full z-10">
               Actuel
             </div>
           )}
@@ -99,9 +99,9 @@ export default function BillingPage() {
             <span className="text-sm text-gray-400 font-medium mb-1">FCFA / mois</span>
           </div>
           <ul className="space-y-3 mb-8 flex-1 text-sm text-gray-300 relative z-10">
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Tout le forfait Pro inclus</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Multi-utilisateurs (jusqu'à 5)</li>
-            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-red" /> Multi-entreprises (jusqu'à 3)</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Tout le forfait Pro inclus</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Multi-utilisateurs (jusqu'à 5)</li>
+            <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-brand-blue" /> Multi-entreprises (jusqu'à 3)</li>
           </ul>
           <Button 
             variant="outline"
@@ -117,7 +117,7 @@ export default function BillingPage() {
       {/* Payment Information */}
       <div className="bg-muted/30 rounded-3xl p-6 mt-4 flex items-start gap-4">
         <div className="p-3 bg-brand-cream rounded-xl">
-          <AlertCircle className="w-6 h-6 text-brand-red" />
+          <AlertCircle className="w-6 h-6 text-brand-blue" />
         </div>
         <div>
           <h4 className="font-semibold mb-1">Comment payer mon abonnement ?</h4>
