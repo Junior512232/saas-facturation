@@ -31,19 +31,20 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname } = request.nextUrl;
-  const isPublicRoute = pathname === "/login" || pathname === "/register";
+  const isPublicRoute = pathname === "/" || pathname === "/login" || pathname === "/register" || pathname.startsWith("/pay/") || pathname.startsWith("/api/webhooks/");
 
-  // Redirect unauthenticated users to /login
+  // Redirect unauthenticated users to /login if not on a public route
   if (!user && !isPublicRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Redirect authenticated users away from /login and /register
-  if (user && isPublicRoute) {
+  // Redirect authenticated users away from auth pages
+  const isAuthRoute = pathname === "/login" || pathname === "/register";
+  if (user && isAuthRoute) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/";
+    redirectUrl.pathname = "/dashboard";
     return NextResponse.redirect(redirectUrl);
   }
 
