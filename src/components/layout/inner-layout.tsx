@@ -71,7 +71,7 @@ export default function InnerLayout({ children }: { children: React.ReactNode })
 
   return (
     <>
-      <div className="print:hidden">
+      <div className="print:hidden hidden md:block w-64 shrink-0">
         <Sidebar />
       </div>
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

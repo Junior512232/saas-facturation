@@ -50,6 +50,7 @@ export default function ReportsPage() {
 
   const handleExport = () => {
     setExported(true);
+    window.print();
     setTimeout(() => setExported(false), 3000);
   };
 

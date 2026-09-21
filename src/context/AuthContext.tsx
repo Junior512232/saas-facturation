@@ -25,6 +25,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<{ error?: string }>;
   register: (companyName: string, email: string, phone: string, password: string, ninea?: string, plan?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
+  updateProfile: (updates: Partial<AppUser>) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -137,6 +138,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
+  const updateProfile = async (updates: Partial<AppUser>) => {
+    if (!user) return;
+    
+    // Optimistic update
+    setUser({ ...user, ...updates });
+    
+    // DB update
+    await supabase.from("profiles").update({
+      company_name: updates.name,
+      ninea: updates.ninea,
+      rccm: updates.rccm,
+      logo_url: updates.logo_url,
+      phone: updates.phone
+    }).eq("id", user.id);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -146,6 +163,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateProfile,
         isAuthenticated: !!session,
       }}
     >

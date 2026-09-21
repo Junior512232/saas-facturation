@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { 
   Building, 
   CreditCard, 
@@ -16,16 +17,17 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
+  const { user, updateProfile } = useAuth();
   const [activeTab, setActiveTab] = useState<"company" | "payment" | "notifications" | "api">("company");
   const [saved, setSaved] = useState(false);
 
   // Form states
-  const [companyName, setCompanyName] = useState("SeneSaaS SARL");
-  const [ninea, setNinea] = useState("00892341-2G3");
-  const [rccm, setRccm] = useState("SN-DKR-2023-B-1234");
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [email, setEmail] = useState("contact@senesaas.sn");
-  const [phone, setPhone] = useState("+221 33 824 00 00");
+  const [companyName, setCompanyName] = useState(user?.name || "");
+  const [ninea, setNinea] = useState(user?.ninea || "");
+  const [rccm, setRccm] = useState(user?.rccm || "");
+  const [logoPreview, setLogoPreview] = useState<string | null>(user?.logo_url || null);
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [address, setAddress] = useState("Almadies, Dakar, Sénégal");
   const [currency, setCurrency] = useState("FCFA");
   const [tvaRate, setTvaRate] = useState("18");
@@ -36,8 +38,15 @@ export default function SettingsPage() {
   const [waveWebhook, setWaveWebhook] = useState(true);
   const [omWebhook, setOmWebhook] = useState(true);
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    await updateProfile({
+      name: companyName,
+      ninea,
+      rccm,
+      logo_url: logoPreview || undefined,
+      phone
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   };
