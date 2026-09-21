@@ -67,11 +67,9 @@ export default function ClientsPage() {
           />
         </div>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="w-full sm:w-auto flex items-center justify-center gap-2 h-10 px-4 rounded-xl text-sm font-medium">
-              <Filter className="w-4 h-4" />
-              Trier
-            </Button>
+          <DropdownMenuTrigger className="w-full sm:w-auto flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
+            <Filter className="w-4 h-4" />
+            Trier
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
             <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>

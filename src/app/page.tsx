@@ -480,7 +480,7 @@ export default function LandingPage() {
                 </ul>
                 <Link
                   className="block w-full py-3.5 text-center text-xs font-bold bg-brand-red text-white rounded-full hover:bg-brand-redDark shadow-red-glow transition-all active:scale-[0.98]"
-                  href="/register"
+                  href="/register?plan=pro"
                 >
                   Choisir l'offre Pro (Essai 14 jours)
                 </Link>
@@ -505,7 +505,7 @@ export default function LandingPage() {
                 </ul>
                 <Link
                   className="block w-full py-3 text-center text-xs font-bold bg-white text-brand-dark border border-brand-border rounded-full hover:bg-zinc-100 transition-colors"
-                  href="/register"
+                  href="/register?plan=business"
                 >
                   Sélectionner Business
                 </Link>

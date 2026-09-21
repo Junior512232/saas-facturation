@@ -12,6 +12,8 @@ export interface AppUser {
   phone?: string;
   ninea?: string;
   role: string;
+  plan?: string;
+  plan_expires_at?: string;
 }
 
 interface AuthContextType {
@@ -19,14 +21,14 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  register: (companyName: string, email: string, phone: string, password: string, ninea?: string) => Promise<{ error?: string }>;
+  register: (companyName: string, email: string, phone: string, password: string, ninea?: string, plan?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function mapUser(supabaseUser: User, profile?: { company_name: string; phone?: string; ninea?: string; role?: string } | null): AppUser {
+function mapUser(supabaseUser: User, profile?: { company_name: string; phone?: string; ninea?: string; role?: string; plan?: string; plan_expires_at?: string } | null): AppUser {
   return {
     id: supabaseUser.id,
     name: profile?.company_name || supabaseUser.user_metadata?.company_name || supabaseUser.email?.split("@")[0] || "Utilisateur",
@@ -34,6 +36,8 @@ function mapUser(supabaseUser: User, profile?: { company_name: string; phone?: s
     phone: profile?.phone || supabaseUser.user_metadata?.phone,
     ninea: profile?.ninea || supabaseUser.user_metadata?.ninea,
     role: profile?.role || "Administrateur Pro",
+    plan: profile?.plan || supabaseUser.user_metadata?.plan || "gratuit",
+    plan_expires_at: profile?.plan_expires_at,
   };
 }
 
@@ -48,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (supabaseUser: User): Promise<AppUser> => {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("company_name, phone, ninea, role")
+      .select("company_name, phone, ninea, role, plan, plan_expires_at")
       .eq("id", supabaseUser.id)
       .single();
     return mapUser(supabaseUser, profile);
@@ -96,13 +100,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     phone: string,
     password: string,
-    ninea?: string
+    ninea?: string,
+    plan: string = "gratuit"
   ): Promise<{ error?: string }> => {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
-        data: { company_name: companyName, phone, ninea },
+        data: { company_name: companyName, phone, ninea, plan },
       },
     });
     if (error) {

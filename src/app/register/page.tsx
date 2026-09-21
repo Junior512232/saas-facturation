@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 import { 
   Building2, 
   Lock, 
@@ -15,8 +16,11 @@ import {
   FileText
 } from "lucide-react";
 
-export default function RegisterPage() {
+function RegisterContent() {
   const { register } = useAuth();
+  const searchParams = useSearchParams();
+  const plan = searchParams.get("plan") || "gratuit";
+  
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -38,7 +42,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     setError("");
-    const result = await register(companyName, email, phone, password, ninea);
+    const result = await register(companyName, email, phone, password, ninea, plan);
     if (result.error) {
       setError(result.error);
     }
@@ -209,5 +213,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen w-full flex items-center justify-center bg-background">Chargement...</div>}>
+      <RegisterContent />
+    </Suspense>
   );
 }

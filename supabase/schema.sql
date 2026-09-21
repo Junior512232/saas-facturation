@@ -8,6 +8,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   phone TEXT,
   ninea TEXT,
   role TEXT DEFAULT 'Administrateur Pro',
+  plan TEXT DEFAULT 'gratuit',
+  plan_expires_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -121,13 +123,14 @@ USING (auth.uid() = profile_id);
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, company_name, email, phone, ninea)
+  INSERT INTO public.profiles (id, company_name, email, phone, ninea, plan)
   VALUES (
     new.id, 
     COALESCE(new.raw_user_meta_data->>'company_name', split_part(new.email, '@', 1)),
     new.email,
     new.raw_user_meta_data->>'phone',
-    new.raw_user_meta_data->>'ninea'
+    new.raw_user_meta_data->>'ninea',
+    COALESCE(new.raw_user_meta_data->>'plan', 'gratuit')
   );
   RETURN new;
 END;

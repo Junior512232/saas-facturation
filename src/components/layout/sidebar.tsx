@@ -18,12 +18,14 @@ import {
   Search,
   Command,
   Users,
-  LogOut
+  LogOut,
+  ShieldCheck
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const bottomItems = [
   { icon: HelpCircle, label: "Aide & Support", href: "/support" },
+  { icon: ShieldCheck, label: "Abonnement", href: "/settings/billing" },
   { icon: Settings, label: "Paramètres", href: "/settings" },
 ];
 
