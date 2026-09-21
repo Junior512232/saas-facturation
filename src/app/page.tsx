@@ -16,7 +16,7 @@ export default function LandingPage() {
     <div className="bg-brand-cream text-brand-dark min-h-[100dvh] selection:bg-brand-red selection:text-white antialiased font-sans">
       {/* BEGIN: MainHeader */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-brand-cream/90 border-b border-brand-border/60 transition-all duration-300">
-        <div className="max-w-md mx-auto px-5 h-20 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-5 h-20 flex items-center justify-between">
           {/* Brand Logo */}
           <Link className="flex items-center gap-2.5 group" href="#">
             <div className="w-10 h-10 rounded-2xl bg-brand-red flex items-center justify-center text-white shadow-red-glow/40 transition-transform group-hover:scale-95 duration-200">
@@ -63,22 +63,23 @@ export default function LandingPage() {
 
       <main>
         {/* BEGIN: HeroSection */}
-        <section className="pt-8 pb-14 px-5 max-w-md mx-auto">
+        <section className="pt-8 pb-14 lg:pt-24 lg:pb-32 px-5 max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12">
+          <div className="lg:w-1/2">
           {/* Minimalist Category Chip */}
           <div className="inline-flex items-center gap-2 bg-white/80 border border-brand-border px-3.5 py-1.5 rounded-full text-xs font-semibold text-brand-dark mb-6 shadow-sm">
             <span className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
             Solution Facturation FCFA &amp; UEMOA
           </div>
           {/* Main Headline in heavy typographic style */}
-          <h1 className="text-4xl leading-[1.12] font-black tracking-tight text-brand-dark mb-5 text-balance">
+          <h1 className="text-4xl lg:text-5xl xl:text-6xl leading-[1.12] font-black tracking-tight text-brand-dark mb-5 text-balance">
             Fini les factures sur Word et Excel.<br />
             <span className="text-brand-red">Facturez comme un pro.</span>
           </h1>
-          <p className="text-base text-brand-muted leading-relaxed font-normal mb-8">
+          <p className="text-base lg:text-lg text-brand-muted leading-relaxed font-normal mb-8 max-w-lg">
             La solution pensée pour les entrepreneurs en Côte d'Ivoire, au Sénégal, Cameroun et en Afrique. Créez des factures aux normes en 2 clics, calculez la TVA 18% et suivez vos encaissements.
           </p>
           {/* Action Buttons */}
-          <div className="flex flex-col gap-3 mb-10" id="hero-cta">
+          <div className="flex flex-col sm:flex-row gap-3 mb-10" id="hero-cta">
             <Link
               className="w-full bg-brand-dark text-white font-bold text-center py-4 px-6 rounded-full flex items-center justify-center gap-2 hover:bg-black transition-all shadow-md active:scale-[0.98]"
               href={mounted && !loading && isAuthenticated ? "/dashboard" : "/register"}
@@ -98,8 +99,10 @@ export default function LandingPage() {
               <span>Voir la démo (1 min)</span>
             </a>
           </div>
+          </div>
           {/* Hero Visual Elements & SeePay Style Visual Hierarchy */}
-          <div className="relative pt-4">
+          <div className="lg:w-1/2 w-full">
+          <div className="relative pt-4 lg:pt-0 w-full max-w-md mx-auto lg:max-w-none">
             {/* Floating Ivory Metric Badge */}
             <div className="bg-brand-creamDark rounded-3xl p-5 border border-brand-border/80 shadow-soft mb-5 flex items-center justify-between">
               <div>
@@ -192,13 +195,14 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+          </div>
         </section>
         {/* END: HeroSection */}
 
         {/* BEGIN: ProblemSection */}
-        <section className="py-14 px-5 bg-white border-y border-brand-border/80">
-          <div className="max-w-md mx-auto">
-            <div className="text-left mb-8">
+        <section className="py-14 lg:py-24 px-5 bg-white border-y border-brand-border/80">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-left lg:text-center mb-12">
               <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Le constat</span>
               <h2 className="text-2xl font-black text-brand-dark tracking-tight leading-tight">
                 Le cauchemar de la facturation manuelle
@@ -207,7 +211,7 @@ export default function LandingPage() {
                 Perdre des heures sur Excel vous coûte des millions et entache votre réputation.
               </p>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8">
               {/* Card 1 */}
               <div className="p-5 rounded-3xl bg-brand-cream border border-brand-border/90 flex flex-col gap-2">
                 <div className="w-9 h-9 rounded-xl bg-white border border-brand-border flex items-center justify-center text-brand-red text-base font-black">
@@ -244,8 +248,8 @@ export default function LandingPage() {
         {/* END: ProblemSection */}
 
         {/* BEGIN: FeaturesSection */}
-        <section className="py-14 px-5 max-w-md mx-auto">
-          <div className="mb-8">
+        <section className="py-14 lg:py-24 px-5 max-w-6xl mx-auto">
+          <div className="mb-12 lg:text-center">
             <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Fonctionnalités</span>
             <h2 className="text-2xl font-black text-brand-dark tracking-tight leading-tight">
               Tout pour accélérer vos encaissements
@@ -254,7 +258,7 @@ export default function LandingPage() {
               Pensé spécialement pour les PME, freelances et prestataires de services en Afrique francophone.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-8">
             {/* Feature 1 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border shadow-sm">
               <div className="w-12 h-12 rounded-2xl bg-brand-cream flex items-center justify-center mb-4 text-brand-red">
@@ -308,15 +312,15 @@ export default function LandingPage() {
         {/* END: FeaturesSection */}
 
         {/* BEGIN: HowItWorks */}
-        <section className="py-14 px-5 bg-brand-creamDark border-t border-brand-border/70" id="comment-ca-marche">
-          <div className="max-w-md mx-auto">
-            <div className="mb-8">
+        <section className="py-14 lg:py-24 px-5 bg-brand-creamDark border-t border-brand-border/70" id="comment-ca-marche">
+          <div className="max-w-6xl mx-auto">
+            <div className="mb-12 lg:text-center">
               <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Simple &amp; Rapide</span>
-              <h2 className="text-2xl font-black text-brand-dark tracking-tight">
+              <h2 className="text-2xl lg:text-3xl font-black text-brand-dark tracking-tight">
                 3 étapes pour être payé plus vite
               </h2>
             </div>
-            <div className="space-y-6 relative">
+            <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8 relative">
               {/* Step 1 */}
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-full bg-brand-dark text-white font-bold flex items-center justify-center flex-shrink-0 text-sm">
@@ -359,14 +363,14 @@ export default function LandingPage() {
         {/* END: HowItWorks */}
 
         {/* BEGIN: TestimonialsSection */}
-        <section className="py-14 px-5 max-w-md mx-auto">
-          <div className="mb-8">
+        <section className="py-14 lg:py-24 px-5 max-w-6xl mx-auto">
+          <div className="mb-12 lg:text-center">
             <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Témoignages</span>
             <h2 className="text-2xl font-black text-brand-dark tracking-tight">
               Adopté par les entrepreneurs qui avancent
             </h2>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-4 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
             {/* Review 1 */}
             <div className="bg-white p-5 rounded-3xl border border-brand-border">
               <div className="flex text-amber-400 text-sm mb-2">★★★★★</div>
@@ -420,16 +424,16 @@ export default function LandingPage() {
         {/* END: TestimonialsSection */}
 
         {/* BEGIN: PricingSection */}
-        <section className="py-14 px-5 bg-white border-y border-brand-border/80" id="tarification">
-          <div className="max-w-md mx-auto">
-            <div className="text-center mb-8">
+        <section className="py-14 lg:py-24 px-5 bg-white border-y border-brand-border/80" id="tarification">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
               <span className="text-xs font-bold text-brand-red uppercase tracking-wider block mb-1">Tarifs transparents</span>
               <h2 className="text-2xl font-black text-brand-dark tracking-tight">
                 Investissez dans votre sérénité
               </h2>
               <p className="text-xs text-brand-muted mt-1">Facturation en FCFA • Sans engagement</p>
             </div>
-            <div className="space-y-6">
+            <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:items-center">
               {/* Plan Gratuit */}
               <div className="p-6 rounded-3xl bg-brand-cream border border-brand-border">
                 <div className="flex justify-between items-start mb-3">
@@ -512,21 +516,21 @@ export default function LandingPage() {
         {/* END: PricingSection */}
 
         {/* BEGIN: FinalCTASection */}
-        <section className="py-14 px-5 max-w-md mx-auto">
+        <section className="py-14 lg:py-24 px-5 max-w-4xl mx-auto">
           <div className="bg-brand-red rounded-4xl p-7 text-white text-center shadow-red-glow relative overflow-hidden">
             {/* Graphic circle accents */}
             <div className="absolute -top-10 -left-10 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
             <span className="inline-block bg-white/20 text-[11px] font-bold uppercase tracking-wider px-3.5 py-1 rounded-full mb-3 backdrop-blur-sm">
               Rejoignez le mouvement
             </span>
-            <h2 className="text-2xl font-black leading-tight mb-3">
+            <h2 className="text-2xl lg:text-4xl font-black leading-tight mb-4">
               Prêt à facturer comme un grand compte ?
             </h2>
-            <p className="text-xs text-white/85 mb-6 leading-relaxed">
+            <p className="text-sm lg:text-base text-white/85 mb-8 leading-relaxed max-w-lg mx-auto">
               Rejoignez plus de 2 500 entrepreneurs au Sénégal, en Côte d’Ivoire et au Cameroun qui se font payer à temps.
             </p>
             <Link
-              className="inline-block w-full bg-brand-dark text-white font-extrabold text-sm py-4 px-6 rounded-full hover:bg-black shadow-lg transition-transform active:scale-95"
+              className="inline-block w-full md:w-auto md:px-12 bg-brand-dark text-white font-extrabold text-sm py-4 rounded-full hover:bg-black shadow-lg transition-transform active:scale-95"
               href={mounted && !loading && isAuthenticated ? "/dashboard" : "/register"}
             >
               Commencer gratuitement maintenant
@@ -538,8 +542,8 @@ export default function LandingPage() {
       </main>
 
       {/* BEGIN: MainFooter */}
-      <footer className="bg-brand-dark text-white pt-12 pb-16 px-5 border-t border-zinc-800">
-        <div className="max-w-md mx-auto space-y-8">
+      <footer className="bg-brand-dark text-white pt-12 lg:pt-20 pb-16 px-5 border-t border-zinc-800">
+        <div className="max-w-6xl mx-auto space-y-8 lg:space-y-0 lg:grid lg:grid-cols-4 lg:gap-12">
           {/* Brand & Mission */}
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -553,7 +557,7 @@ export default function LandingPage() {
             </p>
           </div>
           {/* Quick Links Grid */}
-          <div className="grid grid-cols-2 gap-6 text-xs text-zinc-300">
+          <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8 text-xs text-zinc-300">
             <div>
               <h4 className="font-bold text-white mb-2.5 text-xs uppercase tracking-wider">Plateforme</h4>
               <ul className="space-y-2">
@@ -574,7 +578,7 @@ export default function LandingPage() {
             </div>
           </div>
           {/* Bottom Credits and Compliance */}
-          <div className="pt-6 border-t border-zinc-800/80 flex flex-col gap-2 text-[11px] text-zinc-500">
+          <div className="lg:col-span-4 pt-6 lg:pt-8 border-t border-zinc-800/80 flex flex-col md:flex-row md:justify-between gap-2 text-[11px] text-zinc-500">
             <div className="flex items-center justify-between">
               <span>© 2024 iziFacture Technologies.</span>
               <span className="text-zinc-400">Devise : XOF / XAF (FCFA)</span>
