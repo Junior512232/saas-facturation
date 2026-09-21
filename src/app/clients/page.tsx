@@ -67,7 +67,7 @@ export default function ClientsPage() {
           />
         </div>
         <DropdownMenu>
-          <DropdownMenuTrigger render={<Button variant="outline" className="w-full sm:w-auto flex items-center gap-2" />}>
+          <DropdownMenuTrigger className="w-full sm:w-auto flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
             <Filter className="w-4 h-4" />
             Trier
           </DropdownMenuTrigger>
