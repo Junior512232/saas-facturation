@@ -16,6 +16,7 @@ import { ArrowLeft, Download, Printer, Send, CreditCard } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 
@@ -23,6 +24,7 @@ export default function InvoiceDetailPage() {
   const params = useParams();
   const id = params.id as string;
   const { getInvoiceById, updateInvoiceStatus } = useAppData();
+  const { user } = useAuth();
   
   const [isMounted, setIsMounted] = useState(false);
 
@@ -145,11 +147,17 @@ export default function InvoiceDetailPage() {
                 <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
               </div>
             </div>
-            <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600">
-              <p>123 Rue de la République</p>
-              <p>Dakar, Sénégal</p>
-              <p>contact@izifacture.com</p>
-              <p>+221 77 000 00 00</p>
+            <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600 mt-2">
+              <p className="font-semibold text-foreground print:text-black">{user?.name || "iziFacture SARL"}</p>
+              <p>123 Rue de la République, Dakar</p>
+              <p>{user?.email || "contact@izifacture.com"}</p>
+              <p>{user?.phone || "+221 77 000 00 00"}</p>
+              {(user?.ninea || user?.rccm) && (
+                <div className="mt-1 pt-1 border-t border-border/50 text-xs">
+                  {user?.ninea && <span>NINEA: {user.ninea} </span>}
+                  {user?.rccm && <span>RCCM: {user.rccm}</span>}
+                </div>
+              )}
             </div>
           </div>
           
@@ -172,13 +180,20 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
 
-        {/* Client Info */}
-        <div className="mb-12 p-6 bg-muted/30 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200">
-          <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 print:text-gray-500">Facturé à</p>
-          <div className="text-foreground print:text-black">
-            <p className="text-xl font-bold mb-1">{invoice.client}</p>
-            <p className="text-muted-foreground print:text-gray-600">{invoice.clientEmail}</p>
+        <div className="mb-12 p-6 bg-muted/30 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 flex flex-col md:flex-row justify-between">
+          <div>
+            <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2 print:text-gray-500">Facturé à</p>
+            <div className="text-foreground print:text-black">
+              <p className="text-xl font-bold mb-1">{invoice.client}</p>
+              <p className="text-muted-foreground print:text-gray-600">{invoice.clientEmail}</p>
+            </div>
           </div>
+          {(invoice.clientNinea || invoice.clientRccm) && (
+            <div className="mt-4 md:mt-0 md:text-right flex flex-col justify-end text-sm text-muted-foreground print:text-gray-600">
+              {invoice.clientNinea && <p>NINEA: <span className="font-mono text-foreground print:text-black">{invoice.clientNinea}</span></p>}
+              {invoice.clientRccm && <p>RCCM: <span className="font-mono text-foreground print:text-black">{invoice.clientRccm}</span></p>}
+            </div>
+          )}
         </div>
 
         {/* Invoice Items */}
@@ -234,7 +249,7 @@ export default function InvoiceDetailPage() {
           <div className="w-full md:w-[350px] print:w-[350px]">
             <div className="flex flex-col gap-3 text-sm">
               <div className="flex justify-between items-center text-muted-foreground print:text-gray-600">
-                <span>Sous-total</span>
+                <span>Total HT</span>
                 <span className="font-mono text-foreground print:text-black">{formatFCFA(subtotal)}</span>
               </div>
               <div className="flex justify-between items-center text-muted-foreground print:text-gray-600">
@@ -249,10 +264,12 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-16 pt-8 border-t border-border text-center text-xs text-muted-foreground flex flex-col gap-1">
-          <p>iziFacture SARL - Capital de 1.000.000 FCFA</p>
-          <p>NINEA: 123456789 - RCCM: SN-DKR-2023-B-1234</p>
+          <p>{user?.name || "iziFacture SARL"} - Solution de facturation conforme</p>
+          <p>
+            {user?.ninea ? `NINEA: ${user.ninea}` : "NINEA: 123456789"} - 
+            {user?.rccm ? ` RCCM: ${user.rccm}` : " RCCM: SN-DKR-2023-B-1234"}
+          </p>
         </div>
       </div>
     </div>

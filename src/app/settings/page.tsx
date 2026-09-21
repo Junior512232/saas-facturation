@@ -22,6 +22,8 @@ export default function SettingsPage() {
   // Form states
   const [companyName, setCompanyName] = useState("SeneSaaS SARL");
   const [ninea, setNinea] = useState("00892341-2G3");
+  const [rccm, setRccm] = useState("SN-DKR-2023-B-1234");
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [email, setEmail] = useState("contact@senesaas.sn");
   const [phone, setPhone] = useState("+221 33 824 00 00");
   const [address, setAddress] = useState("Almadies, Dakar, Sénégal");
@@ -111,11 +113,24 @@ export default function SettingsPage() {
             
             <div>
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">Logo de l'entreprise (Optionnel)</label>
-              <input
-                type="file"
-                accept="image/*"
-                className="w-full px-4 py-2 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
-              />
+              <div className="flex items-center gap-4">
+                {logoPreview ? (
+                  <img src={logoPreview} alt="Logo" className="w-16 h-16 rounded-xl object-contain border border-border bg-white" />
+                ) : (
+                  <div className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30 text-muted-foreground text-xs font-medium">Logo</div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setLogoPreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="flex-1 px-4 py-2 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -131,12 +146,23 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">NINEA / Registre du Commerce</label>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">NINEA</label>
                 <input
                   type="text"
                   required
                   value={ninea}
                   onChange={(e) => setNinea(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">Registre du Commerce (RCCM)</label>
+                <input
+                  type="text"
+                  required
+                  value={rccm}
+                  onChange={(e) => setRccm(e.target.value)}
                   className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:outline-none"
                 />
               </div>

@@ -10,6 +10,8 @@ export interface Client {
   address: string;
   city: string;
   country: string;
+  ninea?: string;
+  rccm?: string;
   taxId?: string;
   totalInvoices: number;
   totalPaid: number;
@@ -31,6 +33,8 @@ export interface Invoice {
   clientId: string;
   client: string;
   clientEmail: string;
+  clientNinea?: string;
+  clientRccm?: string;
   issueDate: string;
   dueDate: string;
   amount: number;
@@ -66,6 +70,8 @@ export const clients: Client[] = [
     address: "123 Rue de Dakar",
     city: "Dakar",
     country: "Sénégal",
+    ninea: "001234567-2G1",
+    rccm: "SN-DKR-2020-B-1234",
     taxId: "SN-TAX-20230001",
     totalInvoices: 8,
     totalPaid: 12500000,
@@ -158,6 +164,8 @@ export const invoices: Invoice[] = [
     clientId: "c1",
     client: "Cansaas Agency",
     clientEmail: "contact@cansaas.com",
+    clientNinea: "001234567-2G1",
+    clientRccm: "SN-DKR-2020-B-1234",
     issueDate: "02/09/2026",
     dueDate: "17/09/2026",
     amount: 2500000,

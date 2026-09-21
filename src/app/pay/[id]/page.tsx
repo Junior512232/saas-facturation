@@ -42,6 +42,7 @@ export default function PublicInvoicePayPage() {
   const [selectedMethod, setSelectedMethod] = useState<"wave" | "om" | "card">("wave");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
@@ -282,6 +283,22 @@ export default function PublicInvoicePayPage() {
                   <span className="font-semibold text-sm">Carte Bancaire</span>
                 </button>
               </div>
+
+              {(selectedMethod === 'wave' || selectedMethod === 'om') && (
+                <div className="flex flex-col gap-2 mt-2 animate-in fade-in slide-in-from-top-2">
+                  <label className="text-sm font-semibold text-foreground">
+                    Numéro de téléphone
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder="Ex: 77 123 45 67"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                    required
+                  />
+                </div>
+              )}
               
               <Button 
                 className={`w-full h-12 text-lg font-semibold mt-2 text-white ${
@@ -290,7 +307,7 @@ export default function PublicInvoicePayPage() {
                   'bg-primary hover:bg-primary/90'
                 }`}
                 onClick={handleSimulatePayment}
-                disabled={isProcessing}
+                disabled={isProcessing || ((selectedMethod === 'wave' || selectedMethod === 'om') && phoneNumber.length < 9)}
               >
                 {isProcessing ? (
                   <div className="flex items-center gap-2">

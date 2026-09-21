@@ -23,7 +23,7 @@ import { useAppData } from "@/context/AppDataContext";
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-10 h-10" }: { className?: string }) {
   return (
-    <div className={`rounded-xl bg-white flex items-center justify-center shadow-md flex-shrink-0 relative overflow-hidden border border-border/40 ${className}`}>
+    <div className={`rounded-xl bg-card flex items-center justify-center shadow-md flex-shrink-0 relative overflow-hidden border border-border/40 ${className}`}>
       <img 
         src="/Wave.webp" 
         alt="Wave" 
@@ -36,7 +36,7 @@ function WaveLogo({ className = "w-10 h-10" }: { className?: string }) {
 // Orange Money Brand Logo Component
 function OrangeMoneyLogo({ className = "w-10 h-10" }: { className?: string }) {
   return (
-    <div className={`rounded-xl bg-white flex items-center justify-center shadow-md flex-shrink-0 relative overflow-hidden border border-border/40 ${className}`}>
+    <div className={`rounded-xl bg-card flex items-center justify-center shadow-md flex-shrink-0 relative overflow-hidden border border-border/40 ${className}`}>
       <img 
         src="/om.webp" 
         alt="Orange Money" 
@@ -49,7 +49,7 @@ function OrangeMoneyLogo({ className = "w-10 h-10" }: { className?: string }) {
 // Realistic SVG QR Code Component
 function QrCodeSVG({ value = "wave-om-pay" }: { value?: string }) {
   return (
-    <div className="bg-white p-4 rounded-2xl shadow-md border border-border inline-block relative">
+    <div className="bg-card p-4 rounded-2xl shadow-md border border-border inline-block relative">
       <svg className="w-48 h-48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Outer frame */}
         <rect x="5" y="5" width="30" height="30" rx="4" fill="black" />

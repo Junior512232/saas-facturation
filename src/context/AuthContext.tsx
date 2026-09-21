@@ -11,6 +11,8 @@ export interface AppUser {
   email: string;
   phone?: string;
   ninea?: string;
+  rccm?: string;
+  logo_url?: string;
   role: string;
   plan?: string;
   plan_expires_at?: string;
@@ -35,6 +37,8 @@ function mapUser(supabaseUser: User, profile?: { company_name: string; phone?: s
     email: supabaseUser.email || "",
     phone: profile?.phone || supabaseUser.user_metadata?.phone,
     ninea: profile?.ninea || supabaseUser.user_metadata?.ninea,
+    rccm: (profile as any)?.rccm || supabaseUser.user_metadata?.rccm,
+    logo_url: (profile as any)?.logo_url || supabaseUser.user_metadata?.logo_url,
     role: profile?.role || "Administrateur Pro",
     plan: profile?.plan || supabaseUser.user_metadata?.plan || "gratuit",
     plan_expires_at: profile?.plan_expires_at,
@@ -52,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (supabaseUser: User): Promise<AppUser> => {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("company_name, phone, ninea, role, plan, plan_expires_at")
+      .select("company_name, phone, ninea, rccm, logo_url, role, plan, plan_expires_at")
       .eq("id", supabaseUser.id)
       .single();
     return mapUser(supabaseUser, profile);
