@@ -82,9 +82,9 @@ export default function InvoicesPage() {
             Filtres
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+              <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="paid">Payée</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="sent">Envoyée</DropdownMenuRadioItem>
@@ -92,9 +92,9 @@ export default function InvoicesPage() {
               <DropdownMenuRadioItem value="overdue">En retard</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Trier par</DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuRadioItem value="date">Date d'émission</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="amount">Montant (Décroissant)</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>

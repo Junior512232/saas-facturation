@@ -72,9 +72,9 @@ export default function ClientsPage() {
             Trier
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>Trier par</DropdownMenuLabel>
-            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+              <DropdownMenuSeparator />
               <DropdownMenuRadioItem value="date">Plus récents</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="revenue">Chiffre d'affaires</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>
