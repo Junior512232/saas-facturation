@@ -13,8 +13,10 @@ import {
   Globe, 
   Mail, 
   Phone, 
-  Smartphone 
+  Smartphone,
+  Lock
 } from "lucide-react";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { user, updateProfile } = useAuth();
@@ -122,24 +124,40 @@ export default function SettingsPage() {
             
             <div>
               <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-2">Logo de l'entreprise (Optionnel)</label>
-              <div className="flex items-center gap-4">
-                {logoPreview ? (
-                  <img src={logoPreview} alt="Logo" className="w-16 h-16 rounded-xl object-contain border border-border bg-white" />
-                ) : (
-                  <div className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30 text-muted-foreground text-xs font-medium">Logo</div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      setLogoPreview(URL.createObjectURL(file));
-                    }
-                  }}
-                  className="flex-1 px-4 py-2 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
-                />
-              </div>
+              
+              {user?.plan === "gratuit" || !user?.plan ? (
+                <div className="flex items-center gap-4 p-4 border border-border rounded-xl bg-muted/30">
+                  <div className="w-16 h-16 rounded-xl border border-border flex items-center justify-center bg-background text-muted-foreground">
+                    <Lock className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground">Personnalisation du logo</h4>
+                    <p className="text-xs text-muted-foreground mb-2">Passez au forfait Pro pour ajouter votre propre logo sur vos factures.</p>
+                    <Link href="/settings/billing" className="text-xs font-bold text-brand-blue hover:underline">
+                      Voir les offres &rarr;
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Logo" className="w-16 h-16 rounded-xl object-contain border border-border bg-white" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center bg-muted/30 text-muted-foreground text-xs font-medium">Logo</div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setLogoPreview(URL.createObjectURL(file));
+                      }
+                    }}
+                    className="flex-1 px-4 py-2 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -322,18 +340,30 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between p-4 border border-border rounded-xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border rounded-xl gap-4">
                 <div>
-                  <h4 className="font-bold text-sm text-foreground">Relances automatiques des factures en retard</h4>
-                  <p className="text-xs text-muted-foreground">Envoyer un rappel après 3 jours d'échéance dépassée.</p>
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-bold text-sm text-foreground">Relances automatiques des factures en retard</h4>
+                    {(user?.plan === "gratuit" || !user?.plan) && (
+                      <span className="bg-brand-blue/10 text-brand-blue text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">Pro</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Envoyer un rappel après 3 jours d'échéance dépassée.</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setAutoReminder(!autoReminder)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${autoReminder ? "bg-primary" : "bg-muted"}`}
-                >
-                  <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${autoReminder ? "left-6" : "left-0.5"}`} />
-                </button>
+                
+                {(user?.plan === "gratuit" || !user?.plan) ? (
+                  <Link href="/settings/billing" className="text-xs font-bold text-brand-blue bg-brand-blue/10 hover:bg-brand-blue/20 px-3 py-1.5 rounded-lg transition-colors text-center shrink-0">
+                    Débloquer
+                  </Link>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setAutoReminder(!autoReminder)}
+                    className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${autoReminder ? "bg-primary" : "bg-muted"}`}
+                  >
+                    <div className={`w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all ${autoReminder ? "left-6" : "left-0.5"}`} />
+                  </button>
+                )}
               </div>
 
               <div className="flex items-center justify-between p-4 border border-border rounded-xl">

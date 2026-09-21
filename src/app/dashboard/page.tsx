@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Plus,
   AlertTriangle,
+  Zap,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/utils";
 
@@ -47,6 +48,24 @@ export default function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8">
+      {/* Upgrade Banner for Free Users */}
+      {(user?.plan === "gratuit" || !user?.plan) && (
+        <div className="bg-gradient-to-r from-brand-blue to-purple-600 rounded-2xl p-6 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/20 rounded-xl shrink-0">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg">Passez à la vitesse supérieure !</h3>
+              <p className="text-white/80 text-sm mt-1">Vous utilisez la version gratuite. Passez à la version Pro pour débloquer les factures illimitées et les relances automatiques.</p>
+            </div>
+          </div>
+          <Link href="/settings/billing" className="shrink-0 bg-white text-brand-blue font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition-colors shadow-sm active:scale-[0.98]">
+            Voir les offres
+          </Link>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex flex-col gap-1">

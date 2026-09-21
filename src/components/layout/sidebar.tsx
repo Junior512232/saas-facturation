@@ -201,8 +201,16 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
               )}
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col min-w-0">
-              <span className="text-sm font-semibold text-sidebar-foreground truncate">{user?.name || "Utilisateur"}</span>
+            <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-sidebar-foreground truncate">{user?.name || "Utilisateur"}</span>
+                {user?.plan === "pro" && (
+                  <span className="bg-brand-blue text-white text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full shrink-0">PRO</span>
+                )}
+                {user?.plan === "business" && (
+                  <span className="bg-brand-dark text-white border border-brand-blue/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full shrink-0">BIZ</span>
+                )}
+              </div>
               <span className="text-xs text-muted-foreground truncate">{user?.email || ""}</span>
             </div>
           </div>
