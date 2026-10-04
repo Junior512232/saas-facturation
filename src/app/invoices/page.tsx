@@ -1,6 +1,7 @@
 "use client";
 
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
 import { statusStyles, statusLabels } from "@/lib/data";
 import { formatFCFA } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,9 +31,14 @@ import { useState } from "react";
 
 export default function InvoicesPage() {
   const { invoicesList, clientsList } = useAppData();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
+
+  const isFreePlan = !user?.plan || user.plan === "gratuit";
+  const INVOICE_LIMIT = 5;
+  const hasReachedLimit = isFreePlan && invoicesList.length >= INVOICE_LIMIT;
 
   const filteredInvoices = invoicesList
     .filter((invoice) => 
@@ -56,12 +62,21 @@ export default function InvoicesPage() {
           <h2 className="text-3xl font-bold tracking-tight text-foreground">Factures</h2>
           <p className="text-muted-foreground">Gérez et suivez toutes vos factures émises.</p>
         </div>
-        <Link href="/invoices/create">
-          <Button className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Nouvelle facture
-          </Button>
-        </Link>
+        {hasReachedLimit ? (
+          <Link href="/settings/billing">
+            <Button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white">
+              <FileText className="w-4 h-4" />
+              Passer Pro (Limite atteinte)
+            </Button>
+          </Link>
+        ) : (
+          <Link href="/invoices/create">
+            <Button className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Nouvelle facture
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Filters and Search */}

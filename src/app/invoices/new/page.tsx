@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
 import { useSyncStore } from "@/lib/syncStore";
 import { formatFCFA } from "@/lib/utils";
 import { Invoice, InvoiceItem } from "@/lib/data";
@@ -110,6 +111,29 @@ export default function NewInvoicePage() {
     buildAndSave("draft");
     router.push("/invoices");
   };
+
+  const { user } = useAuth();
+  
+  const isFreePlan = !user?.plan || user.plan === "gratuit";
+  const INVOICE_LIMIT = 5;
+  const hasReachedLimit = isFreePlan && invoices.length >= INVOICE_LIMIT;
+
+  if (hasReachedLimit) {
+    return (
+      <div className="p-6 lg:p-10 max-w-3xl mx-auto w-full flex flex-col items-center justify-center text-center mt-20 gap-6">
+        <div className="w-20 h-20 bg-brand-cream rounded-full flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-brand-blue" />
+        </div>
+        <h2 className="text-3xl font-bold tracking-tight">Limite atteinte</h2>
+        <p className="text-muted-foreground max-w-md">
+          Vous avez atteint la limite de {INVOICE_LIMIT} factures autorisées sur le forfait Gratuit. Passez à un forfait supérieur pour créer des factures illimitées.
+        </p>
+        <Link href="/settings/billing" className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-blueDark transition-colors">
+          Voir les offres Pro & Business
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto w-full flex flex-col gap-6">
