@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
+// Resend init moved inside POST to prevent build errors
 /**
  * API Route to send invoice PDF link & payment link to client email
  */
@@ -24,6 +23,8 @@ export async function POST(req: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const paymentLink = `${baseUrl}/pay/${invoiceId}`;
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
     const { data, error } = await resend.emails.send({
       from: `${senderName || "Votre Fournisseur"} <factures@votredomaine.com>`, // Mettez votre domaine vérifié sur Resend ici
