@@ -41,7 +41,11 @@ function makeInitials(name: string): string {
 }
 
 // Map Supabase row → Client
-function rowToClient(row: Record<string, unknown>): Client {
+function rowToClient(row: Record<string, unknown>, allInvoices: Invoice[] = []): Client {
+  const clientInvoices = allInvoices.filter(inv => inv.clientId === row.id);
+  const totalInvoices = clientInvoices.length;
+  const totalPaid = clientInvoices.filter(inv => inv.status === "paid").reduce((sum, inv) => sum + inv.amount, 0);
+
   return {
     id: row.id as string,
     name: row.name as string,
@@ -51,8 +55,8 @@ function rowToClient(row: Record<string, unknown>): Client {
     city: (row.city as string) || "",
     country: (row.country as string) || "Sénégal",
     taxId: (row.tax_id as string) || undefined,
-    totalInvoices: (row.total_invoices as number) || 0,
-    totalPaid: (row.total_paid as number) || 0,
+    totalInvoices,
+    totalPaid,
     createdAt: new Date(row.created_at as string).toLocaleDateString("fr-FR"),
     initials: (row.initials as string) || makeInitials(row.name as string),
     color: (row.color as string) || COLORS[0],
@@ -137,8 +141,9 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         supabase.from("invoices").select("*, clients(name, email), invoice_items(*)").order("created_at", { ascending: false }),
         supabase.from("payments").select("*, invoices(invoice_number, clients(id, name))").order("created_at", { ascending: false }),
       ]);
-      setClientsList((clientsData || []).map(rowToClient));
-      setInvoicesList((invoicesData || []).map(rowToInvoice));
+      const parsedInvoices = (invoicesData || []).map(rowToInvoice);
+      setInvoicesList(parsedInvoices);
+      setClientsList((clientsData || []).map(row => rowToClient(row, parsedInvoices)));
       setTransactionsList((paymentsData || []).map(rowToPayment));
     } catch (err) {
       console.error("Error fetching data:", err);
@@ -168,7 +173,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
       .single();
 
     if (!error && data) {
-      setClientsList((prev) => [rowToClient(data), ...prev]);
+      setClientsList((prev) => [rowToClient(data, invoicesList), ...prev]);
     }
   };
 
@@ -217,16 +222,12 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
 
     setInvoicesList((prev) => prev.map((inv) => (inv.id === id ? { ...inv, status } : inv)));
 
-    // Update client totalPaid
+    // Update client totalPaid locally for UI speed
     if (invoice?.clientId) {
       const oldPaid = invoice.status === "paid" ? invoice.amount : 0;
       const newPaid = status === "paid" ? invoice.amount : 0;
       const diff = newPaid - oldPaid;
       if (diff !== 0) {
-        await supabase
-          .from("clients")
-          .update({ total_paid: Math.max(0, (clientsList.find((c) => c.id === invoice.clientId)?.totalPaid || 0) + diff) })
-          .eq("id", invoice.clientId);
         setClientsList((prev) =>
           prev.map((c) =>
             c.id === invoice.clientId ? { ...c, totalPaid: Math.max(0, c.totalPaid + diff) } : c

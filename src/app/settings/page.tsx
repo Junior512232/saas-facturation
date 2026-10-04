@@ -38,7 +38,6 @@ export default function SettingsPage() {
   const [autoReminder, setAutoReminder] = useState(true);
   const [smsNotify, setSmsNotify] = useState(true);
   const [waveWebhook, setWaveWebhook] = useState(true);
-  const [omWebhook, setOmWebhook] = useState(true);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,7 +65,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex flex-col gap-1">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">Paramètres</h2>
-        <p className="text-muted-foreground">Configurez votre entreprise, vos intégrations Wave & Orange Money et vos préférences.</p>
+        <p className="text-muted-foreground">Configurez votre entreprise, votre intégration Wave et vos préférences.</p>
       </div>
 
       {/* Tabs */}
@@ -98,7 +97,7 @@ export default function SettingsPage() {
           }`}
         >
           <Key className="w-4 h-4" />
-          Clés API Wave / OM
+          Clés API Wave
         </button>
 
         <button
@@ -275,8 +274,8 @@ export default function SettingsPage() {
         {activeTab === "api" && (
           <div className="rounded-2xl border border-border bg-card p-6 md:p-8 flex flex-col gap-6 shadow-sm">
             <div>
-              <h3 className="text-lg font-bold text-foreground">Intégrations API Mobile Money</h3>
-              <p className="text-xs text-muted-foreground">Gérez vos identifiants marchands et webhooks pour la réception automatique des paies Wave & Orange Money.</p>
+              <h3 className="text-lg font-bold text-foreground">Intégration API Wave</h3>
+              <p className="text-xs text-muted-foreground">Gérez vos identifiants marchands et webhooks pour la réception automatique des paiements Wave.</p>
             </div>
 
             <div className="flex flex-col gap-6">
@@ -300,30 +299,6 @@ export default function SettingsPage() {
                   <div>
                     <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">Clé Secrète (API Key)</label>
                     <input type="password" readOnly value="wv_live_892348923498239" className="w-full px-3 py-2 border border-border rounded-xl bg-background font-mono text-xs" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Orange Money API */}
-              <div className="p-5 border border-[#ff6600]/30 bg-[#ff6600]/5 rounded-2xl flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img src="/om.webp" alt="Orange Money" className="w-8 h-8 rounded-full object-cover" />
-                    <div>
-                      <h4 className="font-bold text-foreground">Clé API Orange Money</h4>
-                      <p className="text-xs text-muted-foreground">Paiement Web / USSD Pass</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-bold px-2.5 py-1 bg-emerald-500/10 text-emerald-600 rounded-full">Active</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">Client ID</label>
-                    <input type="text" readOnly value="OM-SN-PRO-4412" className="w-full px-3 py-2 border border-border rounded-xl bg-background font-mono text-xs" />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">Token Webhook</label>
-                    <input type="password" readOnly value="om_wh_secret_772183921" className="w-full px-3 py-2 border border-border rounded-xl bg-background font-mono text-xs" />
                   </div>
                 </div>
               </div>
@@ -369,7 +344,7 @@ export default function SettingsPage() {
               <div className="flex items-center justify-between p-4 border border-border rounded-xl">
                 <div>
                   <h4 className="font-bold text-sm text-foreground">Notification SMS lors du paiement client</h4>
-                  <p className="text-xs text-muted-foreground">Recevez un SMS instantané lorsque Wave ou OM valide un règlement.</p>
+                  <p className="text-xs text-muted-foreground">Recevez un SMS instantané lorsque Wave valide un règlement.</p>
                 </div>
                 <button
                   type="button"

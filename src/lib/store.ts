@@ -1,6 +1,20 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { Invoice, Client, invoices as initialInvoices, clients as initialClients } from './data';
+import { persist, StateStorage, createJSONStorage } from 'zustand/middleware';
+import { get, set, del } from 'idb-keyval';
+import { Invoice, Client } from './data';
+
+// Définir le stockage personnalisé basé sur IndexedDB
+const idbStorage: StateStorage = {
+  getItem: async (name: string): Promise<string | null> => {
+    return (await get(name)) || null;
+  },
+  setItem: async (name: string, value: string): Promise<void> => {
+    await set(name, value);
+  },
+  removeItem: async (name: string): Promise<void> => {
+    await del(name);
+  },
+};
 
 interface AppState {
   invoices: Invoice[];
@@ -20,8 +34,8 @@ interface AppState {
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
-      invoices: initialInvoices,
-      clients: initialClients,
+      invoices: [],
+      clients: [],
 
       addInvoice: (invoice) => set((state) => ({ invoices: [invoice, ...state.invoices] })),
       updateInvoice: (id, updatedInvoice) => set((state) => ({
@@ -41,6 +55,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'izifacture-storage', // name of the item in the storage (must be unique)
+      storage: createJSONStorage(() => idbStorage), // Utilise IndexedDB !
     }
   )
 );

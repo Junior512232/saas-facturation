@@ -18,9 +18,9 @@ function getPageTitle(pathname: string): string {
   if (pathname === "/clients") return "Clients";
   if (pathname.startsWith("/clients/")) return "Détail du client";
   if (pathname === "/transactions") return "Transactions";
-  if (pathname === "/wallet") return "Portefeuille";
   if (pathname === "/reports") return "Rapports";
   if (pathname === "/settings") return "Paramètres";
+  if (pathname === "/settings/payment") return "Paramètres de paiement";
   if (pathname === "/support") return "Support";
   return "iziFacture";
 }

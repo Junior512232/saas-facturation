@@ -19,6 +19,7 @@ import { useAppData } from "@/context/AppDataContext";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
+import { Loader2 } from "lucide-react";
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -27,6 +28,7 @@ export default function InvoiceDetailPage() {
   const { user } = useAuth();
   
   const [isMounted, setIsMounted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -68,6 +70,43 @@ export default function InvoiceDetailPage() {
     
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleSendEmail = async () => {
+    if (!invoice.clientEmail) {
+      alert("Le client n'a pas d'adresse email renseignée.");
+      return;
+    }
+    
+    setIsSending(true);
+    try {
+      const response = await fetch('/api/invoices/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: invoice.id,
+          invoiceNumber: invoice.number,
+          clientEmail: invoice.clientEmail,
+          clientName: invoice.client,
+          amount: total,
+          senderName: user?.name,
+        }),
+      });
+      
+      const data = await response.json();
+      if (response.ok) {
+        alert("✅ " + data.message);
+        if (invoice.status === 'draft') {
+          updateInvoiceStatus(id, "sent");
+        }
+      } else {
+        alert("❌ Erreur : " + data.error);
+      }
+    } catch (error) {
+      alert("❌ Une erreur réseau est survenue.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -119,9 +158,13 @@ export default function InvoiceDetailPage() {
               Marquer payée
             </Button>
           )}
-          <Button className="flex items-center gap-2">
-            <Send className="w-4 h-4" />
-            Envoyer
+          <Button 
+            className="flex items-center gap-2" 
+            onClick={handleSendEmail} 
+            disabled={isSending || !invoice.clientEmail}
+          >
+            {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+            {isSending ? "Envoi..." : "Envoyer"}
           </Button>
         </div>
       </div>

@@ -82,7 +82,7 @@ export default function BillingPage() {
           )}
           <h3 className="text-xl font-bold text-foreground mb-2">Pro</h3>
           <div className="flex items-end gap-1 mb-6">
-            <span className="text-4xl font-black text-brand-dark">5 000</span>
+            <span className="text-4xl font-black text-brand-dark">15 000</span>
             <span className="text-sm text-muted-foreground font-medium mb-1">FCFA / mois</span>
           </div>
           <ul className="space-y-3 mb-8 flex-1 text-sm text-muted-foreground">
@@ -92,7 +92,7 @@ export default function BillingPage() {
           </ul>
           <Button 
             className="w-full bg-brand-blue hover:bg-brand-blueDark text-white h-12 rounded-xl font-bold shadow-blue-glow transition-all"
-            onClick={() => handleSubscribe("pro", 5000)}
+            onClick={() => handleSubscribe("pro", 15000)}
             disabled={loadingPlan !== null || currentPlan === "pro"}
           >
             {loadingPlan === "pro" ? "Traitement..." : currentPlan === "pro" ? "Forfait actuel" : "Passer à l'offre Pro"}
@@ -109,7 +109,7 @@ export default function BillingPage() {
           )}
           <h3 className="text-xl font-bold mb-2 relative z-10">Business</h3>
           <div className="flex items-end gap-1 mb-6 relative z-10">
-            <span className="text-4xl font-black">15 000</span>
+            <span className="text-4xl font-black">25 000</span>
             <span className="text-sm text-gray-400 font-medium mb-1">FCFA / mois</span>
           </div>
           <ul className="space-y-3 mb-8 flex-1 text-sm text-gray-300 relative z-10">
@@ -120,7 +120,7 @@ export default function BillingPage() {
           <Button 
             variant="outline"
             className="w-full bg-white/10 hover:bg-white/20 text-white border-none h-12 rounded-xl font-bold transition-all relative z-10"
-            onClick={() => handleSubscribe("business", 15000)}
+            onClick={() => handleSubscribe("business", 25000)}
             disabled={loadingPlan !== null || currentPlan === "business"}
           >
             {loadingPlan === "business" ? "Traitement..." : currentPlan === "business" ? "Forfait actuel" : "Passer à l'offre Business"}
@@ -136,7 +136,7 @@ export default function BillingPage() {
         <div>
           <h4 className="font-semibold mb-1">Comment payer mon abonnement ?</h4>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Lorsque vous cliquez pour passer à une offre supérieure, vous serez redirigé vers notre passerelle de paiement sécurisée. Le paiement de l'abonnement s'effectue via <strong>Wave</strong> ou <strong>Orange Money</strong>. L'activation est instantanée.
+            Lorsque vous cliquez pour passer à une offre supérieure, vous serez redirigé vers notre passerelle de paiement sécurisée CinetPay. Le paiement de l'abonnement s'effectue via <strong>Wave</strong> ou <strong>Carte Bancaire</strong>. L'activation est instantanée.
           </p>
         </div>
       </div>

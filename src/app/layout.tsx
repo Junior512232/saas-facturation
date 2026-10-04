@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import InnerLayout from "@/components/layout/inner-layout";
 import { Providers } from "@/components/providers";
+import { NetworkManager } from "@/components/NetworkManager";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -34,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${plusJakartaSans.variable} ${jetbrainsMono.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="min-h-full flex bg-background text-foreground" suppressHydrationWarning>
+        <NetworkManager />
         <Providers>
           <InnerLayout>{children}</InnerLayout>
         </Providers>

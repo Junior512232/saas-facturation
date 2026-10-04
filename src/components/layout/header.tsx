@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Bell, Menu, CheckCheck, Trash2, X, Smartphone, Sparkles, FileText, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAppData } from "@/context/AppDataContext";
+import { SyncStatus } from "@/components/ui/SyncStatus";
 
 interface HeaderProps {
   title: string;
@@ -176,7 +177,9 @@ export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4 relative" ref={dropdownRef}>
+      <div className="flex items-center gap-2 sm:gap-4 relative" ref={dropdownRef}>
+        <SyncStatus />
+        
         {/* Bell Button */}
         <Button
           variant="outline"

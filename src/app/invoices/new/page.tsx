@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAppData } from "@/context/AppDataContext";
+import { useSyncStore } from "@/lib/syncStore";
 import { formatFCFA } from "@/lib/utils";
 import { Invoice, InvoiceItem } from "@/lib/data";
 import { ArrowLeft, Plus, Trash2, GripVertical, AlertCircle } from "lucide-react";
@@ -18,6 +19,7 @@ interface LineItem {
 export default function NewInvoicePage() {
   const router = useRouter();
   const { clientsList: clients, invoicesList: invoices, addInvoice } = useAppData();
+  const { addToQueue } = useSyncStore();
 
   const [clientId, setClientId] = useState("");
   const [issueDate, setIssueDate] = useState("");
@@ -81,10 +83,16 @@ export default function NewInvoicePage() {
     };
     
     // addInvoice in context takes an Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }
-    // It creates the id itself, so we don't need to pass it, but TS might complain if we defined newInvoice as Invoice.
-    // So we just omit id from the payload.
     const { id, ...payload } = newInvoice;
+    
+    // 1. Mise à jour immédiate de l'UI (Stockage local IndexedDB)
     addInvoice(payload);
+    
+    // 2. Ajout de l'action dans la file d'attente pour synchronisation asynchrone (Supabase)
+    addToQueue({
+      type: 'CREATE_INVOICE',
+      payload: newInvoice
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

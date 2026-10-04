@@ -8,7 +8,6 @@ import { useAuth } from "@/context/AuthContext";
 import { 
   LayoutDashboard, 
   ArrowRightLeft, 
-  Wallet, 
   FileText, 
   BarChart2, 
   HelpCircle, 
@@ -22,7 +21,8 @@ import {
   ShieldCheck,
   Briefcase,
   UserCheck,
-  Package
+  Package,
+  CreditCard
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -51,7 +51,6 @@ const menuGroups: MenuGroup[] = [
     items: [
       { icon: FileText, label: "Factures", href: "/invoices" },
       { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },
-      { icon: Wallet, label: "Portefeuille", href: "/wallet" },
     ]
   },
   {
@@ -60,6 +59,7 @@ const menuGroups: MenuGroup[] = [
       { icon: BarChart2, label: "Rapports", href: "/reports" },
       { icon: ShieldCheck, label: "Abonnement", href: "/settings/billing" },
       { icon: Settings, label: "Paramètres", href: "/settings" },
+      { icon: CreditCard, label: "Paiement", href: "/settings/payment" },
       { icon: HelpCircle, label: "Aide & Support", href: "/support" },
     ]
   },

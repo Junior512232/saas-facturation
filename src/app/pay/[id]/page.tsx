@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import QRCode from "react-qr-code";
+import { initiateCinetPayPayment } from "@/app/actions/payment";
 
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {
@@ -39,13 +40,20 @@ export default function PublicInvoicePayPage() {
   
   const [isMounted, setIsMounted] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<"wave" | "om" | "card">("wave");
+  const [selectedMethod, setSelectedMethod] = useState<"wave" | "card">("wave");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     setIsMounted(true);
+    // Si l'utilisateur revient depuis la page de paiement CinetPay
+    if (typeof window !== "undefined" && window.location.search.includes("success=true")) {
+      setIsSuccess(true);
+      setPaymentModalOpen(true);
+      // Optionnel : nettoyer l'URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   if (!isMounted) return null;
@@ -70,17 +78,28 @@ export default function PublicInvoicePayPage() {
     window.print();
   };
 
-  const handleSimulatePayment = () => {
+  const handlePayment = async () => {
     setIsProcessing(true);
-    // Simulate API call to aggregator
-    setTimeout(() => {
+    try {
+      // Dans ce démo, nous utilisons les identifiants de facturation
+      const res = await initiateCinetPayPayment({
+        invoiceId: invoice.id,
+        amount: total,
+        description: `Facture ${invoice.number}`,
+        customerName: invoice.client,
+        customerEmail: invoice.clientEmail,
+      });
+
+      if (res.success && res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+      } else {
+        alert(res.error || "Erreur lors de l'initialisation du paiement.");
+        setIsProcessing(false);
+      }
+    } catch (err) {
+      alert("Une erreur inattendue est survenue.");
       setIsProcessing(false);
-      setIsSuccess(true);
-      updateInvoiceStatus(id, "paid");
-      setTimeout(() => {
-        setPaymentModalOpen(false);
-      }, 3000);
-    }, 2000);
+    }
   };
 
   return (
@@ -248,7 +267,7 @@ export default function PublicInvoicePayPage() {
                 <p className="text-3xl font-black font-mono text-foreground">{formatFCFA(total)}</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button 
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     selectedMethod === 'wave' ? 'border-[#1dc3f7] bg-[#1dc3f7]/5 shadow-sm' : 'border-border hover:bg-muted/50'
@@ -259,18 +278,7 @@ export default function PublicInvoicePayPage() {
                   <span className="font-semibold text-sm">Wave</span>
                 </button>
                 
-                <button 
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    selectedMethod === 'om' ? 'border-[#f27405] bg-[#f27405]/5 shadow-sm' : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setSelectedMethod('om')}
-                >
-                  <div className="w-10 h-10 bg-[#000000] flex items-center justify-center rounded-xl">
-                    <span className="text-[#f27405] font-black text-xl">O</span>
-                  </div>
-                  <span className="font-semibold text-sm whitespace-nowrap">Orange Money</span>
-                </button>
-                
+
                 <button 
                   className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
                     selectedMethod === 'card' ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:bg-muted/50'
@@ -284,7 +292,7 @@ export default function PublicInvoicePayPage() {
                 </button>
               </div>
 
-              {(selectedMethod === 'wave' || selectedMethod === 'om') && (
+              {selectedMethod === 'wave' && (
                 <div className="flex flex-col gap-2 mt-2 animate-in fade-in slide-in-from-top-2">
                   <label className="text-sm font-semibold text-foreground">
                     Numéro de téléphone
@@ -299,15 +307,13 @@ export default function PublicInvoicePayPage() {
                   />
                 </div>
               )}
-              
               <Button 
                 className={`w-full h-12 text-lg font-semibold mt-2 text-white ${
                   selectedMethod === 'wave' ? 'bg-[#1dc3f7] hover:bg-[#008db9]' :
-                  selectedMethod === 'om' ? 'bg-[#f27405] hover:bg-[#cc6000]' :
                   'bg-primary hover:bg-primary/90'
                 }`}
-                onClick={handleSimulatePayment}
-                disabled={isProcessing || ((selectedMethod === 'wave' || selectedMethod === 'om') && phoneNumber.length < 9)}
+                onClick={handlePayment}
+                disabled={isProcessing || (selectedMethod === 'wave' && phoneNumber.length < 9)}
               >
                 {isProcessing ? (
                   <div className="flex items-center gap-2">
@@ -315,10 +321,10 @@ export default function PublicInvoicePayPage() {
                     Traitement en cours...
                   </div>
                 ) : (
-                  `Payer avec ${selectedMethod === 'wave' ? 'Wave' : selectedMethod === 'om' ? 'Orange Money' : 'Carte Bancaire'}`
+                  `Payer avec ${selectedMethod === 'wave' ? 'Wave' : 'Carte Bancaire'}`
                 )}
               </Button>
-              <p className="text-center text-xs text-muted-foreground">Paiement sécurisé par nos partenaires locaux.</p>
+              <p className="text-center text-xs text-muted-foreground">Paiement direct sécurisé. Les fonds sont transférés immédiatement sur le compte du marchand.</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 gap-4 text-center">
