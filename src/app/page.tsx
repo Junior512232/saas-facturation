@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState } from "react";
+import { MobileDemo } from "@/components/landing/MobileDemo";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -152,48 +153,8 @@ export default function LandingPage() {
                 <span className="text-base leading-none">↗</span>
               </a>
             </div>
-            {/* SaaS Mobile Mockup Preview Card */}
-            <div className="bg-white rounded-3xl p-5 border border-brand-border shadow-card relative">
-              {/* Mockup Header */}
-              <div className="flex items-center justify-between border-b border-brand-border/60 pb-3 mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-                  <span className="text-xs font-bold text-brand-dark tracking-wide">FACTURE #INV-2024-089</span>
-                </div>
-                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200">
-                  Payée via Wave
-                </span>
-              </div>
-              {/* Invoice Details Preview */}
-              <div className="space-y-3">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-brand-muted">Client :</span>
-                  <span className="text-xs font-semibold text-brand-dark">Société AgroTech SA (Abidjan)</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-brand-muted">Montant HT :</span>
-                  <span className="text-xs font-semibold text-brand-dark">1 450 000 FCFA</span>
-                </div>
-                <div className="flex justify-between items-baseline">
-                  <span className="text-xs text-brand-muted">TVA (18%) :</span>
-                  <span className="text-xs font-semibold text-brand-dark">261 000 FCFA</span>
-                </div>
-                <div className="pt-2 border-t border-dashed border-brand-border flex justify-between items-baseline">
-                  <span className="text-sm font-bold text-brand-dark">Total TTC :</span>
-                  <span className="text-lg font-black text-brand-blue">1 711 000 FCFA</span>
-                </div>
-              </div>
-              {/* Micro QR code verification indicator */}
-              <div className="mt-4 pt-3 border-t border-brand-border/50 flex items-center justify-between text-[11px] text-brand-muted">
-                <div className="flex items-center gap-1.5">
-                  <svg className="w-3.5 h-3.5 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" clipRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"></path>
-                  </svg>
-                  <span>QR Code DGI Conforme</span>
-                </div>
-                <span className="font-mono text-[10px] text-zinc-400">CI-2024-V9</span>
-              </div>
-            </div>
+            {/* Animated SaaS Mobile Demo */}
+            <MobileDemo />
           </div>
           </div>
         </section>
