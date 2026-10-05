@@ -12,16 +12,18 @@ export async function POST(req: Request) {
     const webhookSecret = process.env.WAVE_WEBHOOK_SECRET || "default_wave_secret_key";
 
     // HMAC Signature Verification
-    if (waveSignature && process.env.NODE_ENV === "production") {
-      const expectedSignature = crypto
-        .createHmac("sha256", webhookSecret)
-        .update(rawBody)
-        .digest("hex");
+    if (!waveSignature) {
+      return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+    }
 
-      if (waveSignature !== expectedSignature) {
-        console.warn("⚠️ Invalid Wave webhook signature attempt detected!");
-        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-      }
+    const expectedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(rawBody)
+      .digest("hex");
+
+    if (waveSignature !== expectedSignature) {
+      console.warn("⚠️ Invalid Wave webhook signature attempt detected!");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const body = JSON.parse(rawBody);
