@@ -15,7 +15,7 @@ interface AppDataContextProps {
   loading: boolean;
   addClient: (client: Omit<Client, "id" | "totalInvoices" | "totalPaid" | "createdAt" | "initials" | "color">) => Promise<void>;
   addInvoice: (invoice: Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }) => Promise<void>;
-  updateInvoiceStatus: (id: string, status: InvoiceStatus) => Promise<void>;
+
   getClientById: (id: string) => Client | undefined;
   getInvoiceById: (id: string) => Invoice | undefined;
   getInvoicesByClientId: (clientId: string) => Invoice[];
@@ -215,27 +215,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateInvoiceStatus = async (id: string, status: InvoiceStatus) => {
-    const invoice = invoicesList.find((i) => i.id === id);
-    const { error } = await supabase.from("invoices").update({ status }).eq("id", id);
-    if (error) return;
 
-    setInvoicesList((prev) => prev.map((inv) => (inv.id === id ? { ...inv, status } : inv)));
-
-    // Update client totalPaid locally for UI speed
-    if (invoice?.clientId) {
-      const oldPaid = invoice.status === "paid" ? invoice.amount : 0;
-      const newPaid = status === "paid" ? invoice.amount : 0;
-      const diff = newPaid - oldPaid;
-      if (diff !== 0) {
-        setClientsList((prev) =>
-          prev.map((c) =>
-            c.id === invoice.clientId ? { ...c, totalPaid: Math.max(0, c.totalPaid + diff) } : c
-          )
-        );
-      }
-    }
-  };
 
   const getClientById = (id: string) => clientsList.find((c) => c.id === id);
   const getInvoiceById = (id: string) => invoicesList.find((inv) => inv.id === id);
@@ -250,7 +230,7 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         loading,
         addClient,
         addInvoice,
-        updateInvoiceStatus,
+
         getClientById,
         getInvoiceById,
         getInvoicesByClientId,

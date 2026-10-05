@@ -24,7 +24,7 @@ import { Loader2 } from "lucide-react";
 export default function InvoiceDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const { getInvoiceById, updateInvoiceStatus } = useAppData();
+  const { getInvoiceById } = useAppData();
   const { user } = useAuth();
   
   const [isMounted, setIsMounted] = useState(false);
@@ -54,9 +54,6 @@ export default function InvoiceDetailPage() {
   const taxAmount = (subtotal * invoice.taxRate) / 100;
   const total = subtotal + taxAmount;
 
-  const handleMarkPaid = () => {
-    updateInvoiceStatus(id, "paid");
-  };
 
   const handleDownloadPDF = () => {
     window.print();
@@ -96,9 +93,8 @@ export default function InvoiceDetailPage() {
       const data = await response.json();
       if (response.ok) {
         alert("✅ " + data.message);
-        if (invoice.status === 'draft') {
-          updateInvoiceStatus(id, "sent");
-        }
+        // Le statut ne peut plus être modifié via le front-end.
+        // Il sera mis à jour via webhooks ou côté serveur uniquement.
       } else {
         alert("❌ Erreur : " + data.error);
       }
@@ -152,12 +148,7 @@ export default function InvoiceDetailPage() {
             </svg>
             WhatsApp
           </Button>
-          {invoice.status !== 'paid' && (
-            <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white" onClick={handleMarkPaid}>
-              <CreditCard className="w-4 h-4" />
-              Marquer payée
-            </Button>
-          )}
+
           <Button 
             className="flex items-center gap-2" 
             onClick={handleSendEmail} 
