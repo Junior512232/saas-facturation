@@ -24,6 +24,7 @@ interface NotificationItem {
 export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
   const { invoicesList, clientsList } = useAppData();
   const [customNotifications, setCustomNotifications] = useState<NotificationItem[]>([]);
+  const [clearedIds, setClearedIds] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -83,11 +84,13 @@ export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
     }
 
     // Merge with custom (manually set read state)
-    return items.map((item) => {
+    const mappedItems = items.map((item) => {
       const custom = customNotifications.find((c) => c.id === item.id);
       return custom ? { ...item, read: custom.read } : item;
     });
-  }, [invoicesList, clientsList, customNotifications]);
+
+    return mappedItems.filter(item => !clearedIds.includes(item.id));
+  }, [invoicesList, clientsList, customNotifications, clearedIds]);
 
   const notifications = buildNotifications();
   const unreadCount = notifications.filter((n) => !n.read).length;
@@ -111,7 +114,7 @@ export function Header({ title, breadcrumbs, onMenuClick }: HeaderProps) {
   };
 
   const clearAll = () => {
-    setCustomNotifications(notifications.map((n) => ({ ...n, read: true })));
+    setClearedIds(prev => [...prev, ...notifications.map(n => n.id)]);
   };
 
   const toggleRead = (id: string) => {
