@@ -1,6 +1,66 @@
 "use server";
 
-import { getPaymentSettings } from "./payment-settings";
+import { createClient } from "@supabase/supabase-js";
+import { decrypt } from "@/lib/encryption";
+import { Database } from "@/lib/database.types";
+
+const supabaseAdmin = createClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export async function getPublicInvoiceDetails(invoiceId: string) {
+  try {
+    const { data: invoice, error: invoiceError } = await supabaseAdmin
+      .from("invoices")
+      .select("*, clients(name, email), invoice_items(*), profiles(company_name, logo_url, plan, rccm, ninea, phone, email)")
+      .eq("id", invoiceId)
+      .single();
+
+    if (invoiceError || !invoice) {
+      return { success: false, error: "Facture introuvable." };
+    }
+
+    // Format items
+    const items = (invoice.invoice_items || []).map((item: any) => ({
+      id: item.id,
+      description: item.description,
+      quantity: item.quantity,
+      unitPrice: item.unit_price,
+    }));
+
+    const clientData = invoice.clients as any;
+    const profile = invoice.profiles as any;
+
+    const formattedInvoice = {
+      id: invoice.id,
+      number: invoice.invoice_number,
+      clientId: invoice.client_id,
+      client: clientData?.name || invoice.client_name || "Client",
+      clientEmail: clientData?.email || invoice.client_email || "",
+      issueDate: invoice.issue_date ? new Date(invoice.issue_date).toLocaleDateString("fr-FR") : "",
+      dueDate: invoice.due_date ? new Date(invoice.due_date).toLocaleDateString("fr-FR") : "",
+      amount: invoice.total,
+      taxRate: invoice.tax_rate || 18,
+      status: invoice.status,
+      notes: invoice.notes,
+      items,
+      merchant: {
+        name: profile?.company_name || "iziFacture SARL",
+        email: profile?.email || "contact@izifacture.com",
+        phone: profile?.phone || "+221 77 000 00 00",
+        logo_url: profile?.logo_url,
+        plan: profile?.plan || "gratuit",
+        ninea: profile?.ninea,
+        rccm: profile?.rccm,
+      }
+    };
+
+    return { success: true, data: formattedInvoice };
+  } catch (err) {
+    return { success: false, error: "Erreur lors de la récupération." };
+  }
+}
 
 export async function initiateCinetPayPayment({
   invoiceId,
@@ -18,18 +78,36 @@ export async function initiateCinetPayPayment({
   customerEmail: string;
 }) {
   try {
-    // 1. Récupérer les clés CinetPay du marchand (actuellement connecté dans notre démo)
-    const { siteId, apikey } = await getPaymentSettings();
-    
-    if (!siteId || !apikey) {
-      throw new Error("Les paramètres de paiement CinetPay ne sont pas configurés par le marchand.");
+    // 1. Fetch the invoice to get the profile_id (merchant)
+    const { data: invoice } = await supabaseAdmin
+      .from("invoices")
+      .select("profile_id")
+      .eq("id", invoiceId)
+      .single();
+
+    if (!invoice?.profile_id) {
+      throw new Error("Facture introuvable ou marchand inconnu.");
     }
 
+    // 2. Fetch the merchant's payment keys
+    const { data: profile } = await supabaseAdmin
+      .from("profiles")
+      .select("cinetpay_site_id, cinetpay_apikey")
+      .eq("id", invoice.profile_id)
+      .single();
+
+    if (!profile?.cinetpay_site_id || !profile?.cinetpay_apikey) {
+      throw new Error("Le marchand n'a pas configuré ses paramètres de paiement CinetPay.");
+    }
+
+    // Decrypt keys
+    // @ts-ignore
+    const siteId = decrypt(profile.cinetpay_site_id);
+    // @ts-ignore
+    const apikey = decrypt(profile.cinetpay_apikey);
+
     // 2. Préparer le payload pour l'API CinetPay
-    // CinetPay demande un transaction_id unique
     const transactionId = `${invoiceId}_${Date.now()}`;
-    
-    // On génère l'URL de base dynamiquement si possible, sinon on met une URL fixe pour le retour
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://izifacture.com";
 
     const payload = {
@@ -40,9 +118,7 @@ export async function initiateCinetPayPayment({
       currency: currency,
       channels: "ALL",
       description: description,
-      // L'URL de notre webhook qui recevra la confirmation silencieuse
       notify_url: `${baseUrl}/api/webhooks/cinetpay`,
-      // L'URL où l'utilisateur est redirigé après le paiement
       return_url: `${baseUrl}/pay/${invoiceId}?success=true`,
       customer_name: customerName,
       customer_surname: "",
@@ -53,7 +129,6 @@ export async function initiateCinetPayPayment({
       customer_country: "SN",
       customer_state: "DK",
       customer_zip_code: "00000",
-      // On peut passer des métadonnées comme l'ID de la facture pour le retrouver dans le webhook
       metadata: invoiceId, 
     };
 

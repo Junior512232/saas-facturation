@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import QRCode from "react-qr-code";
-import { initiateCinetPayPayment } from "@/app/actions/payment";
+import { initiateCinetPayPayment, getPublicInvoiceDetails } from "@/app/actions/payment";
 
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {
@@ -36,9 +36,11 @@ function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {
 export default function PublicInvoicePayPage() {
   const params = useParams();
   const id = params.id as string;
-  const { getInvoiceById } = useAppData();
   
-  const [isMounted, setIsMounted] = useState(false);
+  const [invoice, setInvoice] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<"wave" | "card">("wave");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -46,31 +48,47 @@ export default function PublicInvoicePayPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
-    setIsMounted(true);
     // Si l'utilisateur revient depuis la page de paiement CinetPay
     if (typeof window !== "undefined" && window.location.search.includes("success=true")) {
       setIsSuccess(true);
       setPaymentModalOpen(true);
-      // Optionnel : nettoyer l'URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }
-  }, []);
+    
+    // Fetch public invoice details
+    const fetchInvoice = async () => {
+      const res = await getPublicInvoiceDetails(id);
+      if (res.success && res.data) {
+        setInvoice(res.data);
+      } else {
+        setError(res.error || "Facture introuvable.");
+      }
+      setLoading(false);
+    };
+    
+    fetchInvoice();
+  }, [id]);
 
-  if (!isMounted) return null;
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-background">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-muted-foreground">Chargement de la facture...</p>
+      </div>
+    );
+  }
 
-  const invoice = getInvoiceById(id);
-
-  if (!invoice) {
+  if (error || !invoice) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background">
         <h2 className="text-2xl font-bold mb-4">Facture introuvable</h2>
-        <p className="text-muted-foreground">Le lien de cette facture est invalide ou a expiré.</p>
+        <p className="text-muted-foreground">{error || "Le lien de cette facture est invalide ou a expiré."}</p>
       </div>
     );
   }
 
   // Calculate totals
-  const subtotal = invoice.items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
+  const subtotal = invoice.items.reduce((acc: number, item: any) => acc + (item.quantity * item.unitPrice), 0);
   const taxAmount = (subtotal * invoice.taxRate) / 100;
   const total = subtotal + taxAmount;
 
@@ -81,7 +99,6 @@ export default function PublicInvoicePayPage() {
   const handlePayment = async () => {
     setIsProcessing(true);
     try {
-      // Dans ce démo, nous utilisons les identifiants de facturation
       const res = await initiateCinetPayPayment({
         invoiceId: invoice.id,
         amount: total,
@@ -101,6 +118,8 @@ export default function PublicInvoicePayPage() {
       setIsProcessing(false);
     }
   };
+
+  const hasPremiumFeatures = invoice.merchant.plan === "pro" || invoice.merchant.plan === "business";
 
   return (
     <div className="min-h-screen bg-secondary/30 py-8 px-4 sm:px-6">
@@ -139,23 +158,35 @@ export default function PublicInvoicePayPage() {
           <div className="flex flex-col md:flex-row print:flex-row justify-between gap-8 mb-12">
             <div>
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white print:bg-brand-blue">
-                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
-                  </svg>
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xl font-extrabold tracking-tight flex items-center">
-                    izi<span className="text-brand-blue">Facture</span>
-                  </span>
-                  <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
-                </div>
+                {hasPremiumFeatures && invoice.merchant.logo_url ? (
+                  <img src={invoice.merchant.logo_url} alt="Logo de l'entreprise" className="h-12 w-auto object-contain print:h-12" />
+                ) : hasPremiumFeatures && invoice.merchant.name ? (
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-extrabold tracking-tight flex items-center text-foreground print:text-black">
+                      {invoice.merchant.name}
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white print:bg-brand-blue">
+                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xl font-extrabold tracking-tight flex items-center">
+                        izi<span className="text-brand-blue">Facture</span>
+                      </span>
+                      <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
+                    </div>
+                  </>
+                )}
               </div>
-              <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600">
-                <p>123 Rue de la République</p>
+              <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600 mt-2">
+                <p className="font-semibold text-foreground print:text-black">{invoice.merchant.name}</p>
                 <p>Dakar, Sénégal</p>
-                <p>contact@izifacture.com</p>
-                <p>+221 77 000 00 00</p>
+                <p>{invoice.merchant.email}</p>
+                <p>{invoice.merchant.phone}</p>
               </div>
             </div>
             
@@ -244,8 +275,21 @@ export default function PublicInvoicePayPage() {
 
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-border text-center text-xs text-muted-foreground flex flex-col gap-1">
-            <p>iziFacture SARL - Capital de 1.000.000 FCFA</p>
-            <p>NINEA: 123456789 - RCCM: SN-DKR-2023-B-1234</p>
+            {hasPremiumFeatures ? (
+              <>
+                <p>{invoice.merchant.name} - Solution de facturation conforme</p>
+                <p>
+                  {invoice.merchant.ninea ? `NINEA: ${invoice.merchant.ninea}` : ""} 
+                  {invoice.merchant.ninea && invoice.merchant.rccm ? " - " : ""}
+                  {invoice.merchant.rccm ? `RCCM: ${invoice.merchant.rccm}` : ""}
+                </p>
+              </>
+            ) : (
+              <>
+                <p>iziFacture SARL - Capital de 1.000.000 FCFA</p>
+                <p>NINEA: 123456789 - RCCM: SN-DKR-2023-B-1234</p>
+              </>
+            )}
           </div>
         </div>
       </div>
