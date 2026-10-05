@@ -36,7 +36,7 @@ function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {
 export default function PublicInvoicePayPage() {
   const params = useParams();
   const id = params.id as string;
-  const { getInvoiceById, updateInvoiceStatus } = useAppData();
+  const { getInvoiceById } = useAppData();
   
   const [isMounted, setIsMounted] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
