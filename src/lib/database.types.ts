@@ -16,7 +16,13 @@ export interface Database {
           email: string
           phone: string | null
           ninea: string | null
+          rccm: string | null
           role: string | null
+          logo_url: string | null
+          plan: string | null
+          plan_expires_at: string | null
+          cinetpay_site_id: string | null
+          cinetpay_apikey: string | null
           created_at: string | null
           updated_at: string | null
         }
@@ -26,7 +32,13 @@ export interface Database {
           email: string
           phone?: string | null
           ninea?: string | null
+          rccm?: string | null
           role?: string | null
+          logo_url?: string | null
+          plan?: string | null
+          plan_expires_at?: string | null
+          cinetpay_site_id?: string | null
+          cinetpay_apikey?: string | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -36,7 +48,13 @@ export interface Database {
           email?: string
           phone?: string | null
           ninea?: string | null
+          rccm?: string | null
           role?: string | null
+          logo_url?: string | null
+          plan?: string | null
+          plan_expires_at?: string | null
+          cinetpay_site_id?: string | null
+          cinetpay_apikey?: string | null
           created_at?: string | null
           updated_at?: string | null
         }

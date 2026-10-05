@@ -200,8 +200,8 @@ export default function PublicInvoicePayPage() {
                 <span className="font-semibold">{invoice.issueDate}</span>
                 
                 <span className="text-muted-foreground md:text-right print:text-right print:text-gray-600">Statut:</span>
-                <Badge className={`${statusStyles[invoice.status]} shadow-none w-max md:ml-auto`}>
-                  {statusLabels[invoice.status]}
+                <Badge className={`${statusStyles[invoice.status as keyof typeof statusStyles]} shadow-none w-max md:ml-auto`}>
+                  {statusLabels[invoice.status as keyof typeof statusLabels]}
                 </Badge>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default function PublicInvoicePayPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoice.items.map((item) => (
+                {invoice.items.map((item: any) => (
                   <TableRow key={item.id} className="border-b-border/50 hover:bg-transparent print:border-gray-200">
                     <TableCell className="py-4 font-medium print:text-black">{item.description}</TableCell>
                     <TableCell className="py-4 text-center print:text-gray-700">{item.quantity}</TableCell>
