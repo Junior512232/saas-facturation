@@ -21,6 +21,8 @@ export interface Database {
           logo_url: string | null
           plan: string | null
           plan_expires_at: string | null
+          bictorys_api_key?: string | null
+          bictorys_webhook_secret?: string | null
           cinetpay_site_id: string | null
           cinetpay_apikey: string | null
           created_at: string | null
@@ -37,6 +39,8 @@ export interface Database {
           logo_url?: string | null
           plan?: string | null
           plan_expires_at?: string | null
+          bictorys_api_key?: string | null
+          bictorys_webhook_secret?: string | null
           cinetpay_site_id?: string | null
           cinetpay_apikey?: string | null
           created_at?: string | null
@@ -53,6 +57,8 @@ export interface Database {
           logo_url?: string | null
           plan?: string | null
           plan_expires_at?: string | null
+          bictorys_api_key?: string | null
+          bictorys_webhook_secret?: string | null
           cinetpay_site_id?: string | null
           cinetpay_apikey?: string | null
           created_at?: string | null

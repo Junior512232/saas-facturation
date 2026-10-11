@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { Database } from "@/lib/database.types";
 
-export async function savePaymentSettings(siteId: string, apikey: string) {
+export async function savePaymentSettings(apiKey: string, webhookSecret: string = "") {
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -31,23 +31,40 @@ export async function savePaymentSettings(siteId: string, apikey: string) {
     throw new Error("Non autorisé");
   }
 
-  // Encrypt the sensitive keys
-  const encryptedSiteId = encrypt(siteId);
-  const encryptedApiKey = encrypt(apikey);
+  // Chiffrement des clés sensibles Bictorys
+  const encryptedApiKey = encrypt(apiKey?.trim() || "");
+  const encryptedWebhookSecret = encrypt(webhookSecret?.trim() || "");
 
-  // For this project, we save them into the `profiles` table.
-  // Note: the `profiles` table must have `cinetpay_site_id` and `cinetpay_apikey` columns.
+  // Tentative de sauvegarde dans les colonnes Bictorys dédiées
+  // Avec fallback gracieux sur cinetpay_* si les nouvelles colonnes ne sont pas encore migrées
+  const updatePayload: Record<string, any> = {
+    bictorys_api_key: encryptedApiKey,
+    bictorys_webhook_secret: encryptedWebhookSecret,
+    // Backup de compatibilité avec le schéma existant
+    cinetpay_apikey: encryptedApiKey,
+    cinetpay_site_id: encryptedWebhookSecret,
+  };
+
   const { error } = await supabase
     .from("profiles")
-    .update({
-      cinetpay_site_id: encryptedSiteId,
-      cinetpay_apikey: encryptedApiKey,
-    } as any) // Using any to bypass strict type checking if not updated in types yet
+    .update(updatePayload as any)
     .eq("id", user.id);
 
   if (error) {
-    console.error("Error saving payment settings:", error);
-    throw new Error("Erreur lors de la sauvegarde des paramètres de paiement.");
+    // Si la colonne bictorys_api_key n'existe pas encore dans Supabase, sauvegarder via cinetpay_*
+    console.warn("Échec d'enregistrement avec bictorys_*, tentative avec les colonnes existantes:", error.message);
+    const { error: fallbackError } = await supabase
+      .from("profiles")
+      .update({
+        cinetpay_apikey: encryptedApiKey,
+        cinetpay_site_id: encryptedWebhookSecret,
+      } as any)
+      .eq("id", user.id);
+
+    if (fallbackError) {
+      console.error("Error saving payment settings fallback:", fallbackError);
+      throw new Error("Erreur lors de la sauvegarde des paramètres de paiement.");
+    }
   }
 
   return { success: true };
@@ -75,26 +92,53 @@ export async function getPaymentSettings() {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) return { siteId: "", apikey: "" };
+  if (!user) {
+    return { apiKey: "", webhookSecret: "", siteId: "", apikey: "" };
+  }
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("cinetpay_site_id, cinetpay_apikey")
+    .select("bictorys_api_key, bictorys_webhook_secret, cinetpay_site_id, cinetpay_apikey")
     .eq("id", user.id)
     .single();
 
   if (error || !data) {
-    return { siteId: "", apikey: "" };
+    // Si la requête a échoué (par exemple colonne inexistante), essayer avec cinetpay seul
+    const { data: fallbackData } = await supabase
+      .from("profiles")
+      .select("cinetpay_site_id, cinetpay_apikey")
+      .eq("id", user.id)
+      .single();
+
+    if (!fallbackData) {
+      return { apiKey: "", webhookSecret: "", siteId: "", apikey: "" };
+    }
+
+    const decryptedKey = fallbackData.cinetpay_apikey ? decrypt(fallbackData.cinetpay_apikey) : "";
+    const decryptedSecret = fallbackData.cinetpay_site_id ? decrypt(fallbackData.cinetpay_site_id) : "";
+
+    return {
+      apiKey: decryptedKey,
+      webhookSecret: decryptedSecret,
+      apikey: decryptedKey,
+      siteId: decryptedSecret,
+    };
   }
 
-  // Decrypt the sensitive keys
-  // @ts-ignore - bypassing strict types for new columns
-  const decryptedSiteId = data.cinetpay_site_id ? decrypt(data.cinetpay_site_id) : "";
+  // Déchiffrement des clés
   // @ts-ignore
-  const decryptedApiKey = data.cinetpay_apikey ? decrypt(data.cinetpay_apikey) : "";
+  const rawApiKey = data.bictorys_api_key || data.cinetpay_apikey || "";
+  // @ts-ignore
+  const rawWebhookSecret = data.bictorys_webhook_secret || data.cinetpay_site_id || "";
+
+  const decryptedApiKey = rawApiKey ? decrypt(rawApiKey) : "";
+  const decryptedWebhookSecret = rawWebhookSecret ? decrypt(rawWebhookSecret) : "";
 
   return {
-    siteId: decryptedSiteId,
+    apiKey: decryptedApiKey,
+    webhookSecret: decryptedWebhookSecret,
+    // Compatibilité rétroactive
     apikey: decryptedApiKey,
+    siteId: decryptedWebhookSecret,
   };
 }

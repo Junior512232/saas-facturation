@@ -10,9 +10,16 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   role TEXT DEFAULT 'Administrateur Pro',
   plan TEXT DEFAULT 'gratuit',
   plan_expires_at TIMESTAMPTZ,
+  bictorys_api_key TEXT,
+  bictorys_webhook_secret TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Migration Bictorys (exécuter si la table existe déjà) :
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bictorys_api_key TEXT;
+-- ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bictorys_webhook_secret TEXT;
+
 
 -- Clients table
 CREATE TABLE IF NOT EXISTS public.clients (

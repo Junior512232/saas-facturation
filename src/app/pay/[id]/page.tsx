@@ -12,9 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Download, CheckCircle2 } from "lucide-react";
+import { CreditCard, Download, CheckCircle2, ShieldCheck, ArrowRight, Smartphone, AlertCircle } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useAppData } from "@/context/AppDataContext";
 import { useEffect, useState } from "react";
 import {
   Dialog,
@@ -23,13 +22,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import QRCode from "react-qr-code";
-import { initiateCinetPayPayment, getPublicInvoiceDetails } from "@/app/actions/payment";
+import { initiateBictorysPayment, getPublicInvoiceDetails } from "@/app/actions/payment";
 
 // Wave Brand Logo Component
 function WaveLogo({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <img src="/Wave.webp" alt="Wave" className={`rounded-full object-cover ${className}`} />
+  );
+}
+
+// Orange Money Logo Component
+function OrangeMoneyLogo({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <img src="/om.webp" alt="Orange Money" className={`rounded-full object-cover ${className}`} />
   );
 }
 
@@ -42,13 +47,13 @@ export default function PublicInvoicePayPage() {
   const [error, setError] = useState("");
   
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [selectedMethod, setSelectedMethod] = useState<"wave" | "card">("wave");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
-    // Si l'utilisateur revient depuis la page de paiement CinetPay
+    // Si l'utilisateur revient depuis la page de paiement Bictorys
     if (typeof window !== "undefined" && window.location.search.includes("success=true")) {
       setIsSuccess(true);
       setPaymentModalOpen(true);
@@ -60,6 +65,9 @@ export default function PublicInvoicePayPage() {
       const res = await getPublicInvoiceDetails(id);
       if (res.success && res.data) {
         setInvoice(res.data);
+        if (res.data.clientPhone) {
+          setPhoneNumber(res.data.clientPhone);
+        }
       } else {
         setError(res.error || "Facture introuvable.");
       }
@@ -73,16 +81,19 @@ export default function PublicInvoicePayPage() {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-background">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-muted-foreground">Chargement de la facture...</p>
+        <p className="mt-4 text-muted-foreground text-sm font-medium">Chargement de la facture...</p>
       </div>
     );
   }
 
   if (error || !invoice) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen bg-background">
-        <h2 className="text-2xl font-bold mb-4">Facture introuvable</h2>
-        <p className="text-muted-foreground">{error || "Le lien de cette facture est invalide ou a expiré."}</p>
+      <div className="flex flex-col items-center justify-center h-screen bg-background p-6 text-center">
+        <div className="w-16 h-16 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-4">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <h2 className="text-2xl font-bold mb-2">Facture introuvable</h2>
+        <p className="text-muted-foreground max-w-md">{error || "Le lien de cette facture est invalide ou a expiré."}</p>
       </div>
     );
   }
@@ -98,23 +109,25 @@ export default function PublicInvoicePayPage() {
 
   const handlePayment = async () => {
     setIsProcessing(true);
+    setErrorMessage("");
     try {
-      const res = await initiateCinetPayPayment({
+      const res = await initiateBictorysPayment({
         invoiceId: invoice.id,
         amount: total,
-        description: `Facture ${invoice.number}`,
+        description: `Règlement facture ${invoice.number}`,
         customerName: invoice.client,
         customerEmail: invoice.clientEmail,
+        customerPhone: phoneNumber,
       });
 
       if (res.success && res.paymentUrl) {
         window.location.href = res.paymentUrl;
       } else {
-        alert(res.error || "Erreur lors de l'initialisation du paiement.");
+        setErrorMessage(res.error || "Erreur lors de l'initialisation du paiement Bictorys.");
         setIsProcessing(false);
       }
-    } catch (err) {
-      alert("Une erreur inattendue est survenue.");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Une erreur inattendue est survenue.");
       setIsProcessing(false);
     }
   };
@@ -131,7 +144,7 @@ export default function PublicInvoicePayPage() {
             <h1 className="text-xl font-bold">Bonjour {invoice.client},</h1>
             <p className="text-muted-foreground text-sm">
               {invoice.status === 'paid' 
-                ? "Merci ! Cette facture a été réglée." 
+                ? "Merci ! Cette facture a été réglée avec succès." 
                 : `Vous avez une facture en attente de paiement d'un montant de ${formatFCFA(total)}.`}
             </p>
           </div>
@@ -142,7 +155,7 @@ export default function PublicInvoicePayPage() {
             </Button>
             {invoice.status !== 'paid' && (
               <Button 
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md"
                 onClick={() => setPaymentModalOpen(true)}
               >
                 Payer maintenant
@@ -296,87 +309,118 @@ export default function PublicInvoicePayPage() {
 
       {/* Payment Modal */}
       <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Procéder au paiement</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+              <CreditCard className="w-5 h-5 text-primary" />
+              Régler la facture {invoice.number}
+            </DialogTitle>
             <DialogDescription>
-              Choisissez votre méthode de paiement pour la facture {invoice.number}.
+              Paiement sécurisé et instantané via la passerelle <strong>Bictorys</strong>.
             </DialogDescription>
           </DialogHeader>
           
           {!isSuccess ? (
-            <div className="flex flex-col gap-6 py-4">
-              <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-xl border border-border/50 mb-2">
-                <p className="text-sm text-muted-foreground mb-1">Montant à payer</p>
+            <div className="flex flex-col gap-5 py-2">
+              {/* Total amount highlight */}
+              <div className="flex flex-col items-center justify-center p-5 bg-primary/5 rounded-2xl border border-primary/20">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Montant à régler</p>
                 <p className="text-3xl font-black font-mono text-foreground">{formatFCFA(total)}</p>
+                <p className="text-xs text-muted-foreground mt-1">Émis par : {invoice.merchant.name}</p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button 
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    selectedMethod === 'wave' ? 'border-[#1dc3f7] bg-[#1dc3f7]/5 shadow-sm' : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setSelectedMethod('wave')}
-                >
-                  <WaveLogo className="w-10 h-10" />
-                  <span className="font-semibold text-sm">Wave</span>
-                </button>
-                
-
-                <button 
-                  className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                    selectedMethod === 'card' ? 'border-primary bg-primary/5 shadow-sm' : 'border-border hover:bg-muted/50'
-                  }`}
-                  onClick={() => setSelectedMethod('card')}
-                >
-                  <div className="w-10 h-10 bg-primary/10 flex items-center justify-center rounded-xl text-primary">
-                    <CreditCard className="w-6 h-6" />
-                  </div>
-                  <span className="font-semibold text-sm">Carte Bancaire</span>
-                </button>
-              </div>
-
-              {selectedMethod === 'wave' && (
-                <div className="flex flex-col gap-2 mt-2 animate-in fade-in slide-in-from-top-2">
-                  <label className="text-sm font-semibold text-foreground">
-                    Numéro de téléphone
-                  </label>
-                  <input
-                    type="tel"
-                    placeholder="Ex: 77 123 45 67"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full px-4 py-3 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                    required
-                  />
+              {errorMessage && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive flex items-start gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <span>{errorMessage}</span>
                 </div>
               )}
+
+              {/* Supported Payment Channels */}
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Moyens de paiement acceptés
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
+                    <WaveLogo className="w-8 h-8 mb-1.5" />
+                    <span className="text-xs font-bold text-foreground">Wave</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
+                    <OrangeMoneyLogo className="w-8 h-8 mb-1.5" />
+                    <span className="text-xs font-bold text-foreground">Orange Money</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center font-black text-xs mb-1.5">
+                      FM
+                    </div>
+                    <span className="text-xs font-bold text-foreground">Free Money</span>
+                  </div>
+                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
+                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1.5">
+                      <CreditCard className="w-4 h-4" />
+                    </div>
+                    <span className="text-xs font-bold text-foreground">Carte Bancaire</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Optional Phone Number */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-foreground flex items-center gap-1">
+                  <Smartphone className="w-3.5 h-3.5 text-muted-foreground" />
+                  Numéro de téléphone (optionnel pour Mobile Money)
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Ex: 77 123 45 67"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                />
+              </div>
+
+              {/* Pay Button */}
               <Button 
-                className={`w-full h-12 text-lg font-semibold mt-2 text-white ${
-                  selectedMethod === 'wave' ? 'bg-[#1dc3f7] hover:bg-[#008db9]' :
-                  'bg-primary hover:bg-primary/90'
-                }`}
+                className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
                 onClick={handlePayment}
-                disabled={isProcessing || (selectedMethod === 'wave' && phoneNumber.length < 9)}
+                disabled={isProcessing}
               >
                 {isProcessing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Traitement en cours...
-                  </div>
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Redirection vers Bictorys...
+                  </>
                 ) : (
-                  `Payer avec ${selectedMethod === 'wave' ? 'Wave' : 'Carte Bancaire'}`
+                  <>
+                    Payer avec Bictorys
+                    <ArrowRight className="w-4 h-4" />
+                  </>
                 )}
               </Button>
-              <p className="text-center text-xs text-muted-foreground">Paiement direct sécurisé. Les fonds sont transférés immédiatement sur le compte du marchand.</p>
+
+              <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Paiement crypté et certifié conforme PCI-DSS par Bictorys.</span>
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center py-10 gap-4 text-center">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
+              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 rounded-full flex items-center justify-center mb-2 animate-in zoom-in-75">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
-              <h3 className="text-2xl font-bold">Paiement réussi !</h3>
-              <p className="text-muted-foreground">La facture a bien été réglée. Merci de votre confiance.</p>
+              <h3 className="text-2xl font-bold text-foreground">Paiement validé avec succès !</h3>
+              <p className="text-sm text-muted-foreground max-w-sm">
+                La facture <strong>{invoice.number}</strong> a bien été enregistrée comme réglée. Un reçu électronique est disponible au téléchargement.
+              </p>
+              <Button 
+                onClick={handleDownloadPDF} 
+                variant="outline" 
+                className="mt-2 flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Télécharger le reçu (PDF)
+              </Button>
             </div>
           )}
         </DialogContent>
