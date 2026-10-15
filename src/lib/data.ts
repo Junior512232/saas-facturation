@@ -159,15 +159,52 @@ export interface Payroll {
   id: string;
   employeeId: string;
   employeeName: string;
+  position?: string;
+  department?: string;
   periodMonth: number;
   periodYear: number;
   baseSalary: number;
+  transportAllowance?: number;
   bonus: number;
+  ipresDeduction?: number;
+  cssDeduction?: number;
+  taxDeduction?: number;
   deductions: number;
   netSalary: number;
   status: "draft" | "pending" | "paid";
+  paymentMethod?: "wave" | "om" | "bank_transfer" | "cash";
   paymentDate?: string;
   notes?: string;
+}
+
+// ─── CRM & Pipeline ──────────────────────────────────────────────────────────
+
+export type DealStage = "prospect" | "contact" | "proposal" | "negotiation" | "won" | "lost";
+
+export interface Deal {
+  id: string;
+  title: string;
+  companyName: string;
+  contactName: string;
+  email?: string;
+  phone: string;
+  estimatedValue: number;
+  stage: DealStage;
+  priority: "low" | "medium" | "high";
+  expectedCloseDate: string;
+  notes?: string;
+  createdAt: string;
+  convertedInvoiceId?: string;
+}
+
+// ─── WhatsApp Relances ───────────────────────────────────────────────────────
+
+export interface WhatsAppReminderTemplate {
+  id: string;
+  name: string;
+  level: "friendly" | "due" | "urgent";
+  subject: string;
+  template: string;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

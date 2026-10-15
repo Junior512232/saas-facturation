@@ -26,7 +26,8 @@ import {
   ShoppingBag,
   Puzzle,
   FileCheck2,
-  Sparkles
+  Sparkles,
+  MessageCircle
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useExtensions } from "@/context/ExtensionsContext";
@@ -80,6 +81,8 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
       items: [
         { icon: FileText, label: "Factures", href: "/invoices" },
         ...(isExtensionEnabled("sales") ? [{ icon: ShoppingBag, label: "Ventes & Caisse", href: "/sales", badge: "Direct", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" }] : []),
+        ...(isExtensionEnabled("crm") ? [{ icon: UserCheck, label: "Pipeline CRM", href: "/crm", badge: "Kanban", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" }] : []),
+        ...(isExtensionEnabled("whatsapp") ? [{ icon: MessageCircle, label: "Relances WhatsApp", href: "/relances", badge: "1-Clic", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" }] : []),
         { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },
       ]
     },
@@ -88,7 +91,6 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
       items: [
         ...(isExtensionEnabled("stocks") ? [{ icon: Package, label: "Stocks & Inventaire", href: "/inventory", badge: "Auto", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" }] : []),
         ...(isExtensionEnabled("payroll") ? [{ icon: Briefcase, label: "Paie & RH", href: "/payroll", badge: "Bulletins", badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" }] : []),
-        ...(isExtensionEnabled("crm") ? [{ icon: UserCheck, label: "Pipeline CRM", href: "/crm", badge: "Kanban", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" }] : []),
       ]
     },
     {

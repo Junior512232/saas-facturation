@@ -89,7 +89,7 @@ const DEFAULT_EXTENSIONS: ExtensionItem[] = [
     category: "communication",
     categoryLabel: "Communication",
     iconName: "MessageCircle",
-    route: "/settings/whatsapp",
+    route: "/relances",
     badge: "Gain de temps",
     defaultEnabled: true,
     enabled: true,

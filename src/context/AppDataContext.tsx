@@ -13,7 +13,11 @@ import type {
   Product,
   StockMovement,
   Sale,
-  CompanySettings
+  CompanySettings,
+  Employee,
+  Payroll,
+  Deal,
+  DealStage
 } from "@/lib/data";
 
 // Re-export types for convenience
@@ -26,7 +30,11 @@ export type {
   Product,
   StockMovement,
   Sale,
-  CompanySettings
+  CompanySettings,
+  Employee,
+  Payroll,
+  Deal,
+  DealStage
 };
 
 interface AppDataContextProps {
@@ -37,6 +45,9 @@ interface AppDataContextProps {
   salesList: Sale[];
   stockMovementsList: StockMovement[];
   companySettings: CompanySettings | null;
+  employeesList: Employee[];
+  payrollsList: Payroll[];
+  dealsList: Deal[];
   loading: boolean;
   addClient: (client: Omit<Client, "id" | "totalInvoices" | "totalPaid" | "createdAt" | "initials" | "color">) => Promise<void>;
   addInvoice: (invoice: Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }) => Promise<void>;
@@ -46,6 +57,14 @@ interface AppDataContextProps {
   adjustStock: (productId: string, quantityDelta: number, reason: string) => Promise<void>;
   addSale: (sale: Omit<Sale, "id" | "createdAt">) => Promise<void>;
   updateCompanySettings: (settings: Partial<CompanySettings>) => Promise<void>;
+  addEmployee: (employee: Omit<Employee, "id">) => Promise<void>;
+  updateEmployee: (id: string, updates: Partial<Employee>) => Promise<void>;
+  deleteEmployee: (id: string) => Promise<void>;
+  addPayroll: (payroll: Omit<Payroll, "id">) => Promise<void>;
+  updatePayrollStatus: (id: string, status: "draft" | "pending" | "paid") => Promise<void>;
+  addDeal: (deal: Omit<Deal, "id" | "createdAt">) => Promise<void>;
+  updateDealStage: (id: string, stage: DealStage) => Promise<void>;
+  deleteDeal: (id: string) => Promise<void>;
 
   getClientById: (id: string) => Client | undefined;
   getInvoiceById: (id: string) => Invoice | undefined;
@@ -300,6 +319,218 @@ const DEFAULT_SALES: Sale[] = [
   }
 ];
 
+const DEFAULT_EMPLOYEES: Employee[] = [
+  {
+    id: "emp-1",
+    fullName: "Moussa Diop",
+    email: "moussa.diop@iziflow.sn",
+    phone: "+221 77 450 12 34",
+    position: "Responsable Commercial B2B",
+    department: "Ventes & Marketing",
+    baseSalary: 450000,
+    contractType: "CDI",
+    hireDate: "01/02/2024",
+    paymentMethod: "wave",
+    accountNumber: "+221 77 450 12 34",
+    status: "active",
+  },
+  {
+    id: "emp-2",
+    fullName: "Fatou Kiné Ndiaye",
+    email: "fatou.ndiaye@iziflow.sn",
+    phone: "+221 78 320 55 66",
+    position: "Comptable & Gestionnaire Paie",
+    department: "Finance & Comptabilité",
+    baseSalary: 550000,
+    contractType: "CDI",
+    hireDate: "15/05/2023",
+    paymentMethod: "bank_transfer",
+    accountNumber: "SN012 01001 12345678901 22",
+    status: "active",
+  },
+  {
+    id: "emp-3",
+    fullName: "Ibrahima Fall",
+    email: "ibrahima.fall@iziflow.sn",
+    phone: "+221 76 612 88 90",
+    position: "Développeur Fullstack",
+    department: "Technologie & IT",
+    baseSalary: 650000,
+    contractType: "CDI",
+    hireDate: "10/01/2024",
+    paymentMethod: "wave",
+    accountNumber: "+221 76 612 88 90",
+    status: "active",
+  },
+  {
+    id: "emp-4",
+    fullName: "Aïssatou Sow",
+    email: "aissatou.sow@iziflow.sn",
+    phone: "+221 70 889 44 11",
+    position: "Assistante Administrative",
+    department: "Administration",
+    baseSalary: 280000,
+    contractType: "CDD",
+    hireDate: "01/06/2024",
+    paymentMethod: "om",
+    accountNumber: "+221 70 889 44 11",
+    status: "active",
+  },
+];
+
+const DEFAULT_PAYROLLS: Payroll[] = [
+  {
+    id: "pay-1",
+    employeeId: "emp-1",
+    employeeName: "Moussa Diop",
+    position: "Responsable Commercial B2B",
+    department: "Ventes & Marketing",
+    periodMonth: 10,
+    periodYear: 2026,
+    baseSalary: 450000,
+    transportAllowance: 35000,
+    bonus: 50000,
+    ipresDeduction: 25200,
+    cssDeduction: 0,
+    taxDeduction: 42000,
+    deductions: 67200,
+    netSalary: 467800,
+    status: "paid",
+    paymentMethod: "wave",
+    paymentDate: "10/10/2026",
+    notes: "Prime de performance Q3 incluse",
+  },
+  {
+    id: "pay-2",
+    employeeId: "emp-2",
+    employeeName: "Fatou Kiné Ndiaye",
+    position: "Comptable & Gestionnaire Paie",
+    department: "Finance & Comptabilité",
+    periodMonth: 10,
+    periodYear: 2026,
+    baseSalary: 550000,
+    transportAllowance: 35000,
+    bonus: 0,
+    ipresDeduction: 30800,
+    taxDeduction: 58000,
+    deductions: 88800,
+    netSalary: 496200,
+    status: "paid",
+    paymentMethod: "bank_transfer",
+    paymentDate: "10/10/2026",
+  },
+  {
+    id: "pay-3",
+    employeeId: "emp-3",
+    employeeName: "Ibrahima Fall",
+    position: "Développeur Fullstack",
+    department: "Technologie & IT",
+    periodMonth: 10,
+    periodYear: 2026,
+    baseSalary: 650000,
+    transportAllowance: 35000,
+    bonus: 25000,
+    ipresDeduction: 36400,
+    taxDeduction: 74000,
+    deductions: 110400,
+    netSalary: 599600,
+    status: "pending",
+    paymentMethod: "wave",
+    notes: "Virement Wave programmé pour le 28",
+  },
+  {
+    id: "pay-4",
+    employeeId: "emp-4",
+    employeeName: "Aïssatou Sow",
+    position: "Assistante Administrative",
+    department: "Administration",
+    periodMonth: 10,
+    periodYear: 2026,
+    baseSalary: 280000,
+    transportAllowance: 25000,
+    bonus: 0,
+    ipresDeduction: 15680,
+    taxDeduction: 18500,
+    deductions: 34180,
+    netSalary: 270820,
+    status: "pending",
+    paymentMethod: "om",
+  },
+];
+
+const DEFAULT_DEALS: Deal[] = [
+  {
+    id: "deal-1",
+    title: "Équipement Caisse & Facturation 3 Magasins",
+    companyName: "Groupe Alimentaire Dakarois",
+    contactName: "Amadou Diallo",
+    email: "a.diallo@gad-senegal.sn",
+    phone: "+221 77 500 22 33",
+    estimatedValue: 2450000,
+    stage: "negotiation",
+    priority: "high",
+    expectedCloseDate: "25/10/2026",
+    notes: "Négociation remise de 5% sur l'achat de 3 terminaux et licence annuelle.",
+    createdAt: "05/10/2026",
+  },
+  {
+    id: "deal-2",
+    title: "Abonnement Annuel Suite Entreprise + Paie",
+    companyName: "Société Sénégalaise de Transit (SST)",
+    contactName: "Mariama Ba",
+    email: "mba@sst-transit.sn",
+    phone: "+221 78 911 44 22",
+    estimatedValue: 1200000,
+    stage: "proposal",
+    priority: "medium",
+    expectedCloseDate: "30/10/2026",
+    notes: "Devis envoyé suite à la démo Zoom. En attente de validation DG.",
+    createdAt: "08/10/2026",
+  },
+  {
+    id: "deal-3",
+    title: "Déploiement TPE & Facturation WhatsApp",
+    companyName: "Clinique Médicale Les Mamelles",
+    contactName: "Dr. Ousmane Kane",
+    email: "dr.kane@clinique-mamelles.sn",
+    phone: "+221 77 622 11 00",
+    estimatedValue: 850000,
+    stage: "won",
+    priority: "high",
+    expectedCloseDate: "12/10/2026",
+    notes: "Contrat signé ! Facture d'acompte à émettre.",
+    createdAt: "02/10/2026",
+  },
+  {
+    id: "deal-4",
+    title: "Formation Équipe Commerciale & Logiciel",
+    companyName: "Cabinet Conseil Almadies",
+    contactName: "Cheikh Tidiane Sy",
+    email: "ct.sy@cabinet-almadies.com",
+    phone: "+221 76 333 45 67",
+    estimatedValue: 600000,
+    stage: "contact",
+    priority: "medium",
+    expectedCloseDate: "05/11/2026",
+    notes: "Échange téléphonique concluant, rendez-vous physique prévu jeudi.",
+    createdAt: "12/10/2026",
+  },
+  {
+    id: "deal-5",
+    title: "Automatisation Devis BTP",
+    companyName: "Entreprise Diop BTP",
+    contactName: "Babacar Diop",
+    email: "b.diop@diop-btp.sn",
+    phone: "+221 70 411 99 88",
+    estimatedValue: 3500000,
+    stage: "prospect",
+    priority: "high",
+    expectedCloseDate: "15/11/2026",
+    notes: "Formulaire web reçu, souhaite intégrer la signature électronique sur ses devis.",
+    createdAt: "14/10/2026",
+  },
+];
+
 export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
@@ -307,6 +538,9 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [productsList, setProductsList] = useState<Product[]>(DEFAULT_PRODUCTS);
   const [salesList, setSalesList] = useState<Sale[]>(DEFAULT_SALES);
   const [stockMovementsList, setStockMovementsList] = useState<StockMovement[]>([]);
+  const [employeesList, setEmployeesList] = useState<Employee[]>(DEFAULT_EMPLOYEES);
+  const [payrollsList, setPayrollsList] = useState<Payroll[]>(DEFAULT_PAYROLLS);
+  const [dealsList, setDealsList] = useState<Deal[]>(DEFAULT_DEALS);
   const [companySettings, setCompanySettings] = useState<CompanySettings | null>({
     companyName: "iziFlow SARL",
     email: "contact@iziflow.sn",
@@ -337,6 +571,15 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
 
       const localSettings = localStorage.getItem("iziflow_company_settings");
       if (localSettings) setCompanySettings(JSON.parse(localSettings));
+
+      const localEmployees = localStorage.getItem("iziflow_employees");
+      if (localEmployees) setEmployeesList(JSON.parse(localEmployees));
+
+      const localPayrolls = localStorage.getItem("iziflow_payrolls");
+      if (localPayrolls) setPayrollsList(JSON.parse(localPayrolls));
+
+      const localDeals = localStorage.getItem("iziflow_deals");
+      if (localDeals) setDealsList(JSON.parse(localDeals));
     } catch {}
   }, []);
 
@@ -634,6 +877,95 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // ─── Employees & Payroll ────────────────────────────────────────────────────
+
+  const addEmployee = async (employeeData: Omit<Employee, "id">) => {
+    const newEmp: Employee = {
+      ...employeeData,
+      id: "emp-" + Date.now(),
+    };
+    setEmployeesList((prev) => {
+      const updated = [newEmp, ...prev];
+      try { localStorage.setItem("iziflow_employees", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const updateEmployee = async (id: string, updates: Partial<Employee>) => {
+    setEmployeesList((prev) => {
+      const updated = prev.map((e) => (e.id === id ? { ...e, ...updates } : e));
+      try { localStorage.setItem("iziflow_employees", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const deleteEmployee = async (id: string) => {
+    setEmployeesList((prev) => {
+      const updated = prev.filter((e) => e.id !== id);
+      try { localStorage.setItem("iziflow_employees", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const addPayroll = async (payrollData: Omit<Payroll, "id">) => {
+    const newPay: Payroll = {
+      ...payrollData,
+      id: "pay-" + Date.now(),
+    };
+    setPayrollsList((prev) => {
+      const updated = [newPay, ...prev];
+      try { localStorage.setItem("iziflow_payrolls", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const updatePayrollStatus = async (id: string, status: "draft" | "pending" | "paid") => {
+    setPayrollsList((prev) => {
+      const updated = prev.map((p) =>
+        p.id === id
+          ? {
+              ...p,
+              status,
+              paymentDate: status === "paid" ? new Date().toLocaleDateString("fr-FR") : p.paymentDate,
+            }
+          : p
+      );
+      try { localStorage.setItem("iziflow_payrolls", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  // ─── CRM & Deals ────────────────────────────────────────────────────────────
+
+  const addDeal = async (dealData: Omit<Deal, "id" | "createdAt">) => {
+    const newDeal: Deal = {
+      ...dealData,
+      id: "deal-" + Date.now(),
+      createdAt: new Date().toLocaleDateString("fr-FR"),
+    };
+    setDealsList((prev) => {
+      const updated = [newDeal, ...prev];
+      try { localStorage.setItem("iziflow_deals", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const updateDealStage = async (id: string, stage: DealStage) => {
+    setDealsList((prev) => {
+      const updated = prev.map((d) => (d.id === id ? { ...d, stage } : d));
+      try { localStorage.setItem("iziflow_deals", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const deleteDeal = async (id: string) => {
+    setDealsList((prev) => {
+      const updated = prev.filter((d) => d.id !== id);
+      try { localStorage.setItem("iziflow_deals", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
   const getClientById = (id: string) => clientsList.find((c) => c.id === id);
   const getInvoiceById = (id: string) => invoicesList.find((inv) => inv.id === id);
   const getProductById = (id: string) => productsList.find((p) => p.id === id);
@@ -649,6 +981,9 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         salesList,
         stockMovementsList,
         companySettings,
+        employeesList,
+        payrollsList,
+        dealsList,
         loading,
         addClient,
         addInvoice,
@@ -658,6 +993,14 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         adjustStock,
         addSale,
         updateCompanySettings,
+        addEmployee,
+        updateEmployee,
+        deleteEmployee,
+        addPayroll,
+        updatePayrollStatus,
+        addDeal,
+        updateDealStage,
+        deleteDeal,
 
         getClientById,
         getInvoiceById,
