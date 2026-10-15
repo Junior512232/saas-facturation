@@ -126,6 +126,7 @@ export interface CompanySettings {
   companyName: string;
   email: string;
   phone?: string;
+  address?: string;
   ninea?: string;
   rccm?: string;
   currency: string;

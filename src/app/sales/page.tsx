@@ -30,6 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { WaveLogo, OrangeMoneyLogo, PaymentMethodBadge } from "@/components/ui/payment-logos";
 
 export default function SalesPage() {
   const { 
@@ -508,40 +509,40 @@ export default function SalesPage() {
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("wave")}
-                    className={`py-2 px-2.5 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
                       paymentMethod === "wave"
-                        ? "border-[#1dc3f7] bg-[#1dc3f7]/10 text-[#0099cc] shadow-sm ring-1 ring-[#1dc3f7]"
+                        ? "border-[#1dc3f7] bg-[#1dc3f7]/15 text-[#0284c7] shadow-sm ring-2 ring-[#1dc3f7]/40"
                         : "border-border hover:bg-muted text-muted-foreground"
                     }`}
                   >
-                    <Smartphone className="w-4 h-4 text-[#1dc3f7]" />
-                    <span>Wave</span>
+                    <WaveLogo className="w-5 h-5 shadow-sm" />
+                    <span className="font-extrabold text-[#0284c7] dark:text-[#38bdf8]">Wave</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("om")}
-                    className={`py-2 px-2.5 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
                       paymentMethod === "om"
-                        ? "border-[#ff6600] bg-[#ff6600]/10 text-[#ff6600] shadow-sm ring-1 ring-[#ff6600]"
+                        ? "border-[#ff7900] bg-[#ff7900]/15 text-[#ea580c] shadow-sm ring-2 ring-[#ff7900]/40"
                         : "border-border hover:bg-muted text-muted-foreground"
                     }`}
                   >
-                    <Smartphone className="w-4 h-4 text-[#ff6600]" />
-                    <span>Orange M.</span>
+                    <OrangeMoneyLogo className="w-5 h-5 shadow-sm" />
+                    <span className="font-extrabold text-[#ea580c] dark:text-[#fb923c]">Orange M.</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("cash")}
-                    className={`py-2 px-2.5 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1 transition-all ${
+                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
                       paymentMethod === "cash"
-                        ? "border-emerald-600 bg-emerald-500/10 text-emerald-600 shadow-sm ring-1 ring-emerald-600"
+                        ? "border-emerald-600 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 shadow-sm ring-2 ring-emerald-500/40"
                         : "border-border hover:bg-muted text-muted-foreground"
                     }`}
                   >
-                    <Banknote className="w-4 h-4 text-emerald-600" />
-                    <span>Espèces</span>
+                    <Banknote className="w-5 h-5 text-emerald-600" />
+                    <span className="font-extrabold text-emerald-700 dark:text-emerald-400">Espèces</span>
                   </button>
                 </div>
 
@@ -653,15 +654,7 @@ export default function SalesPage() {
                       {sale.customerName}
                     </td>
                     <td className="py-4 px-4">
-                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                        sale.paymentMethod === "wave"
-                          ? "bg-[#1dc3f7]/10 text-[#0099cc]"
-                          : sale.paymentMethod === "om"
-                          ? "bg-[#ff6600]/10 text-[#ff6600]"
-                          : "bg-emerald-500/10 text-emerald-600"
-                      }`}>
-                        {sale.paymentMethod.toUpperCase()}
-                      </span>
+                      <PaymentMethodBadge method={sale.paymentMethod} />
                     </td>
                     <td className="py-4 px-4 text-right text-xs font-mono text-muted-foreground">
                       {sale.items.length} art.
@@ -695,113 +688,208 @@ export default function SalesPage() {
           MODAL: TICKET DE CAISSE (REÇU DE VENTE IMPRIMABLE)
       ────────────────────────────────────────────────────────────────────────── */}
       {completedSale && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-3xl max-w-sm w-full p-6 shadow-2xl relative flex flex-col">
-            <button
-              onClick={() => setCompletedSale(null)}
-              className="absolute top-4 right-4 w-7 h-7 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+          {/* Floating Toolbar above the physical receipt */}
+          <div className="w-full max-w-[360px] flex items-center justify-between pb-3 text-white print:hidden">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-bold tracking-wide uppercase text-slate-300">
+                Ticket Caisse Émis
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => window.print()}
+                className="h-8 px-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs gap-1.5 shadow-lg"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Imprimer</span>
+              </Button>
+              <button
+                onClick={() => setCompletedSale(null)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                title="Fermer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
-            {/* Thermal Receipt Body */}
-            <div id="thermal-receipt" className="p-4 rounded-2xl bg-white text-zinc-900 border border-zinc-200 font-mono text-xs shadow-inner">
+          {/* Realistic Physical Thermal Ticket Paper Roll */}
+          <div className="w-full max-w-[360px] relative filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.65)] select-text print:filter-none print:max-w-full">
+            {/* Top Sawtooth Tear Cut (POS Thermal roll cut) */}
+            <div className="w-full overflow-hidden leading-none rotate-180 print:hidden">
+              <svg className="w-full h-3 text-white fill-current block" viewBox="0 0 360 12" preserveAspectRatio="none">
+                <path d="M0,12 L6,0 L12,12 L18,0 L24,12 L30,0 L36,12 L42,0 L48,12 L54,0 L60,12 L66,0 L72,12 L78,0 L84,12 L90,0 L96,12 L102,0 L108,12 L114,0 L120,12 L126,0 L132,12 L138,0 L144,12 L150,0 L156,12 L162,0 L168,12 L174,0 L180,12 L186,0 L192,12 L198,0 L204,12 L210,0 L216,12 L222,0 L228,12 L234,0 L240,12 L246,0 L252,12 L258,0 L264,12 L270,0 L276,12 L282,0 L288,12 L294,0 L300,12 L306,0 L312,12 L318,0 L324,12 L330,0 L336,12 L342,0 L348,12 L354,0 L360,12 Z" />
+              </svg>
+            </div>
+
+            {/* Solid Pure White Thermal Paper Body */}
+            <div 
+              id="thermal-receipt" 
+              className="bg-white text-zinc-950 px-6 py-5 font-mono text-xs border-x border-zinc-200 print:border-none print:p-0"
+              style={{ backgroundColor: "#ffffff", color: "#09090b" }}
+            >
               {/* Receipt Header */}
-              <div className="text-center pb-3 border-b border-dashed border-zinc-300">
-                <p className="font-extrabold text-sm uppercase tracking-wide">
+              <div className="text-center pb-3 border-b-2 border-dashed border-zinc-400">
+                <div className="inline-block p-1.5 rounded-full bg-zinc-100 mb-1.5">
+                  <Receipt className="w-5 h-5 text-zinc-800" />
+                </div>
+                <h2 className="font-black text-sm uppercase tracking-wider text-zinc-950">
                   {companySettings?.companyName || "iziFlow SARL"}
+                </h2>
+                <p className="text-[10px] font-bold text-zinc-600 uppercase mt-0.5">
+                  COMMERCE &amp; SERVICES AGRÉÉS
                 </p>
-                <p className="text-[10px] text-zinc-500">Suite Commerciale • OHADA</p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">
-                  NINEA : {companySettings?.ninea || "001234567 2V3"}
-                </p>
-                <p className="text-[10px] text-zinc-500">Tél : {companySettings?.phone || "+221 77 123 45 67"}</p>
+                <div className="text-[10px] text-zinc-600 mt-1 space-y-0.5">
+                  <p>NINEA : {companySettings?.ninea || "001234567 2V3"}</p>
+                  <p>RCCM : {companySettings?.rccm || "SN-DKR-2024-B-12345"}</p>
+                  <p>Tél : {companySettings?.phone || "+221 77 123 45 67"}</p>
+                  <p>{companySettings?.address || "Dakar, Sénégal"}</p>
+                </div>
               </div>
 
-              {/* Receipt Info */}
-              <div className="py-2.5 border-b border-dashed border-zinc-300 text-[10px] flex flex-col gap-1">
+              {/* Receipt Meta */}
+              <div className="py-2.5 border-b border-dashed border-zinc-300 text-[11px] space-y-1">
                 <div className="flex justify-between">
-                  <span>Reçu N° :</span>
-                  <span className="font-bold">{completedSale.saleNumber}</span>
+                  <span className="text-zinc-600">Ticket N° :</span>
+                  <span className="font-extrabold text-zinc-950">{completedSale.saleNumber}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Date :</span>
-                  <span>{completedSale.createdAt}</span>
+                  <span className="text-zinc-600">Date &amp; Heure :</span>
+                  <span className="font-medium text-zinc-900">{completedSale.createdAt}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Client :</span>
-                  <span className="font-semibold">{completedSale.customerName}</span>
+                  <span className="text-zinc-600">Client :</span>
+                  <span className="font-bold text-zinc-900">{completedSale.customerName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Règlement :</span>
-                  <span className="font-bold uppercase text-emerald-700">{completedSale.paymentMethod}</span>
+                <div className="flex justify-between items-center pt-0.5">
+                  <span className="text-zinc-600">Règlement :</span>
+                  <div className="flex items-center gap-1.5 font-bold">
+                    {completedSale.paymentMethod === "wave" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#1dc3f7]/15 text-[#0284c7] border border-[#1dc3f7]/40 text-[11px] font-extrabold">
+                        <WaveLogo className="w-4 h-4" />
+                        <span>Wave</span>
+                      </span>
+                    ) : completedSale.paymentMethod === "om" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ff7900]/15 text-[#ea580c] border border-[#ff7900]/40 text-[11px] font-extrabold">
+                        <OrangeMoneyLogo className="w-4 h-4" />
+                        <span>Orange Money</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[11px] font-bold">
+                        💵 Espèces
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Items Table */}
-              <div className="py-2.5 border-b border-dashed border-zinc-300 flex flex-col gap-1.5">
+              <div className="py-3 border-b-2 border-dashed border-zinc-400 space-y-2">
+                <div className="flex justify-between text-[10px] uppercase font-bold text-zinc-500 border-b border-zinc-200 pb-1">
+                  <span>Désignation</span>
+                  <span>Total</span>
+                </div>
                 {completedSale.items.map((item, idx) => (
-                  <div key={idx} className="flex justify-between text-[11px]">
-                    <div className="flex-1 pr-2">
-                      <p className="font-bold leading-tight">{item.name}</p>
-                      <span className="text-[10px] text-zinc-500">{item.quantity} x {formatFCFA(item.unitPrice)}</span>
+                  <div key={idx} className="flex justify-between items-start text-[11px]">
+                    <div className="flex-1 pr-3">
+                      <p className="font-bold text-zinc-950 leading-tight">{item.name}</p>
+                      <span className="text-[10px] text-zinc-500">
+                        {item.quantity} x {formatFCFA(item.unitPrice)}
+                      </span>
                     </div>
-                    <span className="font-bold text-right">{formatFCFA(item.totalPrice)}</span>
+                    <span className="font-extrabold text-right text-zinc-950 whitespace-nowrap">
+                      {formatFCFA(item.totalPrice)}
+                    </span>
                   </div>
                 ))}
               </div>
 
-              {/* Totals */}
-              <div className="pt-2.5 flex flex-col gap-1 text-[11px]">
-                <div className="flex justify-between text-zinc-500">
+              {/* Totals Summary */}
+              <div className="pt-2.5 pb-2 border-b border-dashed border-zinc-300 text-[11px] space-y-1">
+                <div className="flex justify-between text-zinc-600">
                   <span>Sous-total HT</span>
-                  <span>{formatFCFA(completedSale.subtotal)}</span>
+                  <span className="font-bold">{formatFCFA(completedSale.subtotal)}</span>
                 </div>
-                <div className="flex justify-between text-zinc-500">
-                  <span>TVA</span>
+                <div className="flex justify-between text-zinc-600">
+                  <span>TVA (18%)</span>
                   <span>{formatFCFA(completedSale.taxAmount)}</span>
                 </div>
-                <div className="flex justify-between text-sm font-black pt-1 border-t border-zinc-300">
-                  <span>TOTAL PAYÉ</span>
-                  <span>{formatFCFA(completedSale.total)}</span>
+                <div className="flex justify-between items-center text-sm font-black pt-1.5 border-t border-zinc-300 text-zinc-950">
+                  <span className="uppercase tracking-wider">TOTAL TTC PAYÉ</span>
+                  <span className="text-base font-extrabold">{formatFCFA(completedSale.total)}</span>
                 </div>
               </div>
 
+              {/* Cash tendered & change if applicable */}
+              {completedSale.paymentMethod === "cash" && cashTendered > 0 && (
+                <div className="py-2 border-b border-dashed border-zinc-300 text-[10px] text-zinc-600 space-y-0.5">
+                  <div className="flex justify-between">
+                    <span>Espèces reçues :</span>
+                    <span className="font-bold">{formatFCFA(cashTendered)}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-emerald-800">
+                    <span>Monnaie rendue :</span>
+                    <span>{formatFCFA(changeDue)}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Stamp watermark preview if available */}
               {companySettings?.useStampOnDocuments && companySettings?.companyStampUrl && (
-                <div className="flex justify-center my-2 opacity-80">
+                <div className="flex justify-center my-3">
                   <img
                     src={companySettings.companyStampUrl}
                     alt="Cachet officiel"
-                    className="w-16 h-16 object-contain"
+                    className="w-16 h-16 object-contain opacity-90 rotate-[-5deg]"
                   />
                 </div>
               )}
 
+              {/* Barcode Graphic Simulation */}
+              <div className="pt-3 pb-1 text-center">
+                <div className="flex justify-center items-center gap-[2px] h-9 mx-auto w-48 opacity-80">
+                  {[3, 1, 2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 1, 2, 4, 1, 3].map((w, i) => (
+                    <span
+                      key={i}
+                      className="bg-zinc-950 h-full inline-block"
+                      style={{ width: `${w}px` }}
+                    />
+                  ))}
+                </div>
+                <p className="text-[9px] tracking-widest text-zinc-500 font-mono mt-1">
+                  *{completedSale.saleNumber.replace(/-/g, "")}*
+                </p>
+              </div>
+
               {/* Receipt Footer */}
-              <div className="text-center pt-3 text-[9px] text-zinc-500 border-t border-dashed border-zinc-300 mt-2">
-                <p>Merci pour votre confiance !</p>
-                <p className="mt-0.5">Certifié par iziFlow • Solution de Gestion Commerciale</p>
+              <div className="text-center pt-2 text-[9px] text-zinc-500 space-y-0.5">
+                <p className="font-bold text-zinc-800">MERCI POUR VOTRE ACHAT !</p>
+                <p>Les articles vendus ne sont ni repris ni échangés.</p>
+                <p className="text-[8px] text-zinc-400 pt-1">
+                  Système de Caisse certifié iziFlow POS • www.iziflow.sn
+                </p>
               </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-2 mt-4">
-              <Button
-                onClick={() => window.print()}
-                className="flex-1 rounded-xl text-xs font-bold bg-primary hover:bg-primary/90 text-primary-foreground flex items-center justify-center gap-1.5"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                Imprimer le ticket
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setCompletedSale(null)}
-                className="rounded-xl text-xs font-semibold"
-              >
-                Fermer
-              </Button>
+            {/* Bottom Sawtooth Tear Cut */}
+            <div className="w-full overflow-hidden leading-none print:hidden">
+              <svg className="w-full h-3 text-white fill-current block" viewBox="0 0 360 12" preserveAspectRatio="none">
+                <path d="M0,0 L6,12 L12,0 L18,12 L24,0 L30,12 L36,0 L42,12 L48,0 L54,12 L60,0 L66,12 L72,0 L78,12 L84,0 L90,12 L96,0 L102,12 L108,0 L114,12 L120,0 L126,12 L132,0 L138,12 L144,0 L150,12 L156,0 L162,12 L168,0 L174,12 L180,0 L186,12 L192,0 L198,12 L204,0 L210,12 L216,0 L222,12 L228,0 L234,12 L240,0 L246,12 L252,0 L258,12 L264,0 L270,12 L276,0 L282,12 L288,0 L294,12 L300,0 L306,12 L312,0 L318,12 L324,0 L330,12 L336,0 L342,12 L348,0 L354,12 L360,0 Z" />
+              </svg>
             </div>
+          </div>
+
+          {/* Quick Close Button Below */}
+          <div className="mt-4 print:hidden">
+            <button
+              onClick={() => setCompletedSale(null)}
+              className="text-xs font-semibold text-slate-400 hover:text-white transition-colors underline underline-offset-4"
+            >
+              Fermer et retourner à la caisse
+            </button>
           </div>
         </div>
       )}

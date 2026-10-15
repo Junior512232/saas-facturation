@@ -27,6 +27,7 @@ import { useAppData } from "@/context/AppDataContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Employee, Payroll } from "@/lib/data";
+import { WaveLogo, OrangeMoneyLogo, PaymentMethodBadge } from "@/components/ui/payment-logos";
 
 export default function PayrollPage() {
   const { 
@@ -313,12 +314,7 @@ export default function PayrollPage() {
                         {p.netSalary.toLocaleString("fr-FR")} FCFA
                       </td>
                       <td className="p-3.5 text-center">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground">
-                          {p.paymentMethod === "wave" && "🌊 Wave"}
-                          {p.paymentMethod === "om" && "🟠 Orange Money"}
-                          {p.paymentMethod === "bank_transfer" && "🏦 Virement"}
-                          {p.paymentMethod === "cash" && "💵 Espèces"}
-                        </span>
+                        <PaymentMethodBadge method={p.paymentMethod} />
                       </td>
                       <td className="p-3.5 text-center">
                         {p.status === "paid" ? (
@@ -391,9 +387,9 @@ export default function PayrollPage() {
                   <span>Salaire de base :</span>
                   <strong className="text-foreground font-mono">{emp.baseSalary.toLocaleString("fr-FR")} FCFA</strong>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span>Mode de paiement :</span>
-                  <span className="capitalize font-medium text-foreground">{emp.paymentMethod}</span>
+                  <PaymentMethodBadge method={emp.paymentMethod} />
                 </div>
                 <div className="flex justify-between">
                   <span>Téléphone :</span>
@@ -483,38 +479,44 @@ export default function PayrollPage() {
 
       {/* MODAL 1: Bulletin de Paie Imprimable Officiel avec Cachet & Signature */}
       {showPayslipModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-white text-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-            {/* Top close & print actions */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-lg bg-purple-100 text-purple-700 font-bold text-xs">
-                  BULLETIN OFFICIEL
-                </span>
-                <span className="text-xs text-slate-500 font-mono">
-                  Réf: BUL-{showPayslipModal.periodYear}-{String(showPayslipModal.periodMonth).padStart(2, "0")}-{showPayslipModal.id.slice(-4)}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  onClick={() => window.print()}
-                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold gap-1.5 h-8 px-3 shadow"
-                >
-                  <Printer className="w-3.5 h-3.5" />
-                  <span>Imprimer le Bulletin</span>
-                </Button>
-                <button
-                  onClick={() => setShowPayslipModal(null)}
-                  className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-500 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start p-4 sm:p-6 bg-slate-950/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+          {/* Floating Action Bar above the A4 sheet */}
+          <div className="w-full max-w-3xl flex items-center justify-between pb-3 text-white print:hidden">
+            <div className="flex items-center gap-2">
+              <span className="p-1.5 rounded-lg bg-purple-600/30 text-purple-300 font-black text-xs uppercase tracking-wider border border-purple-500/30">
+                Document RH Officiel • Format A4
+              </span>
+              <span className="text-xs text-slate-300 font-mono hidden sm:inline">
+                Réf: BUL-{showPayslipModal.periodYear}-{String(showPayslipModal.periodMonth).padStart(2, "0")}-{showPayslipModal.id.slice(-4)}
+              </span>
             </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                onClick={() => window.print()}
+                className="h-8 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs gap-1.5 shadow-lg"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Imprimer le Bulletin</span>
+              </Button>
+              <button
+                onClick={() => setShowPayslipModal(null)}
+                className="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                title="Fermer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
 
-            {/* Payslip Document Body */}
-            <div className="py-6 space-y-6">
+          {/* Authentic Physical A4 Payslip Sheet */}
+          <div 
+            id="payslip-document"
+            className="w-full max-w-3xl bg-white text-slate-950 p-8 sm:p-12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-300 rounded-sm sm:rounded-md relative select-text my-2 print:border-none print:shadow-none print:p-0"
+            style={{ backgroundColor: "#ffffff", color: "#020617" }}
+          >
+            {/* Senegal Republic Tricolor Accent Stripe */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-[#00853f] via-[#fdef42] to-[#e31b23] rounded-t-sm mb-6 print:hidden" />
               {/* Header Company & Payslip Title */}
               <div className="flex items-start justify-between">
                 <div>
@@ -529,15 +531,33 @@ export default function PayrollPage() {
                   </p>
                 </div>
 
-                <div className="text-right">
-                  <div className="text-base font-black text-purple-700 uppercase tracking-tight">
+                <div className="text-right space-y-1">
+                  <div className="inline-block px-2.5 py-0.5 bg-slate-900 text-white font-black text-[10px] uppercase tracking-wider rounded">
+                    RÉPUBLIQUE DU SÉNÉGAL
+                  </div>
+                  <div className="text-base font-black text-purple-900 uppercase tracking-tight">
                     BULLETIN DE SALAIRE
                   </div>
-                  <div className="text-xs font-bold text-slate-700">
-                    Mois de : {String(showPayslipModal.periodMonth).padStart(2, "0")} / {showPayslipModal.periodYear}
+                  <div className="text-xs font-bold text-slate-800">
+                    Mois de : <span className="font-mono text-purple-800">{String(showPayslipModal.periodMonth).padStart(2, "0")} / {showPayslipModal.periodYear}</span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono">
-                    Paiement : {showPayslipModal.paymentMethod?.toUpperCase() || "WAVE"}
+                  <div className="flex items-center justify-end gap-1.5 pt-1">
+                    <span className="text-[11px] font-semibold text-slate-500">Paiement :</span>
+                    {showPayslipModal.paymentMethod === "wave" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#1dc3f7]/15 text-[#0284c7] border border-[#1dc3f7]/40 text-[11px] font-extrabold">
+                        <WaveLogo className="w-3.5 h-3.5" />
+                        <span>Wave</span>
+                      </span>
+                    ) : showPayslipModal.paymentMethod === "om" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ff7900]/15 text-[#ea580c] border border-[#ff7900]/40 text-[11px] font-extrabold">
+                        <OrangeMoneyLogo className="w-3.5 h-3.5" />
+                        <span>Orange Money</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-800 border border-slate-300 text-[11px] font-bold">
+                        🏦 Virement
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -679,10 +699,29 @@ export default function PayrollPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Legal Notice Footer */}
+              <div className="text-center pt-6 text-[10px] text-slate-500 space-y-0.5 border-t border-slate-200 mt-6">
+                <p className="font-semibold text-slate-700">
+                  Conservez ce bulletin de paie sans limitation de durée (Article L.116 du Code du Travail du Sénégal).
+                </p>
+                <p className="text-[9px] text-slate-400">
+                  Généré et certifié électroniquement par iziFlow Paie &amp; RH • Solution de Gestion Commerciale
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Close Button Below */}
+            <div className="my-4 print:hidden">
+              <button
+                onClick={() => setShowPayslipModal(null)}
+                className="text-xs font-semibold text-slate-400 hover:text-white transition-colors underline underline-offset-4"
+              >
+                Fermer le document
+              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* MODAL 2: Nouvel Employé */}
       {showNewEmployeeModal && (
@@ -788,29 +827,32 @@ export default function PayrollPage() {
                   <button
                     type="button"
                     onClick={() => setNewEmpPayment("wave")}
-                    className={`p-2 rounded-xl border text-center font-bold text-xs transition-colors ${
-                      newEmpPayment === "wave" ? "border-sky-500 bg-sky-500/10 text-sky-400" : "border-border text-muted-foreground"
+                    className={`p-2.5 rounded-xl border text-center font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      newEmpPayment === "wave" ? "border-[#1dc3f7] bg-[#1dc3f7]/15 text-[#0284c7] ring-1 ring-[#1dc3f7]" : "border-border text-muted-foreground"
                     }`}
                   >
-                    🌊 Wave
+                    <WaveLogo className="w-4 h-4" />
+                    <span>Wave</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewEmpPayment("om")}
-                    className={`p-2 rounded-xl border text-center font-bold text-xs transition-colors ${
-                      newEmpPayment === "om" ? "border-amber-500 bg-amber-500/10 text-amber-400" : "border-border text-muted-foreground"
+                    className={`p-2.5 rounded-xl border text-center font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      newEmpPayment === "om" ? "border-[#ff7900] bg-[#ff7900]/15 text-[#ea580c] ring-1 ring-[#ff7900]" : "border-border text-muted-foreground"
                     }`}
                   >
-                    🟠 OM
+                    <OrangeMoneyLogo className="w-4 h-4" />
+                    <span>Orange M.</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setNewEmpPayment("bank_transfer")}
-                    className={`p-2 rounded-xl border text-center font-bold text-xs transition-colors ${
-                      newEmpPayment === "bank_transfer" ? "border-purple-500 bg-purple-500/10 text-purple-400" : "border-border text-muted-foreground"
+                    className={`p-2.5 rounded-xl border text-center font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
+                      newEmpPayment === "bank_transfer" ? "border-purple-500 bg-purple-500/15 text-purple-600 dark:text-purple-400 ring-1 ring-purple-500" : "border-border text-muted-foreground"
                     }`}
                   >
-                    🏦 Banque
+                    <span>🏦</span>
+                    <span>Banque</span>
                   </button>
                 </div>
               </div>

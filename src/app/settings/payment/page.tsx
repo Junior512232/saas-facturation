@@ -17,6 +17,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import { savePaymentSettings, getPaymentSettings } from "@/app/actions/payment-settings";
+import { WaveLogo, OrangeMoneyLogo } from "@/components/ui/payment-logos";
 
 export default function PaymentSettingsPage() {
   const [apiKey, setApiKey] = useState("");
@@ -117,11 +118,13 @@ export default function PaymentSettingsPage() {
         {/* Badges des méthodes supportées par Bictorys */}
         <div className="flex flex-wrap items-center gap-2 pt-2">
           <span className="text-xs font-semibold text-muted-foreground mr-1">Modes de paiement pris en charge :</span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#1dc3f7]/10 text-[#0091bd] border border-[#1dc3f7]/30">
-            <span className="w-2 h-2 rounded-full bg-[#1dc3f7]" /> Wave
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#1dc3f7]/15 text-[#0091bd] border border-[#1dc3f7]/30 shadow-xs">
+            <WaveLogo className="w-4 h-4" />
+            <span>Wave Mobile Money</span>
           </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-orange-500/10 text-orange-600 border border-orange-500/30">
-            <span className="w-2 h-2 rounded-full bg-orange-500" /> Orange Money
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-[#ff7900]/15 text-[#ea580c] border border-[#ff7900]/30 shadow-xs">
+            <OrangeMoneyLogo className="w-4 h-4" />
+            <span>Orange Money</span>
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-600 border border-rose-500/30">
             <span className="w-2 h-2 rounded-full bg-rose-500" /> Free Money

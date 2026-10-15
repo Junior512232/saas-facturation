@@ -24,6 +24,7 @@ import {
 import { useAppData } from "@/context/AppDataContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { WaveLogo, OrangeMoneyLogo } from "@/components/ui/payment-logos";
 
 export default function RelancesWhatsAppPage() {
   const { invoicesList, clientsList, companySettings } = useAppData();
@@ -307,13 +308,23 @@ export default function RelancesWhatsAppPage() {
                 </p>
 
                 {/* Wave / OM Card Preview inside WhatsApp */}
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-emerald-400/30 text-[11px] space-y-1 mt-2">
+                <div className="p-3 rounded-xl bg-slate-950/70 border border-emerald-400/30 text-[11px] space-y-2 mt-2">
                   <div className="flex items-center justify-between font-bold text-emerald-300">
-                    <span>Paiement Direct iziFlow</span>
+                    <span>Paiement Sécurisé iziFlow</span>
                     <span className="font-mono">{sampleInvoice.amount.toLocaleString("fr-FR")} FCFA</span>
                   </div>
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#1dc3f7]/20 text-[#38bdf8] text-[10px] font-bold">
+                      <WaveLogo className="w-3.5 h-3.5" />
+                      <span>Wave</span>
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ff7900]/20 text-[#fb923c] text-[10px] font-bold">
+                      <OrangeMoneyLogo className="w-3.5 h-3.5" />
+                      <span>Orange Money</span>
+                    </span>
+                  </div>
                   <p className="text-[10px] text-slate-300">
-                    Facture {sampleInvoice.number} • Encaissement instantané Wave / Orange Money
+                    Facture {sampleInvoice.number} • Encaissement instantané 1-clic
                   </p>
                 </div>
 
