@@ -231,24 +231,26 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
   const totalRealizedMargin = salesList.reduce((sum, s) => sum + s.margin, 0);
 
   return (
-    <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8 animate-in fade-in duration-300">
+    <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8 animate-in fade-in duration-300 print:p-0 print:m-0 print:max-w-none">
       {/* Toast */}
       {toastMessage && (
-        <div className="fixed top-6 right-6 z-50 bg-foreground text-background px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 duration-200 border border-border">
+        <div className="fixed top-6 right-6 z-50 bg-foreground text-background px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-top-4 duration-200 border border-border print:hidden">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <span className="text-sm font-medium">{toastMessage}</span>
         </div>
       )}
 
-      {/* Header & Tabs */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Ventes & Caisse Rapide</h1>
-            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs py-0.5">
-              Caisse Directe
-            </Badge>
-          </div>
+      {/* Main POS Dashboard & Register (Hidden when printing ticket) */}
+      <div className={`flex flex-col gap-8 ${completedSale ? "print:hidden" : ""}`}>
+        {/* Header & Tabs */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Ventes & Caisse Rapide</h1>
+              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs py-0.5">
+                Caisse Directe
+              </Badge>
+            </div>
           <p className="text-muted-foreground text-sm mt-1">
             Encaissez au comptoir par Wave, Orange Money ou Espèces avec déstockage instantané.
           </p>
@@ -734,12 +736,13 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
           </div>
         </div>
       )}
+      </div>
 
       {/* ──────────────────────────────────────────────────────────────────────────
           MODAL: TICKET DE CAISSE (REÇU DE VENTE IMPRIMABLE)
       ────────────────────────────────────────────────────────────────────────── */}
       {completedSale && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-6 sm:pt-10 pb-24 bg-slate-950/90 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-6 sm:pt-10 pb-24 bg-slate-950/90 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200 print:static print:inset-auto print:p-0 print:m-0 print:bg-white print:overflow-visible print:block print:w-full">
           {/* Floating Toolbar above the physical receipt */}
           <div className="w-full max-w-[360px] flex items-center justify-between pb-3 text-white print:hidden">
             <div className="flex items-center gap-2">
@@ -778,7 +781,7 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
           </div>
 
           {/* Realistic Physical Thermal Ticket Paper Roll */}
-          <div className="w-full max-w-[360px] relative filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.65)] select-text print:filter-none print:max-w-full">
+          <div className="w-full max-w-[360px] relative filter drop-shadow-[0_25px_35px_rgba(0,0,0,0.65)] select-text print:filter-none print:shadow-none print:max-w-none print:w-full print:flex print:justify-center">
             {/* Top Sawtooth Tear Cut (POS Thermal roll cut) */}
             <div className="w-full overflow-hidden leading-none rotate-180 print:hidden">
               <svg className="w-full h-3 text-white fill-current block" viewBox="0 0 360 12" preserveAspectRatio="none">
@@ -789,7 +792,7 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
             {/* Solid Pure White Thermal Paper Body */}
             <div 
               id="thermal-receipt" 
-              className="bg-white text-zinc-950 px-6 py-5 font-mono text-xs border-x border-zinc-200 print:border-none print:p-0"
+              className="bg-white text-zinc-950 px-6 py-5 font-mono text-xs border-x border-zinc-200 print:border print:border-zinc-400 print:p-4 print:w-[82mm] print:max-w-[82mm] print:mx-auto print:shadow-none print:rounded-none"
               style={{ backgroundColor: "#ffffff", color: "#09090b" }}
             >
               {/* Receipt Header */}

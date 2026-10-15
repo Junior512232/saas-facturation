@@ -181,9 +181,11 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
   };
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border">
+    <div className="space-y-6 pb-12 print:p-0 print:m-0">
+      {/* Main Payroll Dashboard (Hidden during print when payslip is displayed) */}
+      <div className={`space-y-6 ${showPayslipModal ? "print:hidden" : ""}`}>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border">
         <div>
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
@@ -525,10 +527,11 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
           </div>
         </div>
       )}
+      </div>
 
       {/* MODAL 1: Bulletin de Paie Imprimable Officiel avec Cachet & Signature */}
       {showPayslipModal && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start p-4 sm:p-6 bg-slate-950/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start p-4 sm:p-6 bg-slate-950/90 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200 print:static print:inset-auto print:p-0 print:m-0 print:bg-white print:overflow-visible print:block print:w-full">
           {/* Floating Action Bar above the A4 sheet */}
           <div className="w-full max-w-3xl flex items-center justify-between pb-3 text-white print:hidden">
             <div className="flex items-center gap-2">
@@ -570,11 +573,11 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
           {/* Authentic Physical A4 Payslip Sheet */}
           <div 
             id="payslip-document"
-            className="w-full max-w-3xl bg-white text-slate-950 p-8 sm:p-12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-300 rounded-sm sm:rounded-md relative select-text my-2 print:border-none print:shadow-none print:p-0"
+            className="w-full max-w-3xl bg-white text-slate-950 p-8 sm:p-12 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-300 rounded-sm sm:rounded-md relative select-text my-2 print:border-none print:shadow-none print:p-6 print:m-0 print:max-w-full print:w-full"
             style={{ backgroundColor: "#ffffff", color: "#020617" }}
           >
             {/* Senegal Republic Tricolor Accent Stripe */}
-            <div className="h-1.5 w-full bg-gradient-to-r from-[#00853f] via-[#fdef42] to-[#e31b23] rounded-t-sm mb-6 print:hidden" />
+            <div className="h-2 w-full bg-gradient-to-r from-[#00853f] via-[#fdef42] to-[#e31b23] rounded-t-sm mb-6 print:block" />
               {/* Header Company & Payslip Title */}
               <div className="flex items-start justify-between">
                 <div>
@@ -803,7 +806,7 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
 
       {/* MODAL 2: Nouvel Employé */}
       {showNewEmployeeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 print:hidden">
           <div className="w-full max-w-md bg-card text-foreground rounded-3xl p-6 sm:p-7 border border-border shadow-2xl relative">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <h3 className="font-bold text-base flex items-center gap-2">
@@ -948,7 +951,7 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
 
       {/* MODAL 3: Nouveau Bulletin de Paie */}
       {showNewPayrollModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 print:hidden">
           <div className="w-full max-w-md bg-card text-foreground rounded-3xl p-6 sm:p-7 border border-border shadow-2xl relative">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <h3 className="font-bold text-base flex items-center gap-2">
