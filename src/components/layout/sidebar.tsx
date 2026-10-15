@@ -80,17 +80,17 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
       label: "Commerce & Ventes",
       items: [
         { icon: FileText, label: "Factures", href: "/invoices" },
-        ...(isExtensionEnabled("sales") ? [{ icon: ShoppingBag, label: "Ventes & Caisse", href: "/sales", badge: "Direct", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" }] : []),
-        ...(isExtensionEnabled("crm") ? [{ icon: UserCheck, label: "Pipeline CRM", href: "/crm", badge: "Kanban", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" }] : []),
-        ...(isExtensionEnabled("whatsapp") ? [{ icon: MessageCircle, label: "Relances WhatsApp", href: "/relances", badge: "1-Clic", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" }] : []),
+        { icon: ShoppingBag, label: "Ventes & Caisse", href: "/sales", badge: "Direct", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+        { icon: UserCheck, label: "Pipeline CRM", href: "/crm", badge: "Kanban", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
+        { icon: MessageCircle, label: "Relances WhatsApp", href: "/relances", badge: "1-Clic", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
         { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },
       ]
     },
     {
       label: "Opérations & RH",
       items: [
-        ...(isExtensionEnabled("stocks") ? [{ icon: Package, label: "Stocks & Inventaire", href: "/inventory", badge: "Auto", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" }] : []),
-        ...(isExtensionEnabled("payroll") ? [{ icon: Briefcase, label: "Paie & RH", href: "/payroll", badge: "Bulletins", badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" }] : []),
+        { icon: Package, label: "Stocks & Inventaire", href: "/inventory", badge: "Auto", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" },
+        { icon: Briefcase, label: "Paie & RH", href: "/payroll", badge: "Bulletins", badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" },
       ]
     },
     {
@@ -109,7 +109,7 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
     {
       label: "Configuration",
       items: [
-        ...(isExtensionEnabled("stamp_signature") ? [{ icon: FileCheck2, label: "Signature & Cachet", href: "/settings/signature", badge: "Certifié", badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" }] : []),
+        { icon: FileCheck2, label: "Signature & Cachet", href: "/settings/signature", badge: "Certifié", badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" },
         { icon: Settings, label: "Paramètres", href: "/settings" },
         { icon: CreditCard, label: "Passerelles Paiement", href: "/settings/payment" },
         { icon: ShieldCheck, label: "Abonnement", href: "/settings/billing" },

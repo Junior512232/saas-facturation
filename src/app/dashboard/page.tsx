@@ -17,6 +17,12 @@ import {
   Plus,
   AlertTriangle,
   Zap,
+  Briefcase,
+  UserCheck,
+  MessageCircle,
+  Package,
+  ShoppingBag,
+  ArrowRight
 } from "lucide-react";
 import { formatFCFA } from "@/lib/utils";
 
@@ -146,6 +152,109 @@ export default function DashboardPage() {
             iconBgColor="bg-red-100 dark:bg-red-900/30"
             iconColor="text-red-600 dark:text-red-400"
           />
+        </div>
+      </div>
+
+      {/* Modules de Gestion Rapide */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+            <span>Modules Commerciaux & Opérations</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              Nouveau
+            </span>
+          </h3>
+          <Link href="/extensions" className="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+            <span>Tous les modules</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Link
+            href="/crm"
+            className="p-4 rounded-2xl bg-card border border-border hover:border-amber-500/50 hover:shadow-md transition-all group flex flex-col justify-between space-y-2"
+          >
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <UserCheck className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-foreground group-hover:text-amber-500 transition-colors">
+                Pipeline CRM
+              </h4>
+              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                Kanban prospects & opportunités
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/relances"
+            className="p-4 rounded-2xl bg-card border border-border hover:border-emerald-500/50 hover:shadow-md transition-all group flex flex-col justify-between space-y-2"
+          >
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <MessageCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-foreground group-hover:text-emerald-500 transition-colors">
+                Relances WhatsApp
+              </h4>
+              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                Lien Wave & impayés en 1 clic
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/payroll"
+            className="p-4 rounded-2xl bg-card border border-border hover:border-purple-500/50 hover:shadow-md transition-all group flex flex-col justify-between space-y-2"
+          >
+            <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Briefcase className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-foreground group-hover:text-purple-500 transition-colors">
+                Paie & RH
+              </h4>
+              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                Fiches de paie OHADA & IPRES
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/sales"
+            className="p-4 rounded-2xl bg-card border border-border hover:border-teal-500/50 hover:shadow-md transition-all group flex flex-col justify-between space-y-2"
+          >
+            <div className="w-9 h-9 rounded-xl bg-teal-500/10 text-teal-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-foreground group-hover:text-teal-500 transition-colors">
+                Ventes & Caisse
+              </h4>
+              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                Terminal POS & reçus thermiques
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            href="/inventory"
+            className="p-4 rounded-2xl bg-card border border-border hover:border-blue-500/50 hover:shadow-md transition-all group flex flex-col justify-between space-y-2"
+          >
+            <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <Package className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="font-bold text-xs text-foreground group-hover:text-blue-500 transition-colors">
+                Stocks & Inventaire
+              </h4>
+              <p className="text-[11px] text-muted-foreground line-clamp-1">
+                Articles & alertes rupture
+              </p>
+            </div>
+          </Link>
         </div>
       </div>
 
