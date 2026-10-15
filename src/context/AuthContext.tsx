@@ -23,7 +23,8 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error?: string }>;
-  register: (companyName: string, email: string, phone: string, password: string, ninea?: string, plan?: string) => Promise<{ error?: string }>;
+  register: (companyName: string, email: string, phone: string, password: string, ninea?: string, plan?: string) => Promise<{ error?: string; needsEmailConfirmation?: boolean }>;
+  resendConfirmationEmail: (email: string) => Promise<{ error?: string; success?: boolean }>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<AppUser>) => Promise<void>;
   isAuthenticated: boolean;
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     ninea?: string,
     plan: string = "gratuit"
-  ): Promise<{ error?: string }> => {
+  ): Promise<{ error?: string; needsEmailConfirmation?: boolean }> => {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
@@ -124,11 +125,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Profil créé automatiquement par le Trigger de la base de données (on_auth_user_created)
 
     if (data.session === null) {
-      return { error: "✅ Compte créé ! Veuillez vérifier votre boîte mail pour le lien de confirmation." };
+      return { needsEmailConfirmation: true };
     }
 
     router.push("/dashboard");
     return {};
+  };
+
+  const resendConfirmationEmail = async (email: string): Promise<{ error?: string; success?: boolean }> => {
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: email.trim(),
+    });
+    if (error) {
+      return { error: error.message };
+    }
+    return { success: true };
   };
 
   const logout = async () => {
@@ -165,6 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         register,
+        resendConfirmationEmail,
         logout,
         updateProfile,
         isAuthenticated: !!session,
