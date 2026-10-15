@@ -249,8 +249,8 @@ export async function initiateSubscriptionPayment({
 
     // Montants en FCFA (cohérents avec la page de tarification)
     const planPrices: Record<string, number> = {
-      pro: 5000,
-      business: 15000,
+      pro: 10000,
+      business: 25000,
     };
 
     const amount = planPrices[plan];

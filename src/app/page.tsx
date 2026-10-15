@@ -676,7 +676,7 @@ export default function LandingPage() {
               <p className="text-xs text-indigo-300 mt-1">Pour commerçants, boutiques, artisans &amp; indépendants</p>
               
               <div className="my-5">
-                <span className="text-4xl font-black text-white font-mono">5 000 FCFA</span>
+                <span className="text-4xl font-black text-white font-mono">10 000 FCFA</span>
                 <span className="text-xs text-slate-400"> / mois</span>
               </div>
 
@@ -711,7 +711,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <Link href="/register" className="mt-8 w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-indigo-600/30 transition-all">
-              Choisir le forfait Pro (5 000 FCFA)
+              Choisir le forfait Pro (10 000 FCFA)
             </Link>
           </div>
 
@@ -725,7 +725,7 @@ export default function LandingPage() {
               <p className="text-xs text-slate-400 mt-1">Pour PME structurées, RH complètes &amp; équipes</p>
               
               <div className="my-5">
-                <span className="text-4xl font-black text-white font-mono">15 000 FCFA</span>
+                <span className="text-4xl font-black text-white font-mono">25 000 FCFA</span>
                 <span className="text-xs text-slate-400"> / mois</span>
               </div>
 
@@ -760,7 +760,7 @@ export default function LandingPage() {
               </ul>
             </div>
             <Link href="/register" className="mt-8 w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-purple-600/30 transition-all">
-              Choisir le forfait Business (15 000 FCFA)
+              Choisir le forfait Business (25 000 FCFA)
             </Link>
           </div>
         </div>

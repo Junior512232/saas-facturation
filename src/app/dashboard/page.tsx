@@ -64,12 +64,12 @@ export default function DashboardPage() {
             <div>
               <h3 className="font-bold text-lg">Passez à la vitesse supérieure !</h3>
               <p className="text-white/90 text-sm mt-1">
-                Passez au forfait Pro (5 000 FCFA) pour débloquer 150 factures, tickets de caisse illimités, bulletins de paie et relances WhatsApp en 1 clic.
+                Passez au forfait Pro (10 000 FCFA) pour débloquer 150 factures, tickets de caisse illimités, bulletins de paie et relances WhatsApp en 1 clic.
               </p>
             </div>
           </div>
           <Link href="/settings/billing" className="shrink-0 bg-white text-brand-blue font-bold px-6 py-3 rounded-xl hover:bg-white/90 transition-colors shadow-sm active:scale-[0.98]">
-            Voir les offres (Dès 5 000 F)
+            Voir les offres (Dès 10 000 F)
           </Link>
         </div>
       )}

@@ -265,9 +265,9 @@ export default function BillingPage() {
             )}
           </div>
 
-          {/* Prix PRO : 5 000 FCFA */}
+          {/* Prix PRO : 10 000 FCFA */}
           <div className="flex items-baseline gap-1 my-4">
-            <span className="text-4xl font-black text-foreground">5 000</span>
+            <span className="text-4xl font-black text-foreground">10 000</span>
             <span className="text-xs text-muted-foreground font-semibold">FCFA / mois</span>
           </div>
 
@@ -348,7 +348,7 @@ export default function BillingPage() {
               ) : currentPlan === "pro" ? (
                 "Forfait actuel (Pro)"
               ) : (
-                "Passer à l'offre Pro (5 000 FCFA)"
+                "Passer à l'offre Pro (10 000 FCFA)"
               )}
             </Button>
           </div>
@@ -375,9 +375,9 @@ export default function BillingPage() {
             )}
           </div>
 
-          {/* Prix BUSINESS : 15 000 FCFA */}
+          {/* Prix BUSINESS : 25 000 FCFA */}
           <div className="flex items-baseline gap-1 my-4">
-            <span className="text-4xl font-black text-foreground">15 000</span>
+            <span className="text-4xl font-black text-foreground">25 000</span>
             <span className="text-xs text-muted-foreground font-semibold">FCFA / mois</span>
           </div>
 
@@ -459,7 +459,7 @@ export default function BillingPage() {
               ) : currentPlan === "business" ? (
                 "Forfait actuel (Business)"
               ) : (
-                "Passer à l'offre Business (15 000 FCFA)"
+                "Passer à l'offre Business (25 000 FCFA)"
               )}
             </Button>
           </div>
@@ -480,8 +480,8 @@ export default function BillingPage() {
               <tr className="border-b border-border bg-muted/40 text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
                 <th className="py-3 px-4">Fonctionnalité / Module</th>
                 <th className="py-3 px-4 text-center">Gratuit (0 F)</th>
-                <th className="py-3 px-4 text-center bg-brand-blue/5 text-brand-blue">Pro (5 000 F)</th>
-                <th className="py-3 px-4 text-center bg-purple-500/5 text-purple-600 dark:text-purple-400">Business (15 000 F)</th>
+                <th className="py-3 px-4 text-center bg-brand-blue/5 text-brand-blue">Pro (10 000 F)</th>
+                <th className="py-3 px-4 text-center bg-purple-500/5 text-purple-600 dark:text-purple-400">Business (25 000 F)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
