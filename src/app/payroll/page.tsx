@@ -21,7 +21,9 @@ import {
   CreditCard,
   X,
   Eye,
-  AlertCircle
+  AlertCircle,
+  MessageCircle,
+  Send
 } from "lucide-react";
 import { useAppData } from "@/context/AppDataContext";
 import { Button } from "@/components/ui/button";
@@ -139,6 +141,43 @@ export default function PayrollPage() {
 
   const handlePayViaWave = async (payrollId: string) => {
     await updatePayrollStatus(payrollId, "paid");
+  };
+
+  const handleSendPayrollWhatsApp = (payrollToSend?: Payroll) => {
+    const p = payrollToSend || showPayslipModal;
+    if (!p) return;
+    const emp = employeesList.find((e) => e.id === p.employeeId);
+    const phone = emp?.phone ? emp.phone.replace(/[^0-9]/g, "") : "";
+    const comp = companySettings?.companyName || "iziFlow SARL";
+    const ref = `BUL-${p.periodYear}-${String(p.periodMonth).padStart(2, "0")}-${p.id.slice(-4)}`;
+
+    const message = 
+`📄 *BULLETIN DE PAIE DÉMATÉRIALISÉ*
+*${comp}* • Direction des Ressources Humaines
+---------------------------------------
+*Salarié :* ${p.employeeName}
+*Poste :* ${p.position || "Non spécifié"}
+*Département :* ${p.department || "Général"}
+*Période :* Mois de ${String(p.periodMonth).padStart(2, "0")}/${p.periodYear}
+*Réf. Document :* ${ref}
+
+*Détails des Rubriques :*
+• Salaire de Base : ${p.baseSalary.toLocaleString("fr-FR")} FCFA
+${(p.transportAllowance || 0) > 0 ? `• Indemnité Transport : ${(p.transportAllowance || 0).toLocaleString("fr-FR")} FCFA\n` : ""}${(p.bonus || 0) > 0 ? `• Prime & Bonus : ${(p.bonus || 0).toLocaleString("fr-FR")} FCFA\n` : ""}• Cotisation Retraite IPRES : -${(p.ipresDeduction || Math.round(p.baseSalary * 0.056)).toLocaleString("fr-FR")} FCFA
+• Retenue Fiscale TRIMF : -${(p.taxDeduction || Math.round(p.baseSalary * 0.08)).toLocaleString("fr-FR")} FCFA
+
+---------------------------------------
+💰 *NET À PAYER AU SALARIÉ :* *${p.netSalary.toLocaleString("fr-FR")} FCFA*
+*Mode de règlement :* ${(p.paymentMethod || "wave").toUpperCase()}
+*Statut :* ${p.status === "paid" ? `✅ Réglé le ${p.paymentDate || "10/10"}` : "⏳ En attente de virement"}
+---------------------------------------
+_Certifié conforme aux règles du Code du Travail du Sénégal et du Système Comptable OHADA._`;
+
+    const whatsappUrl = phone 
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -333,6 +372,16 @@ export default function PayrollPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <Button
                             size="sm"
+                            onClick={() => handleSendPayrollWhatsApp(p)}
+                            className="h-7 px-2 text-[11px] bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold gap-1 shadow-xs"
+                            title="Envoyer le bulletin par WhatsApp"
+                          >
+                            <MessageCircle className="w-3 h-3 fill-current" />
+                            <span className="hidden sm:inline">WhatsApp</span>
+                          </Button>
+
+                          <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => setShowPayslipModal(p)}
                             className="h-7 px-2.5 text-[11px] gap-1 font-semibold border-border hover:bg-purple-500/10 hover:text-purple-600"
@@ -493,11 +542,20 @@ export default function PayrollPage() {
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
+                onClick={() => handleSendPayrollWhatsApp()}
+                className="h-8 px-3 rounded-xl bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold text-xs gap-1.5 shadow-lg active:scale-95 transition-all"
+                title="Envoyer le bulletin au salarié par WhatsApp"
+              >
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                <span>WhatsApp</span>
+              </Button>
+              <Button
+                size="sm"
                 onClick={() => window.print()}
                 className="h-8 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs gap-1.5 shadow-lg"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Imprimer le Bulletin</span>
+                <span>Imprimer</span>
               </Button>
               <button
                 onClick={() => setShowPayslipModal(null)}
@@ -711,14 +769,34 @@ export default function PayrollPage() {
               </div>
             </div>
 
-            {/* Quick Close Button Below */}
-            <div className="my-4 print:hidden">
-              <button
+            {/* Prominent Action Dock Below the Payslip */}
+            <div className="w-full max-w-3xl mt-4 flex flex-col gap-2.5 print:hidden">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  onClick={() => window.print()}
+                  className="h-11 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-xs sm:text-sm gap-2 shadow-xl active:scale-[0.98] transition-all"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>Imprimer le Bulletin (A4)</span>
+                </Button>
+
+                <Button
+                  onClick={() => handleSendPayrollWhatsApp()}
+                  className="h-11 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-black text-xs sm:text-sm gap-2 shadow-xl shadow-[#25D366]/20 active:scale-[0.98] transition-all"
+                >
+                  <MessageCircle className="w-4 h-4 fill-current" />
+                  <span>Envoyer sur WhatsApp</span>
+                </Button>
+              </div>
+
+              <Button
+                variant="outline"
                 onClick={() => setShowPayslipModal(null)}
-                className="text-xs font-semibold text-slate-400 hover:text-white transition-colors underline underline-offset-4"
+                className="w-full h-10 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs font-bold gap-2"
               >
-                Fermer le document
-              </button>
+                <X className="w-4 h-4" />
+                <span>Fermer le document</span>
+              </Button>
             </div>
           </div>
         )}

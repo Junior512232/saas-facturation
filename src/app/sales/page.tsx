@@ -25,7 +25,9 @@ import {
   X,
   RotateCcw,
   ShieldCheck,
-  Package
+  Package,
+  MessageCircle,
+  Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +62,44 @@ export default function SalesPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleSendTicketWhatsApp = (saleToSend?: Sale) => {
+    const sale = saleToSend || completedSale;
+    if (!sale) return;
+    const client = clientsList.find((c) => c.id === sale.clientId);
+    const phone = client?.phone ? client.phone.replace(/[^0-9]/g, "") : "";
+    const comp = companySettings?.companyName || "iziFlow SARL";
+    
+    const itemsText = sale.items
+      .map((it) => `• ${it.name} (x${it.quantity}) : ${formatFCFA(it.totalPrice)}`)
+      .join("\n");
+
+    const message = 
+`🧾 *TICKET DE CAISSE DÉMATÉRIALISÉ*
+*${comp}*
+---------------------------------------
+*Ticket N° :* ${sale.saleNumber}
+*Date :* ${sale.createdAt}
+*Client :* ${sale.customerName}
+
+*Articles :*
+${itemsText}
+
+---------------------------------------
+*Sous-total HT :* ${formatFCFA(sale.subtotal)}
+*TVA :* ${formatFCFA(sale.taxAmount)}
+*TOTAL PAYÉ TTC :* *${formatFCFA(sale.total)}*
+*Mode de règlement :* ${sale.paymentMethod.toUpperCase()}
+---------------------------------------
+Merci pour votre confiance et à très bientôt !
+_Certifié conforme par iziFlow POS • www.iziflow.sn_`;
+
+    const whatsappUrl = phone 
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, "_blank");
   };
 
   // Categories
@@ -666,15 +706,26 @@ export default function SalesPage() {
                       +{formatFCFA(sale.margin)}
                     </td>
                     <td className="py-4 px-4 text-right">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setCompletedSale(sale)}
-                        className="rounded-xl h-7 px-2.5 text-xs gap-1 border-border"
-                      >
-                        <Receipt className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span>Ticket</span>
-                      </Button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          size="sm"
+                          onClick={() => handleSendTicketWhatsApp(sale)}
+                          className="rounded-xl h-7 px-2.5 text-xs gap-1 bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold shadow-xs"
+                          title="Envoyer le ticket par WhatsApp"
+                        >
+                          <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                          <span className="hidden sm:inline">WhatsApp</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setCompletedSale(sale)}
+                          className="rounded-xl h-7 px-2.5 text-xs gap-1 border-border hover:bg-primary/10 hover:text-primary"
+                        >
+                          <Receipt className="w-3.5 h-3.5" />
+                          <span>Ticket</span>
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -688,23 +739,33 @@ export default function SalesPage() {
           MODAL: TICKET DE CAISSE (REÇU DE VENTE IMPRIMABLE)
       ────────────────────────────────────────────────────────────────────────── */}
       {completedSale && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/90 backdrop-blur-md p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-start pt-6 sm:pt-10 pb-24 bg-slate-950/90 backdrop-blur-md p-4 overflow-y-auto animate-in fade-in duration-200">
           {/* Floating Toolbar above the physical receipt */}
           <div className="w-full max-w-[360px] flex items-center justify-between pb-3 text-white print:hidden">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs font-bold tracking-wide uppercase text-slate-300">
-                Ticket Caisse Émis
+                Ticket Caisse
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <Button
+                size="sm"
+                onClick={() => handleSendTicketWhatsApp()}
+                className="h-8 px-2.5 rounded-xl bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-extrabold text-xs gap-1 shadow-md active:scale-95 transition-all"
+                title="Envoyer le ticket par WhatsApp"
+              >
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                <span className="text-[11px]">WhatsApp</span>
+              </Button>
               <Button
                 size="sm"
                 onClick={() => window.print()}
-                className="h-8 px-3 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-bold text-xs gap-1.5 shadow-lg"
+                className="h-8 px-2.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-extrabold text-xs gap-1 shadow-md active:scale-95 transition-all"
+                title="Imprimer le ticket"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Imprimer</span>
+                <span className="text-[11px]">Imprimer</span>
               </Button>
               <button
                 onClick={() => setCompletedSale(null)}
@@ -882,14 +943,34 @@ export default function SalesPage() {
             </div>
           </div>
 
-          {/* Quick Close Button Below */}
-          <div className="mt-4 print:hidden">
-            <button
+          {/* Prominent Action Dock Below the Ticket */}
+          <div className="w-full max-w-[360px] mt-4 flex flex-col gap-2.5 print:hidden">
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={() => window.print()}
+                className="h-11 rounded-2xl bg-white text-slate-950 hover:bg-slate-100 font-black text-xs sm:text-sm gap-2 shadow-xl border border-slate-200 active:scale-[0.98] transition-all"
+              >
+                <Printer className="w-4 h-4 text-purple-600" />
+                <span>Imprimer le Ticket</span>
+              </Button>
+
+              <Button
+                onClick={() => handleSendTicketWhatsApp()}
+                className="h-11 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-black text-xs sm:text-sm gap-2 shadow-xl shadow-[#25D366]/20 active:scale-[0.98] transition-all"
+              >
+                <MessageCircle className="w-4 h-4 fill-current" />
+                <span>Envoyer WhatsApp</span>
+              </Button>
+            </div>
+
+            <Button
+              variant="outline"
               onClick={() => setCompletedSale(null)}
-              className="text-xs font-semibold text-slate-400 hover:text-white transition-colors underline underline-offset-4"
+              className="w-full h-10 rounded-2xl bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs font-bold gap-2"
             >
-              Fermer et retourner à la caisse
-            </button>
+              <X className="w-4 h-4" />
+              <span>Fermer et retourner à la caisse</span>
+            </Button>
           </div>
         </div>
       )}
