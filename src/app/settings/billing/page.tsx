@@ -11,7 +11,12 @@ import {
   Building2, 
   UserCheck, 
   Zap,
-  Check
+  Check,
+  FileText,
+  Receipt,
+  Users,
+  Package,
+  X as CloseIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { initiateSubscriptionPayment } from "@/app/actions/payment";
@@ -136,7 +141,7 @@ export default function BillingPage() {
         )}
       </div>
 
-      {/* Grille des offres : 3 colonnes cohérentes (Gratuit / Pro / Business) */}
+      {/* Grille des offres : 3 colonnes axées sur les fonctionnalités et quotas réels */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
         
         {/* 1. PLAN GRATUIT */}
@@ -147,37 +152,76 @@ export default function BillingPage() {
         }`}>
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="text-lg font-bold text-foreground">Gratuit</h3>
-              <p className="text-xs text-muted-foreground">Pour démarrer sereinement</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-0.5 rounded-full bg-muted border border-border inline-block mb-1">
+                Découverte & Essai
+              </span>
+              <h3 className="text-xl font-black text-foreground">Gratuit</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour tester et émettre ses premières factures</p>
             </div>
             {currentPlan === "gratuit" && (
-              <span className="bg-muted text-muted-foreground text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-                Forfait Actuel
+              <span className="bg-muted text-foreground text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-border">
+                Actuel
               </span>
             )}
           </div>
 
-          <div className="flex items-baseline gap-1 my-5">
+          <div className="flex items-baseline gap-1 my-4">
             <span className="text-3xl font-black text-foreground">0</span>
             <span className="text-xs text-muted-foreground font-semibold">FCFA / mois</span>
           </div>
 
-          <ul className="space-y-3 mb-8 flex-1 text-xs text-muted-foreground">
-            <li className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>Jusqu'à 5 factures / mois</span>
+          {/* Quotas clés chiffrés */}
+          <div className="p-3 rounded-2xl bg-muted/40 border border-border/60 space-y-2 mb-5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <FileText className="w-3.5 h-3.5 text-muted-foreground" /> Factures & Devis :
+              </span>
+              <span className="font-mono font-bold text-foreground">5 / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Receipt className="w-3.5 h-3.5 text-muted-foreground" /> Tickets de Caisse :
+              </span>
+              <span className="font-mono font-bold text-foreground">15 / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Users className="w-3.5 h-3.5 text-muted-foreground" /> Bulletins de Paie :
+              </span>
+              <span className="font-mono font-bold text-foreground">1 test / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-medium text-foreground">
+                <Package className="w-3.5 h-3.5 text-muted-foreground" /> Articles en Stock :
+              </span>
+              <span className="font-mono font-bold text-foreground">10 articles max</span>
+            </div>
+          </div>
+
+          <ul className="space-y-2.5 mb-8 flex-1 text-xs text-muted-foreground">
+            <li className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Export PDF standard (avec filigrane iziFlow)</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>Calcul automatique TVA 18%</span>
+            <li className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Calcul automatique TVA sénégalaise 18%</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>Exportation PDF avec filigrane iziFacture</span>
+            <li className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Terminal de caisse direct au comptoir</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <Check className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span>Gestion des clients & historique</span>
+            <li className="flex items-center gap-2">
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>Partage manuel de liens de paiement</span>
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground/60">
+              <CloseIcon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <span>Sans logo personnalisé ni cachet d'entreprise</span>
+            </li>
+            <li className="flex items-center gap-2 text-muted-foreground/60">
+              <CloseIcon className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+              <span>Sans relances automatiques WhatsApp</span>
             </li>
           </ul>
 
@@ -187,12 +231,12 @@ export default function BillingPage() {
               className="w-full h-11 rounded-xl text-xs font-bold"
               disabled={true}
             >
-              {currentPlan === "gratuit" ? "Inclus par défaut" : "Forfait de base"}
+              {currentPlan === "gratuit" ? "Forfait actuel (Gratuit)" : "Forfait de base"}
             </Button>
           </div>
         </div>
 
-        {/* 2. PLAN PRO (Mis en valeur - Recommandé) */}
+        {/* 2. PLAN PRO (Recommandé • Commerces & TPE) */}
         <div className={`rounded-3xl p-6 sm:p-7 flex flex-col relative transition-all border-2 ${
           currentPlan === "pro"
             ? "bg-card border-brand-blue ring-2 ring-brand-blue/30 shadow-lg"
@@ -201,53 +245,92 @@ export default function BillingPage() {
           {/* Badge Recommandé */}
           <div className="absolute -top-3.5 right-6 bg-brand-blue text-white text-[10px] font-black tracking-wider uppercase px-3.5 py-1 rounded-full shadow-md flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            Recommandé
+            Recommandé • Commerces &amp; TPE
           </div>
 
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-brand-blue px-2 py-0.5 rounded-full bg-brand-blue/10 border border-brand-blue/20 inline-block mb-1">
+                Le Plus Populaire
+              </span>
+              <h3 className="text-xl font-black text-foreground flex items-center gap-2">
                 Pro
               </h3>
-              <p className="text-xs text-muted-foreground">Pour indépendants et PME actives</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour commerçants, boutiques, artisans &amp; prestataires</p>
             </div>
             {currentPlan === "pro" && (
-              <span className="bg-brand-blue text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-                Forfait Actuel
+              <span className="bg-brand-blue text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
+                Actuel
               </span>
             )}
           </div>
 
-          {/* Prix PRO : 5 000 FCFA avec haute lisibilité en mode sombre & clair */}
-          <div className="flex items-baseline gap-1 my-5">
+          {/* Prix PRO : 5 000 FCFA */}
+          <div className="flex items-baseline gap-1 my-4">
             <span className="text-4xl font-black text-foreground">5 000</span>
             <span className="text-xs text-muted-foreground font-semibold">FCFA / mois</span>
           </div>
 
-          <ul className="space-y-3 mb-8 flex-1 text-xs text-foreground">
-            <li className="flex items-center gap-2.5">
+          {/* Quotas clés chiffrés */}
+          <div className="p-3.5 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 space-y-2 mb-5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <FileText className="w-3.5 h-3.5 text-brand-blue" /> Factures &amp; Devis :
+              </span>
+              <span className="font-mono font-black text-brand-blue">150 / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Receipt className="w-3.5 h-3.5 text-brand-blue" /> Tickets de Caisse :
+              </span>
+              <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">ILLIMITÉS</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Users className="w-3.5 h-3.5 text-brand-blue" /> Bulletins de Paie :
+              </span>
+              <span className="font-mono font-black text-purple-600 dark:text-purple-400">Jusqu'à 5 / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Package className="w-3.5 h-3.5 text-brand-blue" /> Gestion des Stocks :
+              </span>
+              <span className="font-mono font-black text-emerald-600 dark:text-emerald-400">ILLIMITÉE + Alertes</span>
+            </div>
+          </div>
+
+          <ul className="space-y-2.5 mb-8 flex-1 text-xs text-foreground">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Factures & devis illimités</span>
+              <span className="font-semibold">Votre propre logo (aucun filigrane iziFlow)</span>
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Votre propre logo (sans mention ni filigrane)</span>
+              <span className="font-semibold">Signature numérique &amp; Cachet officiel d'entreprise</span>
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Paiements en ligne Bictorys (Wave, OM, CB)</span>
+              <span className="font-semibold">Paiements directs Wave &amp; Orange Money sur factures</span>
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Relances WhatsApp & Email en 1 clic</span>
+              <span className="font-semibold">Relances des factures impayées en 1 clic sur WhatsApp</span>
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Export comptable Excel pour déclaration</span>
+              <span>Envoi des tickets de caisse par WhatsApp &amp; impression 80mm</span>
             </li>
-            <li className="flex items-center gap-2.5">
+            <li className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
-              <span className="font-medium">Support WhatsApp & Email prioritaire 7j/7</span>
+              <span>Bulletins de paie conformes IPRES / CSS / Code du Travail</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
+              <span>Journal des ventes &amp; suivi des marges commerciales</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
+              <span>Support WhatsApp prioritaire 7j/7</span>
             </li>
           </ul>
 
@@ -263,7 +346,7 @@ export default function BillingPage() {
                   Redirection Bictorys...
                 </div>
               ) : currentPlan === "pro" ? (
-                "Forfait actuel"
+                "Forfait actuel (Pro)"
               ) : (
                 "Passer à l'offre Pro (5 000 FCFA)"
               )}
@@ -271,54 +354,89 @@ export default function BillingPage() {
           </div>
         </div>
 
-        {/* 3. PLAN BUSINESS */}
+        {/* 3. PLAN BUSINESS (Pack Complet Entreprise & PME) */}
         <div className={`rounded-3xl p-6 sm:p-7 flex flex-col border transition-all ${
           currentPlan === "business"
-            ? "bg-card border-brand-blue ring-2 ring-brand-blue/30 shadow-lg"
+            ? "bg-card border-purple-500 ring-2 ring-purple-500/30 shadow-lg"
             : "bg-card border-border hover:border-foreground/30 shadow-sm"
         }`}>
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h3 className="text-lg font-bold text-foreground">Business</h3>
-              <p className="text-xs text-muted-foreground">Multi-sociétés et équipes</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 inline-block mb-1">
+                Pack Complet Entreprise
+              </span>
+              <h3 className="text-xl font-black text-foreground">Business</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Pour PME structurées, RH complètes &amp; suivi commercial</p>
             </div>
             {currentPlan === "business" && (
-              <span className="bg-brand-blue text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full">
-                Forfait Actuel
+              <span className="bg-purple-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full shadow-xs">
+                Actuel
               </span>
             )}
           </div>
 
-          {/* Prix BUSINESS : 15 000 FCFA avec haute lisibilité */}
-          <div className="flex items-baseline gap-1 my-5">
+          {/* Prix BUSINESS : 15 000 FCFA */}
+          <div className="flex items-baseline gap-1 my-4">
             <span className="text-4xl font-black text-foreground">15 000</span>
             <span className="text-xs text-muted-foreground font-semibold">FCFA / mois</span>
           </div>
 
-          <ul className="space-y-3 mb-8 flex-1 text-xs text-foreground">
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span className="font-semibold text-foreground">Tout le forfait Pro inclus</span>
+          {/* Quotas clés chiffrés */}
+          <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 space-y-2 mb-5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <FileText className="w-3.5 h-3.5 text-purple-600" /> Factures &amp; Devis :
+              </span>
+              <span className="font-mono font-black text-purple-600 dark:text-purple-400">100% ILLIMITÉS</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Receipt className="w-3.5 h-3.5 text-purple-600" /> Tickets de Caisse :
+              </span>
+              <span className="font-mono font-black text-purple-600 dark:text-purple-400">100% ILLIMITÉS</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Users className="w-3.5 h-3.5 text-purple-600" /> Bulletins de Paie :
+              </span>
+              <span className="font-mono font-black text-purple-600 dark:text-purple-400">Jusqu'à 25 / mois</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1.5 font-bold text-foreground">
+                <Package className="w-3.5 h-3.5 text-purple-600" /> Stocks &amp; Valorisation :
+              </span>
+              <span className="font-mono font-black text-purple-600 dark:text-purple-400">Illimité + Coût d'achat</span>
+            </div>
+          </div>
+
+          <ul className="space-y-2.5 mb-8 flex-1 text-xs text-foreground">
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span className="font-semibold text-foreground">Tout le forfait Pro inclus sans exception</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Jusqu'à 5 utilisateurs collaborateurs</span>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span className="font-semibold">Pipeline Commercial CRM complet (prospects &amp; devis)</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Gestion multi-entreprises (jusqu'à 3 entités)</span>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span className="font-semibold">Compte de résultat financier automatique (P&amp;L OHADA)</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Accès direct pour votre expert-comptable</span>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span>Gestion RH avancée (cotisations salariales &amp; patronales IPRES/CSS)</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Statistiques financières & audit approfondi</span>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span>Relances WhatsApp groupées et campagnes</span>
             </li>
-            <li className="flex items-center gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <span>Support dédié VIP par téléphone & WhatsApp</span>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span>Export comptable Excel consolidé pour votre expert-comptable</span>
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-600 dark:text-purple-400 shrink-0" />
+              <span>Support VIP dédié par téléphone &amp; WhatsApp 7j/7</span>
             </li>
           </ul>
 
@@ -328,18 +446,18 @@ export default function BillingPage() {
               className={`w-full h-11 rounded-xl text-xs font-bold transition-all active:scale-[0.98] ${
                 currentPlan === "business" 
                   ? "" 
-                  : "bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+                  : "bg-purple-600 hover:bg-purple-700 text-white shadow-md shadow-purple-600/20"
               }`}
               onClick={() => handleSubscribe("business")}
               disabled={loadingPlan !== null || currentPlan === "business"}
             >
               {loadingPlan === "business" ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-3.5 h-3.5 border-2 border-background/30 border-t-background rounded-full animate-spin" />
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   Redirection Bictorys...
                 </div>
               ) : currentPlan === "business" ? (
-                "Forfait actuel"
+                "Forfait actuel (Business)"
               ) : (
                 "Passer à l'offre Business (15 000 FCFA)"
               )}
@@ -347,6 +465,115 @@ export default function BillingPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* Tableau comparatif détaillé des fonctionnalités clés */}
+      <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-6">
+        <div>
+          <h3 className="text-lg font-bold text-foreground">Tableau comparatif des fonctionnalités &amp; quotas</h3>
+          <p className="text-xs text-muted-foreground mt-0.5">Détail complet des fonctionnalités et limites incluses selon chaque forfait.</p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr className="border-b border-border bg-muted/40 text-[11px] uppercase font-bold tracking-wider text-muted-foreground">
+                <th className="py-3 px-4">Fonctionnalité / Module</th>
+                <th className="py-3 px-4 text-center">Gratuit (0 F)</th>
+                <th className="py-3 px-4 text-center bg-brand-blue/5 text-brand-blue">Pro (5 000 F)</th>
+                <th className="py-3 px-4 text-center bg-purple-500/5 text-purple-600 dark:text-purple-400">Business (15 000 F)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {/* SECTION 1: QUOTAS */}
+              <tr className="bg-muted/20 font-bold text-[11px] text-muted-foreground uppercase">
+                <td colSpan={4} className="py-2.5 px-4">1. Quotas &amp; Volumes Mensuels</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Nombre de factures &amp; devis</td>
+                <td className="py-3 px-4 text-center font-mono text-muted-foreground">5 / mois</td>
+                <td className="py-3 px-4 text-center font-mono font-bold text-brand-blue bg-brand-blue/5">150 / mois</td>
+                <td className="py-3 px-4 text-center font-mono font-black text-purple-600 bg-purple-500/5">100% ILLIMITÉ</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Tickets de caisse directe (POS)</td>
+                <td className="py-3 px-4 text-center font-mono text-muted-foreground">15 / mois</td>
+                <td className="py-3 px-4 text-center font-mono font-bold text-emerald-600 bg-brand-blue/5">ILLIMITÉ</td>
+                <td className="py-3 px-4 text-center font-mono font-black text-purple-600 bg-purple-500/5">ILLIMITÉ</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Bulletins de paie RH certifiés</td>
+                <td className="py-3 px-4 text-center font-mono text-muted-foreground">1 d'essai / mois</td>
+                <td className="py-3 px-4 text-center font-mono font-bold text-purple-600 bg-brand-blue/5">Jusqu'à 5 / mois</td>
+                <td className="py-3 px-4 text-center font-mono font-black text-purple-600 bg-purple-500/5">Jusqu'à 25 / mois</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Catalogue &amp; Stocks d'articles</td>
+                <td className="py-3 px-4 text-center text-muted-foreground">10 articles max</td>
+                <td className="py-3 px-4 text-center font-semibold text-foreground bg-brand-blue/5">Illimité + Alertes rupture</td>
+                <td className="py-3 px-4 text-center font-semibold text-foreground bg-purple-500/5">Illimité + Valorisation PUMP</td>
+              </tr>
+
+              {/* SECTION 2: FONCTIONNALITÉS COMMERCIALES */}
+              <tr className="bg-muted/20 font-bold text-[11px] text-muted-foreground uppercase">
+                <td colSpan={4} className="py-2.5 px-4">2. Personnalisation &amp; Paiements Mobiles</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Logo d'entreprise sans filigrane</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">Filigrane iziFlow</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-brand-blue/5">✓ Inclus sans filigrane</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ Inclus sans filigrane</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Signature numérique &amp; Cachet officiel</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">—</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-brand-blue/5">✓ Certifié sur factures &amp; paie</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ Certifié sur factures &amp; paie</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Paiements directs Wave &amp; Orange Money</td>
+                <td className="py-3 px-4 text-center text-muted-foreground">Manuel</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-brand-blue/5">✓ Liens instantanés intégrés</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ Liens instantanés intégrés</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Relances WhatsApp en 1 clic</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">—</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-brand-blue/5">✓ En 1 clic pré-rempli</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ En 1 clic &amp; groupées</td>
+              </tr>
+
+              {/* SECTION 3: RH, CRM & COMPTABILITÉ */}
+              <tr className="bg-muted/20 font-bold text-[11px] text-muted-foreground uppercase">
+                <td colSpan={4} className="py-2.5 px-4">3. RH, CRM &amp; Rapports OHADA</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Conformité Paie IPRES &amp; CSS Sénégal</td>
+                <td className="py-3 px-4 text-center text-muted-foreground">Modèle basique</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-brand-blue/5">✓ Barème complet OHADA</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ Part salariale &amp; patronale</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Pipeline Commercial CRM &amp; Prospects</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">—</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">—</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ Inclus complet (5 étapes)</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Compte de résultat automatique (P&amp;L)</td>
+                <td className="py-3 px-4 text-center text-muted-foreground/60">—</td>
+                <td className="py-3 px-4 text-center text-muted-foreground bg-brand-blue/5">Marges de caisse</td>
+                <td className="py-3 px-4 text-center font-bold text-emerald-600 bg-purple-500/5">✓ P&amp;L, Bilan &amp; Export Excel</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-foreground">Support &amp; Assistance technique</td>
+                <td className="py-3 px-4 text-center text-muted-foreground">Email standard</td>
+                <td className="py-3 px-4 text-center font-semibold text-foreground bg-brand-blue/5">WhatsApp prioritaire 7j/7</td>
+                <td className="py-3 px-4 text-center font-bold text-purple-600 bg-purple-500/5">VIP Téléphone &amp; WhatsApp 7j/7</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
       
       {/* Informations sur le paiement Bictorys */}

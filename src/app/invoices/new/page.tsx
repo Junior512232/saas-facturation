@@ -124,12 +124,12 @@ export default function NewInvoicePage() {
         <div className="w-20 h-20 bg-brand-cream rounded-full flex items-center justify-center">
           <AlertCircle className="w-10 h-10 text-brand-blue" />
         </div>
-        <h2 className="text-3xl font-bold tracking-tight">Limite atteinte</h2>
+        <h2 className="text-3xl font-bold tracking-tight">Limite mensuelle atteinte</h2>
         <p className="text-muted-foreground max-w-md">
-          Vous avez atteint la limite de {INVOICE_LIMIT} factures autorisées sur le forfait Gratuit. Passez à un forfait supérieur pour créer des factures illimitées.
+          Vous avez atteint la limite de {INVOICE_LIMIT} factures autorisées sur le forfait Gratuit. Passez à l'offre <strong>Pro (5 000 FCFA)</strong> pour débloquer 150 factures/mois, les tickets de caisse illimités et la gestion des bulletins de paie.
         </p>
         <Link href="/settings/billing" className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-blueDark transition-colors">
-          Voir les offres Pro & Business
+          Débloquer l'offre Pro (Dès 5 000 FCFA)
         </Link>
       </div>
     );

@@ -620,16 +620,42 @@ export default function LandingPage() {
           {/* Gratuit */}
           <div className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 flex flex-col justify-between">
             <div>
-              <h3 className="text-lg font-bold text-white">Découverte</h3>
-              <p className="text-xs text-slate-400 mt-1">Idéal pour démarrer et tester</p>
-              <div className="my-6">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2.5 py-0.5 rounded-full bg-slate-800 border border-slate-700 inline-block mb-2">
+                Découverte &amp; Test
+              </span>
+              <h3 className="text-xl font-bold text-white">Gratuit</h3>
+              <p className="text-xs text-slate-400 mt-1">Pour tester et émettre ses premières factures</p>
+              
+              <div className="my-5">
                 <span className="text-4xl font-black text-white font-mono">0 FCFA</span>
                 <span className="text-xs text-slate-400"> / mois</span>
               </div>
-              <ul className="space-y-3 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Jusqu'à 5 factures par mois</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Gestion des clients de base</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Export PDF standard</li>
+
+              {/* Quotas concrets */}
+              <div className="p-3 rounded-2xl bg-slate-800/50 border border-slate-700/60 space-y-1.5 mb-5 text-xs">
+                <div className="flex justify-between text-slate-200">
+                  <span>📄 Factures :</span>
+                  <span className="font-bold font-mono">5 / mois</span>
+                </div>
+                <div className="flex justify-between text-slate-200">
+                  <span>🧾 Tickets caisse :</span>
+                  <span className="font-bold font-mono">15 / mois</span>
+                </div>
+                <div className="flex justify-between text-slate-200">
+                  <span>💼 Bulletins paie :</span>
+                  <span className="font-bold font-mono">1 test / mois</span>
+                </div>
+                <div className="flex justify-between text-slate-200">
+                  <span>📦 Stock articles :</span>
+                  <span className="font-bold font-mono">10 articles max</span>
+                </div>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Export PDF standard (filigrane iziFlow)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Calcul automatique TVA 18%</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Caisse Rapide comptoir basique</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Partage de lien de paiement manuel</li>
               </ul>
             </div>
             <Link href="/register" className="mt-8 w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center block transition-colors">
@@ -638,48 +664,103 @@ export default function LandingPage() {
           </div>
 
           {/* Pro */}
-          <div className="p-8 rounded-3xl bg-gradient-to-b from-indigo-900/50 to-slate-900 border-2 border-indigo-500 relative flex flex-col justify-between shadow-2xl">
-            <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-md">
-              Plus Populaire
+          <div className="p-8 rounded-3xl bg-gradient-to-b from-indigo-950/70 via-slate-900 to-slate-900 border-2 border-indigo-500 relative flex flex-col justify-between shadow-2xl">
+            <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-full shadow-md whitespace-nowrap">
+              Recommandé • Commerces &amp; TPE
             </span>
             <div>
-              <h3 className="text-lg font-bold text-white">Professionnel</h3>
-              <p className="text-xs text-indigo-300 mt-1">Pour artisans, commerces & freelances</p>
-              <div className="my-6">
-                <span className="text-4xl font-black text-white font-mono">10 000 FCFA</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 inline-block mb-2">
+                Le Plus Populaire
+              </span>
+              <h3 className="text-xl font-bold text-white">Pro</h3>
+              <p className="text-xs text-indigo-300 mt-1">Pour commerçants, boutiques, artisans &amp; indépendants</p>
+              
+              <div className="my-5">
+                <span className="text-4xl font-black text-white font-mono">5 000 FCFA</span>
                 <span className="text-xs text-slate-400"> / mois</span>
               </div>
-              <ul className="space-y-3 text-xs text-slate-200">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Factures & Devis illimités</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Caisse Rapide (POS) + Déstockage</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Gestion complète des stocks & alertes</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Cachet officiel & Signature numérique</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Paiements Wave & Orange Money</li>
+
+              {/* Quotas concrets */}
+              <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 space-y-1.5 mb-5 text-xs">
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">📄 Factures &amp; devis :</span>
+                  <span className="font-extrabold font-mono text-indigo-300">150 / mois</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">🧾 Tickets de caisse :</span>
+                  <span className="font-extrabold font-mono text-emerald-400">ILLIMITÉS</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">💼 Bulletins de paie :</span>
+                  <span className="font-extrabold font-mono text-purple-300">Jusqu'à 5 / mois</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">📦 Gestion stocks :</span>
+                  <span className="font-extrabold font-mono text-emerald-400">ILLIMITÉE + Alertes</span>
+                </div>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-200">
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Votre propre logo</strong> (sans filigrane)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Cachet officiel &amp; Signature numérique</strong></li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Paiements directs Wave &amp; Orange Money</strong></li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Relances WhatsApp en 1 clic</strong> (impayés)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Tickets caisse thermiques 80mm &amp; WhatsApp</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Bulletins conformes IPRES / CSS / Code Travail</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Support prioritaire WhatsApp 7j/7</li>
               </ul>
             </div>
             <Link href="/register" className="mt-8 w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-indigo-600/30 transition-all">
-              Choisir le forfait Pro
+              Choisir le forfait Pro (5 000 FCFA)
             </Link>
           </div>
 
           {/* Business */}
           <div className="p-8 rounded-3xl bg-slate-900/40 border border-slate-800 flex flex-col justify-between">
             <div>
-              <h3 className="text-lg font-bold text-white">Entreprise</h3>
-              <p className="text-xs text-slate-400 mt-1">Pour PME structurées & multi-magasins</p>
-              <div className="my-6">
-                <span className="text-4xl font-black text-white font-mono">25 000 FCFA</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 px-2.5 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/20 inline-block mb-2">
+                Pack Complet Entreprise
+              </span>
+              <h3 className="text-xl font-bold text-white">Business</h3>
+              <p className="text-xs text-slate-400 mt-1">Pour PME structurées, RH complètes &amp; équipes</p>
+              
+              <div className="my-5">
+                <span className="text-4xl font-black text-white font-mono">15 000 FCFA</span>
                 <span className="text-xs text-slate-400"> / mois</span>
               </div>
-              <ul className="space-y-3 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Tout du forfait Pro</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Compte de résultat & P&L complet</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Extension Paie & Salaires RH</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400" /> Support VIP dédié par WhatsApp</li>
+
+              {/* Quotas concrets */}
+              <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 space-y-1.5 mb-5 text-xs">
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">📄 Factures &amp; devis :</span>
+                  <span className="font-extrabold font-mono text-purple-400">100% ILLIMITÉS</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">🧾 Tickets de caisse :</span>
+                  <span className="font-extrabold font-mono text-purple-400">100% ILLIMITÉS</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">💼 Bulletins de paie :</span>
+                  <span className="font-extrabold font-mono text-purple-400">Jusqu'à 25 / mois</span>
+                </div>
+                <div className="flex justify-between text-white">
+                  <span className="font-semibold">📦 Stocks &amp; Coût :</span>
+                  <span className="font-extrabold font-mono text-purple-400">Illimité + Valorisation</span>
+                </div>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Tout le forfait Pro inclus sans exception</strong></li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Pipeline Commercial CRM complet</strong> (prospects)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> <strong>Compte de résultat automatique (P&amp;L OHADA)</strong></li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> RH avancée (déclarations IPRES &amp; CSS complètes)</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Relances WhatsApp groupées et campagnes</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Export comptable Excel pour expert-comptable</li>
+                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Support VIP dédié Téléphone &amp; WhatsApp 7j/7</li>
               </ul>
             </div>
-            <Link href="/register" className="mt-8 w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center block transition-colors">
-              Contacter pour Entreprise
+            <Link href="/register" className="mt-8 w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-purple-600/30 transition-all">
+              Choisir le forfait Business (15 000 FCFA)
             </Link>
           </div>
         </div>
