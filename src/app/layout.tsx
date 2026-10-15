@@ -16,8 +16,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "iziFacture - SaaS de facturation",
-  description: "Gérez vos factures facilement.",
+  title: "iziFlow - Suite de Gestion Commerciale, Stocks, Factures & RH",
+  description: "Plateforme tout-en-un pour entreprises : Ventes, Stocks, Facturation certifiée avec cachet/signature numérique, Paie & RH.",
 };
 
 export const viewport: Viewport = {

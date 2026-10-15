@@ -12,17 +12,23 @@ const PUBLIC_PREFIXES = ["/pay/"];
 
 function getPageTitle(pathname: string): string {
   if (pathname === "/dashboard") return "Dashboard";
-  if (pathname === "/invoices") return "Factures";
-  if (pathname === "/invoices/new") return "Nouvelle facture";
+  if (pathname === "/invoices") return "Factures & Devis";
+  if (pathname === "/invoices/new" || pathname === "/invoices/create") return "Nouvelle facture";
   if (pathname.startsWith("/invoices/")) return "Détail de la facture";
   if (pathname === "/clients") return "Clients";
   if (pathname.startsWith("/clients/")) return "Détail du client";
   if (pathname === "/transactions") return "Transactions";
-  if (pathname === "/reports") return "Rapports";
+  if (pathname === "/reports") return "Rapport Financier";
+  if (pathname === "/extensions") return "Hub Extensions";
+  if (pathname === "/inventory") return "Stocks & Inventaire";
+  if (pathname === "/sales") return "Ventes & Caisse Rapide";
+  if (pathname === "/payroll") return "Paie & Ressources Humaines";
+  if (pathname === "/crm") return "Pipeline CRM & Prospects";
+  if (pathname === "/settings/signature") return "Signature & Cachet d'Entreprise";
   if (pathname === "/settings") return "Paramètres";
   if (pathname === "/settings/payment") return "Paramètres de paiement";
   if (pathname === "/support") return "Support";
-  return "iziFacture";
+  return "iziFlow";
 }
 
 function getBreadcrumb(pathname: string): string | undefined {

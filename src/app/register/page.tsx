@@ -2,8 +2,8 @@
 
 import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useSearchParams } from "next/navigation";
 import { 
   Building2, 
   Lock, 
@@ -13,10 +13,16 @@ import {
   CheckCircle2, 
   ShieldCheck, 
   Sparkles,
-  FileText
+  FileText,
+  ArrowLeft,
+  Eye,
+  EyeOff
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function RegisterContent() {
+  const router = useRouter();
   const { register } = useAuth();
   const searchParams = useSearchParams();
   const plan = searchParams.get("plan") || "gratuit";
@@ -25,10 +31,10 @@ function RegisterContent() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [ninea, setNinea] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,172 +51,189 @@ function RegisterContent() {
     const result = await register(companyName, email, phone, password, ninea, plan);
     if (result.error) {
       setError(result.error);
+    } else {
+      router.push("/dashboard");
     }
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-background">
-      {/* Left Banner */}
-      <div className="md:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 lg:p-12 flex flex-col justify-between text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-        
-        {/* Brand */}
-        <Link href="/" className="relative z-10 flex items-center gap-2.5 group w-fit">
-          <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-brand-blue shadow-white/20 transition-transform group-hover:scale-95 duration-200">
-            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-              <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
-            </svg>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-extrabold tracking-tight text-white flex items-center">
-              izi<span className="text-white">Facture</span>
-            </span>
-            <span className="text-[9px] uppercase tracking-widest text-white/70 font-bold -mt-1">Zone OHADA • UEMOA</span>
-          </div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 flex flex-col justify-between p-4 sm:p-6 relative overflow-hidden font-sans selection:bg-indigo-600 selection:text-white">
+      {/* Glow effects */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-indigo-600/20 blur-[130px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-80 h-80 bg-violet-600/15 blur-[100px] rounded-full pointer-events-none" />
+
+      {/* Top Navbar */}
+      <div className="max-w-6xl w-full mx-auto flex items-center justify-between z-10 py-2">
+        <Link 
+          href="/"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Retour à l'accueil</span>
         </Link>
 
-        {/* Hero Info */}
-        <div className="relative z-10 my-auto py-12 flex flex-col gap-6 max-w-lg">
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold w-fit">
-            <Sparkles className="w-4 h-4 text-emerald-300" />
-            Création de compte entreprise gratuit
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-600/30">
+            <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
           </div>
-          
-          <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight">
-            Commencez à facturer vos clients en 2 minutes.
-          </h1>
-
-          <p className="text-primary-foreground/80 text-base leading-relaxed">
-            Rejoignez les centaines d'entreprises qui utilisent iziFacture pour automatiser leur facturation et leurs encaissements Mobile Money.
-          </p>
-
-          <div className="flex flex-col gap-3 pt-4 border-t border-white/10 text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-              <span>Génération instantanée de factures PDF</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-              <span>Module d'encaissement Wave & Orange Money inclus</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 text-xs text-primary-foreground/70 flex items-center justify-between">
-          <span>© 2026 iziFacture Inc.</span>
-          <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> Données chiffrées</span>
-        </div>
+          <span className="text-base font-black tracking-tight text-white">
+            izi<span className="text-indigo-400">Flow</span>
+          </span>
+        </Link>
       </div>
 
-      {/* Right Register Form */}
-      <div className="md:w-1/2 p-8 lg:p-16 flex items-center justify-center">
-        <div className="w-full max-w-md flex flex-col gap-6">
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-foreground">Créer un compte</h2>
-            <p className="text-sm text-muted-foreground mt-1">Configurez votre compte professionnel iziFacture.</p>
+      {/* Register Card */}
+      <div className="w-full max-w-lg mx-auto my-auto z-10 py-6">
+        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 backdrop-blur-2xl p-7 sm:p-9 shadow-2xl relative">
+          <div className="text-center mb-6 space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-[11px] font-bold">
+              <Sparkles className="w-3 h-3 text-indigo-400" />
+              <span>Création de Compte Entreprise Gratuit</span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Démarrez avec iziFlow 🚀
+            </h1>
+            <p className="text-xs text-slate-400">
+              Automatisez vos ventes, factures et gestion de stock en quelques clics.
+            </p>
           </div>
 
-          <form onSubmit={handleRegister} className="flex flex-col gap-4">
+          <form onSubmit={handleRegister} className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Nom de l'entreprise / Commerce</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                Nom de l'Entreprise ou du Commerce *
+              </label>
               <div className="relative">
-                <Building2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Building2 className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Input
                   type="text"
                   required
-                  placeholder="Ex: SeneSaaS SARL"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder="Ex: Cansaas Agency SARL"
+                  className="pl-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Email (@gmail.com)</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                Adresse Email Pro (@gmail.com) *
+              </label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Input
                   type="email"
                   required
-                  placeholder="votre.nom@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder="votre.societe@gmail.com"
+                  className="pl-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Téléphone</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  Téléphone Mobile *
+                </label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
+                  <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Input
                     type="text"
                     required
-                    placeholder="+221 77..."
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                    placeholder="+221 77 123 45 67"
+                    className="pl-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">NINEA (Optionnel)</label>
+                <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                  NINEA / RCCM (Optionnel)
+                </label>
                 <div className="relative">
-                  <FileText className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  <input
+                  <FileText className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                  <Input
                     type="text"
-                    placeholder="0089234..."
                     value={ninea}
                     onChange={(e) => setNinea(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background text-sm font-mono focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                    placeholder="001234567 2V3"
+                    className="pl-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider block mb-1.5">Mot de passe</label>
+              <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
+                Mot de Passe (6 caractères min) *
+              </label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="password"
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                <Input
+                  type={showPassword ? "text" : "password"}
                   required
-                  placeholder="Minimum 8 caractères"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                  placeholder="••••••••••••"
+                  className="pl-10 pr-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Création de votre espace en cours...</span>
+                </>
+              ) : (
+                <>
+                  <span>Créer mon compte entreprise</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </Button>
+
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 text-center font-medium mt-2">
+              <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-center font-medium">
                 {error}
               </p>
             )}
-            
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 py-3.5 rounded-xl font-bold transition-all shadow-md active:scale-[0.98] mt-2"
-            >
-              {loading ? "Création du compte..." : "Créer mon compte entreprise"}
-              {!loading && <ArrowRight className="w-4 h-4" />}
-            </button>
           </form>
 
-          <p className="text-center text-xs text-muted-foreground mt-2">
-            Déjà inscrit ?{" "}
-            <Link href="/login" className="font-bold text-primary hover:underline">
+          <div className="text-center pt-6 mt-6 border-t border-slate-800 text-xs text-slate-400">
+            Vous avez déjà un compte ?{" "}
+            <Link href="/login" className="font-bold text-indigo-400 hover:text-indigo-300 underline">
               Se connecter
             </Link>
-          </p>
+          </div>
         </div>
+      </div>
+
+      {/* Security Footer */}
+      <div className="max-w-md w-full mx-auto text-center text-[10px] text-slate-500 z-10 flex items-center justify-center gap-2 py-2">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+        <span>Chiffrement SSL 256-bit • Données conformes Système Comptable OHADA</span>
       </div>
     </div>
   );
@@ -218,7 +241,7 @@ function RegisterContent() {
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen w-full flex items-center justify-center bg-background">Chargement...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-white text-xs">Chargement...</div>}>
       <RegisterContent />
     </Suspense>
   );

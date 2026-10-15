@@ -14,7 +14,8 @@ import {
   Mail, 
   Phone, 
   Smartphone,
-  Lock
+  Lock,
+  FileCheck2
 } from "lucide-react";
 import Link from "next/link";
 
@@ -109,6 +110,15 @@ export default function SettingsPage() {
           <Bell className="w-4 h-4" />
           Notifications & Relances
         </button>
+
+        <Link
+          href="/settings/signature"
+          className="flex items-center gap-2 px-4 py-2.5 font-semibold rounded-xl text-brand-blue bg-brand-blue/10 hover:bg-brand-blue/20 transition-all whitespace-nowrap"
+        >
+          <FileCheck2 className="w-4 h-4" />
+          <span>Signature & Cachet</span>
+          <span className="text-[10px] font-black uppercase bg-brand-blue text-white px-1.5 py-0.5 rounded-full">Pro</span>
+        </Link>
       </div>
 
       {/* Settings Forms */}

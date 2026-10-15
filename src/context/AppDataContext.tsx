@@ -3,21 +3,53 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "./AuthContext";
-import type { Client, Invoice, InvoiceStatus, InvoiceItem, Payment, PaymentStatus } from "@/lib/data";
+import type { 
+  Client, 
+  Invoice, 
+  InvoiceStatus, 
+  InvoiceItem, 
+  Payment, 
+  PaymentStatus,
+  Product,
+  StockMovement,
+  Sale,
+  CompanySettings
+} from "@/lib/data";
 
 // Re-export types for convenience
-export type { Client, Invoice, InvoiceStatus, Payment, PaymentStatus };
+export type { 
+  Client, 
+  Invoice, 
+  InvoiceStatus, 
+  Payment, 
+  PaymentStatus,
+  Product,
+  StockMovement,
+  Sale,
+  CompanySettings
+};
 
 interface AppDataContextProps {
   clientsList: Client[];
   invoicesList: Invoice[];
   transactionsList: Payment[];
+  productsList: Product[];
+  salesList: Sale[];
+  stockMovementsList: StockMovement[];
+  companySettings: CompanySettings | null;
   loading: boolean;
   addClient: (client: Omit<Client, "id" | "totalInvoices" | "totalPaid" | "createdAt" | "initials" | "color">) => Promise<void>;
   addInvoice: (invoice: Omit<Invoice, "id" | "status"> & { status?: InvoiceStatus }) => Promise<void>;
+  addProduct: (product: Omit<Product, "id" | "createdAt">) => Promise<void>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  adjustStock: (productId: string, quantityDelta: number, reason: string) => Promise<void>;
+  addSale: (sale: Omit<Sale, "id" | "createdAt">) => Promise<void>;
+  updateCompanySettings: (settings: Partial<CompanySettings>) => Promise<void>;
 
   getClientById: (id: string) => Client | undefined;
   getInvoiceById: (id: string) => Invoice | undefined;
+  getProductById: (id: string) => Product | undefined;
   getInvoicesByClientId: (clientId: string) => Invoice[];
   refreshData: () => Promise<void>;
 }
@@ -119,13 +151,194 @@ function parseDateForDB(dateStr: string | undefined): string | null {
   return null;
 }
 
+// Map Supabase row → Product
+function rowToProduct(row: Record<string, unknown>): Product {
+  return {
+    id: row.id as string,
+    name: (row.name as string) || "Article sans nom",
+    sku: (row.sku as string) || undefined,
+    category: (row.category as string) || "Général",
+    purchasePrice: Number(row.purchase_price) || 0,
+    sellingPrice: Number(row.selling_price) || 0,
+    stockQuantity: Number(row.stock_quantity) || 0,
+    minStockAlert: Number(row.min_stock_alert) || 5,
+    trackStock: row.track_stock !== false,
+    unit: (row.unit as string) || "unité",
+    imageUrl: (row.image_url as string) || undefined,
+    createdAt: row.created_at ? new Date(row.created_at as string).toLocaleDateString("fr-FR") : new Date().toLocaleDateString("fr-FR"),
+  };
+}
+
+// Map Supabase row → Sale
+function rowToSale(row: Record<string, unknown>): Sale {
+  return {
+    id: row.id as string,
+    saleNumber: (row.sale_number as string) || "VTE-001",
+    clientId: (row.client_id as string) || undefined,
+    customerName: (row.customer_name as string) || "Client de passage",
+    paymentMethod: (row.payment_method as any) || "cash",
+    subtotal: Number(row.subtotal) || 0,
+    taxAmount: Number(row.tax_amount) || 0,
+    total: Number(row.total) || 0,
+    totalCost: Number(row.total_cost) || 0,
+    margin: Number(row.margin) || 0,
+    items: ((row.sale_items || row.items) as any[])?.map((item: any) => ({
+      id: item.id,
+      productId: item.product_id || item.productId,
+      name: item.name,
+      quantity: Number(item.quantity) || 1,
+      purchasePrice: Number(item.purchase_price || item.purchasePrice) || 0,
+      unitPrice: Number(item.unit_price || item.unitPrice) || 0,
+      totalPrice: Number(item.total_price || item.totalPrice) || 0,
+    })) || [],
+    notes: (row.notes as string) || undefined,
+    createdAt: row.created_at ? new Date(row.created_at as string).toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleDateString("fr-FR"),
+  };
+}
+
+const DEFAULT_PRODUCTS: Product[] = [
+  {
+    id: "prod-1",
+    name: "Terminal TPE Wave & QR Code",
+    sku: "TPE-WAVE-01",
+    category: "Matériel Informatique",
+    purchasePrice: 45000,
+    sellingPrice: 75000,
+    stockQuantity: 18,
+    minStockAlert: 5,
+    trackStock: true,
+    unit: "unité",
+    createdAt: "10/10/2026",
+  },
+  {
+    id: "prod-2",
+    name: "Rouleaux Papier Thermique 80mm (Pack x10)",
+    sku: "PAP-TH-80",
+    category: "Consommables",
+    purchasePrice: 6000,
+    sellingPrice: 12000,
+    stockQuantity: 4,
+    minStockAlert: 8, // En alerte stock faible !
+    trackStock: true,
+    unit: "pack",
+    createdAt: "11/10/2026",
+  },
+  {
+    id: "prod-3",
+    name: "Lecteur Code-barres USB 2D",
+    sku: "SCAN-USB-2D",
+    category: "Matériel Informatique",
+    purchasePrice: 22000,
+    sellingPrice: 38000,
+    stockQuantity: 12,
+    minStockAlert: 3,
+    trackStock: true,
+    unit: "unité",
+    createdAt: "12/10/2026",
+  },
+  {
+    id: "prod-4",
+    name: "Prestation Installation & Paramétrage iziFlow",
+    sku: "SRV-INST-PRO",
+    category: "Services",
+    purchasePrice: 0,
+    sellingPrice: 50000,
+    stockQuantity: 999,
+    minStockAlert: 0,
+    trackStock: false, // Service sans déstockage
+    unit: "prestation",
+    createdAt: "12/10/2026",
+  },
+];
+
+const DEFAULT_SALES: Sale[] = [
+  {
+    id: "sale-1",
+    saleNumber: "VTE-2026-001",
+    customerName: "Boutique Le Relais",
+    paymentMethod: "wave",
+    subtotal: 150000,
+    taxAmount: 27000,
+    total: 177000,
+    totalCost: 90000,
+    margin: 60000,
+    items: [
+      {
+        id: "item-1",
+        productId: "prod-1",
+        name: "Terminal TPE Wave & QR Code",
+        quantity: 2,
+        purchasePrice: 45000,
+        unitPrice: 75000,
+        totalPrice: 150000,
+      }
+    ],
+    createdAt: "14/10/2026 15:30",
+  },
+  {
+    id: "sale-2",
+    saleNumber: "VTE-2026-002",
+    customerName: "Client de passage",
+    paymentMethod: "cash",
+    subtotal: 24000,
+    taxAmount: 4320,
+    total: 28320,
+    totalCost: 12000,
+    margin: 12000,
+    items: [
+      {
+        id: "item-2",
+        productId: "prod-2",
+        name: "Rouleaux Papier Thermique 80mm (Pack x10)",
+        quantity: 2,
+        purchasePrice: 6000,
+        unitPrice: 12000,
+        totalPrice: 24000,
+      }
+    ],
+    createdAt: "14/10/2026 17:15",
+  }
+];
+
 export const AppDataProvider = ({ children }: { children: ReactNode }) => {
   const [clientsList, setClientsList] = useState<Client[]>([]);
   const [invoicesList, setInvoicesList] = useState<Invoice[]>([]);
   const [transactionsList, setTransactionsList] = useState<Payment[]>([]);
+  const [productsList, setProductsList] = useState<Product[]>(DEFAULT_PRODUCTS);
+  const [salesList, setSalesList] = useState<Sale[]>(DEFAULT_SALES);
+  const [stockMovementsList, setStockMovementsList] = useState<StockMovement[]>([]);
+  const [companySettings, setCompanySettings] = useState<CompanySettings | null>({
+    companyName: "iziFlow SARL",
+    email: "contact@iziflow.sn",
+    phone: "+221 77 123 45 67",
+    ninea: "001234567 2V3",
+    rccm: "SN-DKR-2024-B-12345",
+    currency: "XOF",
+    defaultTaxRate: 18,
+    companyLogoUrl: undefined,
+    companyStampUrl: undefined,
+    companySignatureUrl: undefined,
+    companySignatoryName: "La Direction Générale",
+    useStampOnDocuments: true,
+    useSignatureOnDocuments: true,
+  });
   const [loading, setLoading] = useState(true);
   const { session } = useAuth();
   const supabase = createClient();
+
+  // Load local cache if available
+  useEffect(() => {
+    try {
+      const localProducts = localStorage.getItem("iziflow_products");
+      if (localProducts) setProductsList(JSON.parse(localProducts));
+
+      const localSales = localStorage.getItem("iziflow_sales");
+      if (localSales) setSalesList(JSON.parse(localSales));
+
+      const localSettings = localStorage.getItem("iziflow_company_settings");
+      if (localSettings) setCompanySettings(JSON.parse(localSettings));
+    } catch {}
+  }, []);
 
   const fetchData = useCallback(async () => {
     if (!session?.user) {
@@ -145,6 +358,45 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
       setInvoicesList(parsedInvoices);
       setClientsList((clientsData || []).map(row => rowToClient(row, parsedInvoices)));
       setTransactionsList((paymentsData || []).map(rowToPayment));
+
+      // Try fetching products if table exists
+      try {
+        const { data: prodData, error: prodErr } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+        if (!prodErr && prodData && prodData.length > 0) {
+          setProductsList(prodData.map(rowToProduct));
+        }
+      } catch {}
+
+      // Try fetching sales if table exists
+      try {
+        const { data: salesData, error: salesErr } = await supabase.from("sales").select("*, sale_items(*)").order("created_at", { ascending: false });
+        if (!salesErr && salesData && salesData.length > 0) {
+          setSalesList(salesData.map(rowToSale));
+        }
+      } catch {}
+
+      // Try fetching profile company stamp / signature settings
+      try {
+        const { data: profileData } = await supabase.from("profiles").select("*").eq("id", session.user.id).single();
+        if (profileData) {
+          setCompanySettings((prev) => ({
+            companyName: profileData.company_name || prev?.companyName || "Entreprise",
+            email: profileData.email || prev?.email || "",
+            phone: profileData.phone || prev?.phone,
+            ninea: profileData.ninea || prev?.ninea,
+            rccm: profileData.rccm || prev?.rccm,
+            currency: profileData.currency || "XOF",
+            defaultTaxRate: Number(profileData.default_tax_rate) || 18,
+            companyLogoUrl: profileData.company_logo_url || prev?.companyLogoUrl,
+            companyStampUrl: profileData.company_stamp_url || prev?.companyStampUrl,
+            companySignatureUrl: profileData.company_signature_url || prev?.companySignatureUrl,
+            companySignatoryName: profileData.company_signatory_name || prev?.companySignatoryName || "La Direction",
+            useStampOnDocuments: profileData.use_stamp_on_documents !== false,
+            useSignatureOnDocuments: profileData.use_signature_on_documents !== false,
+          }));
+        }
+      } catch {}
+
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -215,10 +467,176 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // ─── Products & Stocks Operations ──────────────────────────────────────────
 
+  const addProduct = async (productData: Omit<Product, "id" | "createdAt">) => {
+    const newProd: Product = {
+      ...productData,
+      id: `prod_${Date.now()}`,
+      createdAt: new Date().toLocaleDateString("fr-FR"),
+    };
+
+    // Try Supabase insert
+    if (session?.user) {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .insert({
+            profile_id: session.user.id,
+            name: productData.name,
+            sku: productData.sku || null,
+            category: productData.category || "Général",
+            purchase_price: productData.purchasePrice,
+            selling_price: productData.sellingPrice,
+            stock_quantity: productData.stockQuantity,
+            min_stock_alert: productData.minStockAlert,
+            track_stock: productData.trackStock,
+            unit: productData.unit,
+            image_url: productData.imageUrl || null,
+          })
+          .select()
+          .single();
+
+        if (!error && data) {
+          newProd.id = data.id;
+        }
+      } catch {}
+    }
+
+    setProductsList((prev) => {
+      const updated = [newProd, ...prev];
+      try { localStorage.setItem("iziflow_products", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const updateProduct = async (id: string, updates: Partial<Product>) => {
+    if (session?.user) {
+      try {
+        await supabase
+          .from("products")
+          .update({
+            ...(updates.name !== undefined && { name: updates.name }),
+            ...(updates.sku !== undefined && { sku: updates.sku }),
+            ...(updates.category !== undefined && { category: updates.category }),
+            ...(updates.purchasePrice !== undefined && { purchase_price: updates.purchasePrice }),
+            ...(updates.sellingPrice !== undefined && { selling_price: updates.sellingPrice }),
+            ...(updates.stockQuantity !== undefined && { stock_quantity: updates.stockQuantity }),
+            ...(updates.minStockAlert !== undefined && { min_stock_alert: updates.minStockAlert }),
+            ...(updates.trackStock !== undefined && { track_stock: updates.trackStock }),
+            ...(updates.unit !== undefined && { unit: updates.unit }),
+          })
+          .eq("id", id);
+      } catch {}
+    }
+
+    setProductsList((prev) => {
+      const updated = prev.map((p) => (p.id === id ? { ...p, ...updates } : p));
+      try { localStorage.setItem("iziflow_products", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (session?.user) {
+      try {
+        await supabase.from("products").delete().eq("id", id);
+      } catch {}
+    }
+
+    setProductsList((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      try { localStorage.setItem("iziflow_products", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  const adjustStock = async (productId: string, quantityDelta: number, reason: string) => {
+    const product = productsList.find((p) => p.id === productId);
+    if (!product) return;
+
+    const newStock = Math.max(0, product.stockQuantity + quantityDelta);
+    await updateProduct(productId, { stockQuantity: newStock });
+
+    // Record movement
+    const movement: StockMovement = {
+      id: `mov_${Date.now()}`,
+      productId,
+      productName: product.name,
+      type: quantityDelta >= 0 ? "in" : "out",
+      quantity: Math.abs(quantityDelta),
+      previousStock: product.stockQuantity,
+      newStock,
+      referenceType: "manual_adjustment",
+      notes: reason,
+      createdAt: new Date().toLocaleDateString("fr-FR", { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setStockMovementsList((prev) => [movement, ...prev]);
+  };
+
+  // ─── Sales Operations ───────────────────────────────────────────────────────
+
+  const addSale = async (saleData: Omit<Sale, "id" | "createdAt">) => {
+    const newSale: Sale = {
+      ...saleData,
+      id: `sale_${Date.now()}`,
+      createdAt: new Date().toLocaleDateString("fr-FR", { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+    };
+
+    // Deduct stock for items that have a productId
+    for (const item of saleData.items) {
+      if (item.productId) {
+        const prod = productsList.find((p) => p.id === item.productId);
+        if (prod && prod.trackStock) {
+          const updatedStock = Math.max(0, prod.stockQuantity - item.quantity);
+          await updateProduct(prod.id, { stockQuantity: updatedStock });
+        }
+      }
+    }
+
+    setSalesList((prev) => {
+      const updated = [newSale, ...prev];
+      try { localStorage.setItem("iziflow_sales", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+  };
+
+  // ─── Company Settings & Stamp / Signature ──────────────────────────────────
+
+  const updateCompanySettings = async (settings: Partial<CompanySettings>) => {
+    setCompanySettings((prev) => {
+      const updated = prev ? { ...prev, ...settings } : (settings as CompanySettings);
+      try { localStorage.setItem("iziflow_company_settings", JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+
+    if (session?.user) {
+      try {
+        await supabase
+          .from("profiles")
+          .update({
+            ...(settings.companyName !== undefined && { company_name: settings.companyName }),
+            ...(settings.phone !== undefined && { phone: settings.phone }),
+            ...(settings.ninea !== undefined && { ninea: settings.ninea }),
+            ...(settings.rccm !== undefined && { rccm: settings.rccm }),
+            ...(settings.currency !== undefined && { currency: settings.currency }),
+            ...(settings.defaultTaxRate !== undefined && { default_tax_rate: settings.defaultTaxRate }),
+            ...(settings.companyLogoUrl !== undefined && { company_logo_url: settings.companyLogoUrl }),
+            ...(settings.companyStampUrl !== undefined && { company_stamp_url: settings.companyStampUrl }),
+            ...(settings.companySignatureUrl !== undefined && { company_signature_url: settings.companySignatureUrl }),
+            ...(settings.companySignatoryName !== undefined && { company_signatory_name: settings.companySignatoryName }),
+            ...(settings.useStampOnDocuments !== undefined && { use_stamp_on_documents: settings.useStampOnDocuments }),
+            ...(settings.useSignatureOnDocuments !== undefined && { use_signature_on_documents: settings.useSignatureOnDocuments }),
+          })
+          .eq("id", session.user.id);
+      } catch {}
+    }
+  };
 
   const getClientById = (id: string) => clientsList.find((c) => c.id === id);
   const getInvoiceById = (id: string) => invoicesList.find((inv) => inv.id === id);
+  const getProductById = (id: string) => productsList.find((p) => p.id === id);
   const getInvoicesByClientId = (clientId: string) => invoicesList.filter((inv) => inv.clientId === clientId);
 
   return (
@@ -227,12 +645,23 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
         clientsList,
         invoicesList,
         transactionsList,
+        productsList,
+        salesList,
+        stockMovementsList,
+        companySettings,
         loading,
         addClient,
         addInvoice,
+        addProduct,
+        updateProduct,
+        deleteProduct,
+        adjustStock,
+        addSale,
+        updateCompanySettings,
 
         getClientById,
         getInvoiceById,
+        getProductById,
         getInvoicesByClientId,
         refreshData: fetchData,
       }}

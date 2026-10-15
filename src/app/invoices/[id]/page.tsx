@@ -24,7 +24,7 @@ import { Loader2 } from "lucide-react";
 export default function InvoiceDetailPage() {
   const params = useParams();
   const id = params.id as string;
-  const { getInvoiceById } = useAppData();
+  const { getInvoiceById, companySettings } = useAppData();
   const { user } = useAuth();
   
   const [isMounted, setIsMounted] = useState(false);
@@ -181,25 +181,25 @@ export default function InvoiceDetailPage() {
                 )
               ) : (
                 <>
-                  <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white print:bg-brand-blue">
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-blue to-cyan-500 flex items-center justify-center text-white print:bg-brand-blue">
                     <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
                     </svg>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-xl font-extrabold tracking-tight flex items-center">
-                      izi<span className="text-brand-blue">Facture</span>
+                      izi<span className="text-brand-blue">Flow</span>
                     </span>
-                    <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
+                    <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Suite Commerciale • OHADA</span>
                   </div>
                 </>
               )}
             </div>
             <div className="text-sm text-muted-foreground flex flex-col gap-1 print:text-gray-600 mt-2">
-              <p className="font-semibold text-foreground print:text-black">{user?.name || "iziFacture SARL"}</p>
+              <p className="font-semibold text-foreground print:text-black">{user?.name || companySettings?.companyName || "iziFlow SARL"}</p>
               <p>123 Rue de la République, Dakar</p>
-              <p>{user?.email || "contact@izifacture.com"}</p>
-              <p>{user?.phone || "+221 77 000 00 00"}</p>
+              <p>{user?.email || companySettings?.email || "contact@iziflow.sn"}</p>
+              <p>{user?.phone || companySettings?.phone || "+221 77 000 00 00"}</p>
               {(user?.ninea || user?.rccm) && (
                 <div className="mt-1 pt-1 border-t border-border/50 text-xs">
                   {user?.ninea && <span>NINEA: {user.ninea} </span>}
@@ -312,11 +312,61 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
 
+        {/* Cachet Officiel & Signature de l'Entreprise */}
+        {(companySettings?.useStampOnDocuments || companySettings?.useSignatureOnDocuments) && (
+          <div className="mt-12 pt-6 border-t border-border/80 flex flex-col sm:flex-row justify-between items-end gap-6 print:mt-8 print:pt-4">
+            <div className="text-xs text-muted-foreground print:text-gray-500 max-w-sm">
+              <p className="font-semibold text-foreground print:text-black mb-1">Validation & Certification :</p>
+              <p className="italic">Bon pour accord et certification de service fait conforme aux normes OHADA.</p>
+              <p className="text-[11px] mt-1.5 text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 print:text-gray-700">
+                <span>✓ Document certifié par signature & cachet officiel iziFlow</span>
+              </p>
+            </div>
+
+            <div className="relative min-w-[260px] h-32 border border-border/60 rounded-2xl bg-muted/20 p-4 flex flex-col justify-between print:border-gray-300 print:bg-white overflow-hidden shrink-0">
+              <div className="z-10">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground print:text-gray-600">
+                  Pour l'entreprise :
+                </p>
+                <p className="text-xs font-bold text-foreground print:text-black">
+                  {companySettings?.companySignatoryName || user?.name || "La Direction Générale"}
+                </p>
+              </div>
+
+              {/* Cachet image */}
+              {companySettings?.useStampOnDocuments && companySettings?.companyStampUrl && (
+                <div className="absolute right-12 top-1/2 -translate-y-1/2 z-0 opacity-90 rotate-[-8deg] pointer-events-none print:opacity-100">
+                  <img
+                    src={companySettings.companyStampUrl}
+                    alt="Cachet de l'entreprise"
+                    className="w-24 h-24 object-contain"
+                  />
+                </div>
+              )}
+
+              {/* Signature image */}
+              {companySettings?.useSignatureOnDocuments && companySettings?.companySignatureUrl && (
+                <div className="z-10 absolute right-2 bottom-2 pointer-events-none">
+                  <img
+                    src={companySettings.companySignatureUrl}
+                    alt="Signature"
+                    className="h-14 max-w-[150px] object-contain drop-shadow-sm"
+                  />
+                </div>
+              )}
+
+              <p className="text-[9px] text-muted-foreground print:text-gray-400 font-mono text-right z-10 mt-auto">
+                Signature autorisée
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-16 pt-8 border-t border-border text-center text-xs text-muted-foreground flex flex-col gap-1">
-          <p>{user?.name || "iziFacture SARL"} - Solution de facturation conforme</p>
+          <p>{user?.name || companySettings?.companyName || "iziFlow SARL"} - Solution de facturation conforme</p>
           <p>
-            {user?.ninea ? `NINEA: ${user.ninea}` : "NINEA: 123456789"} - 
-            {user?.rccm ? ` RCCM: ${user.rccm}` : " RCCM: SN-DKR-2023-B-1234"}
+            {user?.ninea || companySettings?.ninea ? `NINEA: ${user?.ninea || companySettings?.ninea}` : "NINEA: 001234567 2V3"} - 
+            {user?.rccm || companySettings?.rccm ? ` RCCM: ${user?.rccm || companySettings?.rccm}` : " RCCM: SN-DKR-2024-B-12345"}
           </p>
         </div>
       </div>

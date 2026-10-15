@@ -22,56 +22,28 @@ import {
   Briefcase,
   UserCheck,
   Package,
-  CreditCard
+  CreditCard,
+  ShoppingBag,
+  Puzzle,
+  FileCheck2,
+  Sparkles
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useExtensions } from "@/context/ExtensionsContext";
 
 type MenuItem = {
   icon: any;
   label: string;
   href: string;
   disabled?: boolean;
+  badge?: string;
+  badgeColor?: string;
 };
 
 type MenuGroup = {
   label: string;
   items: MenuItem[];
 };
-
-const menuGroups: MenuGroup[] = [
-  {
-    label: "Général",
-    items: [
-      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-      { icon: Users, label: "Clients", href: "/clients" },
-    ]
-  },
-  {
-    label: "Finance",
-    items: [
-      { icon: FileText, label: "Factures", href: "/invoices" },
-      { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },
-    ]
-  },
-  {
-    label: "Système",
-    items: [
-      { icon: BarChart2, label: "Rapports", href: "/reports" },
-      { icon: ShieldCheck, label: "Abonnement", href: "/settings/billing" },
-      { icon: Settings, label: "Paramètres", href: "/settings" },
-      { icon: CreditCard, label: "Paiement", href: "/settings/payment" },
-      { icon: HelpCircle, label: "Aide & Support", href: "/support" },
-    ]
-  },
-  {
-    label: "Extensions (Bientôt)",
-    items: [
-      { icon: Briefcase, label: "Paie & RH", href: "#", disabled: true },
-      { icon: UserCheck, label: "CRM", href: "#", disabled: true },
-      { icon: Package, label: "Stocks", href: "#", disabled: true },
-    ]
-  }
-];
 
 export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
@@ -93,21 +65,72 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
 
   const userLogo = (user as any)?.logo_url; // We'll add this to AuthContext later
 
+  const { isExtensionEnabled, activeCount } = useExtensions();
+
+  const menuGroups: MenuGroup[] = [
+    {
+      label: "Général",
+      items: [
+        { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+        { icon: Users, label: "Clients", href: "/clients" },
+      ]
+    },
+    {
+      label: "Commerce & Ventes",
+      items: [
+        { icon: FileText, label: "Factures", href: "/invoices" },
+        ...(isExtensionEnabled("sales") ? [{ icon: ShoppingBag, label: "Ventes & Caisse", href: "/sales", badge: "Direct", badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" }] : []),
+        { icon: ArrowRightLeft, label: "Transactions", href: "/transactions" },
+      ]
+    },
+    {
+      label: "Opérations & RH",
+      items: [
+        ...(isExtensionEnabled("stocks") ? [{ icon: Package, label: "Stocks & Inventaire", href: "/inventory", badge: "Auto", badgeColor: "bg-blue-500/10 text-blue-600 dark:text-blue-400" }] : []),
+        ...(isExtensionEnabled("payroll") ? [{ icon: Briefcase, label: "Paie & RH", href: "/payroll", badge: "Bulletins", badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400" }] : []),
+        ...(isExtensionEnabled("crm") ? [{ icon: UserCheck, label: "Pipeline CRM", href: "/crm", badge: "Kanban", badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400" }] : []),
+      ]
+    },
+    {
+      label: "Pilotage & Modules",
+      items: [
+        { icon: BarChart2, label: "Rapports Financiers", href: "/reports" },
+        { 
+          icon: Puzzle, 
+          label: "Hub Extensions", 
+          href: "/extensions", 
+          badge: `${activeCount} actives`, 
+          badgeColor: "bg-brand-blue/15 text-brand-blue font-bold" 
+        },
+      ]
+    },
+    {
+      label: "Configuration",
+      items: [
+        ...(isExtensionEnabled("stamp_signature") ? [{ icon: FileCheck2, label: "Signature & Cachet", href: "/settings/signature", badge: "Certifié", badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" }] : []),
+        { icon: Settings, label: "Paramètres", href: "/settings" },
+        { icon: CreditCard, label: "Passerelles Paiement", href: "/settings/payment" },
+        { icon: ShieldCheck, label: "Abonnement", href: "/settings/billing" },
+        { icon: HelpCircle, label: "Aide & Support", href: "/support" },
+      ]
+    }
+  ].filter(group => group.items.length > 0);
+
   return (
     <aside className={`w-64 bg-sidebar border-r border-sidebar-border flex-col h-[100dvh] overflow-y-auto ${isMobile ? "flex" : "hidden md:flex"}`}>
       {/* Logo */}
       <div className="p-6 pb-4 shrink-0">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-brand-blue flex items-center justify-center text-white shadow-blue-glow/40 transition-transform group-hover:scale-95 duration-200">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-blue to-cyan-500 flex items-center justify-center text-white shadow-blue-glow/40 transition-transform group-hover:scale-95 duration-200">
             <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-              <path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v2H4V6zm0 5h16v7a2 2 0 01-2 2H6a2 2 0 01-2-2v-7zm9 3a1 1 0 000 2h3a1 1 0 100-2h-3z"></path>
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </svg>
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-extrabold tracking-tight text-sidebar-primary flex items-center">
-              izi<span className="text-brand-blue">Facture</span>
+              izi<span className="text-brand-blue">Flow</span>
             </span>
-            <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Zone OHADA • UEMOA</span>
+            <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold -mt-1">Suite Commerciale • OHADA</span>
           </div>
         </Link>
       </div>
@@ -155,10 +178,12 @@ export function Sidebar({ isMobile = false }: { isMobile?: boolean }) {
                     {isActive && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-sidebar-primary rounded-r-full" />
                     )}
-                    <item.icon className={`w-4 h-4 ${isActive ? "text-sidebar-primary" : item.disabled ? "text-muted-foreground" : "text-muted-foreground group-hover:text-sidebar-foreground"}`} />
-                    <span className="text-sm">{item.label}</span>
-                    {item.disabled && (
-                      <span className="ml-auto text-[9px] uppercase tracking-wider bg-sidebar-accent px-1.5 py-0.5 rounded text-muted-foreground">Prochainement</span>
+                    <item.icon className={`w-4 h-4 shrink-0 ${isActive ? "text-sidebar-primary" : item.disabled ? "text-muted-foreground" : "text-muted-foreground group-hover:text-sidebar-foreground"}`} />
+                    <span className="text-sm truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className={`ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${item.badgeColor || "bg-sidebar-accent text-sidebar-accent-foreground"}`}>
+                        {item.badge}
+                      </span>
                     )}
                   </Link>
                 );

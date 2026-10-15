@@ -59,6 +59,117 @@ export interface Payment {
   status: PaymentStatus;
 }
 
+// ─── Products & Stocks ────────────────────────────────────────────────────────
+
+export interface Product {
+  id: string;
+  name: string;
+  sku?: string;
+  category: string;
+  purchasePrice: number;
+  sellingPrice: number;
+  stockQuantity: number;
+  minStockAlert: number;
+  trackStock: boolean;
+  unit: string;
+  imageUrl?: string;
+  createdAt: string;
+}
+
+export type StockMovementType = "in" | "out" | "adjustment" | "return";
+
+export interface StockMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  type: StockMovementType;
+  quantity: number;
+  previousStock: number;
+  newStock: number;
+  referenceType?: "sale" | "invoice" | "manual_adjustment";
+  referenceId?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// ─── Sales (Ventes Directes) ──────────────────────────────────────────────────
+
+export interface SaleItem {
+  id: string;
+  productId?: string;
+  name: string;
+  quantity: number;
+  purchasePrice: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface Sale {
+  id: string;
+  saleNumber: string;
+  clientId?: string;
+  customerName: string;
+  paymentMethod: "cash" | "wave" | "om" | "card" | "bank_transfer";
+  subtotal: number;
+  taxAmount: number;
+  total: number;
+  totalCost: number;
+  margin: number;
+  items: SaleItem[];
+  notes?: string;
+  createdAt: string;
+}
+
+// ─── Company Stamp & Signature Settings ───────────────────────────────────────
+
+export interface CompanySettings {
+  companyName: string;
+  email: string;
+  phone?: string;
+  ninea?: string;
+  rccm?: string;
+  currency: string;
+  defaultTaxRate: number;
+  companyLogoUrl?: string;
+  companyStampUrl?: string;
+  companySignatureUrl?: string;
+  companySignatoryName?: string;
+  useStampOnDocuments: boolean;
+  useSignatureOnDocuments: boolean;
+}
+
+// ─── Extension Paie & RH ──────────────────────────────────────────────────────
+
+export interface Employee {
+  id: string;
+  fullName: string;
+  email?: string;
+  phone?: string;
+  position: string;
+  department: string;
+  baseSalary: number;
+  contractType: "CDI" | "CDD" | "Stage" | "Prestation";
+  hireDate: string;
+  paymentMethod: "wave" | "om" | "bank_transfer" | "cash";
+  accountNumber?: string;
+  status: "active" | "on_leave" | "terminated";
+}
+
+export interface Payroll {
+  id: string;
+  employeeId: string;
+  employeeName: string;
+  periodMonth: number;
+  periodYear: number;
+  baseSalary: number;
+  bonus: number;
+  deductions: number;
+  netSalary: number;
+  status: "draft" | "pending" | "paid";
+  paymentDate?: string;
+  notes?: string;
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 export const statusStyles: Record<InvoiceStatus, string> = {
