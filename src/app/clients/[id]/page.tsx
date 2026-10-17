@@ -16,11 +16,11 @@ import {
 import { statusStyles, statusLabels } from "@/lib/data";
 import { ArrowLeft, Mail, Phone, MapPin, Building, FileText } from "lucide-react";
 import Link from "next/link";
-import { useParams, notFound } from "next/navigation";
-import { use } from "react";
+import { useParams } from "next/navigation";
 
-export default function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function ClientDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const { getClientById, getInvoicesByClientId } = useAppData();
   
   const client = getClientById(id);

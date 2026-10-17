@@ -3,10 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import { decrypt } from "@/lib/encryption";
 import { Database } from "@/lib/database.types";
 
-const supabaseAdmin = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder";
+
+const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseKey);
 
 export async function POST(req: Request) {
   try {

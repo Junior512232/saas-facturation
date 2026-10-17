@@ -95,8 +95,8 @@ export default function PublicInvoicePayPage() {
   }
 
   // Calculate totals
-  const subtotal = invoice.items.reduce((acc: number, item: any) => acc + (item.quantity * item.unitPrice), 0);
-  const taxAmount = (subtotal * invoice.taxRate) / 100;
+  const subtotal = (invoice.items || []).reduce((acc: number, item: any) => acc + ((item?.quantity || 0) * (item?.unitPrice || 0)), 0);
+  const taxAmount = (subtotal * (invoice?.taxRate || 0)) / 100;
   const total = subtotal + taxAmount;
 
   const handleDownloadPDF = () => {

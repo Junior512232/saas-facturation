@@ -8,8 +8,8 @@ import { Payment } from "@/lib/data";
 
 type PaymentMethod = "all" | "wave" | "orange-money" | "bank" | string;
 
-function MethodBadge({ method }: { method: string }) {
-  const m = method.toLowerCase();
+function MethodBadge({ method }: { method?: string }) {
+  const m = (method || "").toLowerCase();
   if (m === "wave") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-[#1dc3f7]/15 text-[#008db9] dark:text-[#38bdf8] border border-[#1dc3f7]/30">
@@ -39,11 +39,12 @@ export default function TransactionsPage() {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredTransactions = transactionsList.filter((tx) => {
-    const m = tx.paymentMethod.toLowerCase();
+  const filteredTransactions = (transactionsList || []).filter((tx) => {
+    const m = (tx.paymentMethod || "").toLowerCase();
     const matchesMethod = selectedMethod === "all" || m === selectedMethod || (selectedMethod === "orange-money" && m === "om");
-    const matchesSearch = tx.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          tx.clientName.toLowerCase().includes(searchQuery.toLowerCase());
+    const q = (searchQuery || "").toLowerCase();
+    const matchesSearch = (tx.invoiceNumber || "").toLowerCase().includes(q) || 
+                          (tx.clientName || "").toLowerCase().includes(q);
     return matchesMethod && matchesSearch;
   });
 

@@ -110,7 +110,7 @@ export default function SalesPage() {
       ? "BICTORYS (WAVE / ORANGE MONEY / CB)"
       : sale.paymentMethod === "cash"
       ? "ESPÈCES"
-      : sale.paymentMethod.toUpperCase();
+      : (sale.paymentMethod || "").toUpperCase();
 
     const message = 
 `🧾 *TICKET DE CAISSE DÉMATÉRIALISÉ*
@@ -140,13 +140,14 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
   };
 
   // Categories
-  const categories = Array.from(new Set(["all", ...productsList.map((p) => p.category)]));
+  const categories = Array.from(new Set(["all", ...(productsList || []).map((p) => p.category || "Général")]));
 
   // Filtered Products for POS Catalog
-  const filteredProducts = productsList.filter((p) => {
+  const filteredProducts = (productsList || []).filter((p) => {
+    const q = (searchTerm || "").toLowerCase();
     const matchesSearch = 
-      p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (p.sku && p.sku.toLowerCase().includes(searchTerm.toLowerCase()));
+      (p.name || "").toLowerCase().includes(q) ||
+      (p.sku && p.sku.toLowerCase().includes(q));
     const matchesCat = selectedCategory === "all" || p.category === selectedCategory;
     return matchesSearch && matchesCat;
   });
