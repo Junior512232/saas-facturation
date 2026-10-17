@@ -350,5 +350,145 @@ export async function initiateSubscriptionPayment({
   }
 }
 
+/**
+ * Initialise un paiement Bictorys pour une vente directe en caisse (POS / Ticket)
+ */
+export async function initiateBictorysSalePayment({
+  saleNumber,
+  amount,
+  currency = "XOF",
+  description,
+  customerName,
+  customerPhone,
+}: {
+  saleNumber: string;
+  amount: number;
+  currency?: string;
+  description?: string;
+  customerName?: string;
+  customerPhone?: string;
+}) {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set(name, value, options);
+          },
+          remove(name: string, options: any) {
+            cookieStore.delete(name);
+          },
+        },
+      }
+    );
+
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // 1. Récupération des clés API Bictorys du marchand
+    let rawApiKey: string | null = null;
+    const userId = user?.id;
+
+    if (userId) {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("bictorys_api_key, cinetpay_apikey")
+        .eq("id", userId)
+        .single();
+      // @ts-ignore
+      rawApiKey = profile?.bictorys_api_key || profile?.cinetpay_apikey;
+    }
+
+    if (!rawApiKey) {
+      rawApiKey = process.env.BICTORYS_PLATFORM_API_KEY || process.env.BICTORYS_API_KEY || null;
+    }
+
+    const paymentReference = `TICKET-${saleNumber}-${Date.now().toString().slice(-6)}`;
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://izifacture.sn";
+
+    if (!rawApiKey) {
+      // Simulation / démo si la clé n'est pas encore enregistrée dans Paramètres > Paiement
+      return {
+        success: true,
+        paymentUrl: `https://pay.bictorys.com/demo/checkout?ref=${paymentReference}&amount=${Math.round(amount)}`,
+        paymentReference,
+        simulated: true,
+      };
+    }
+
+    const decryptedApiKey = decrypt(rawApiKey) || rawApiKey;
+    const apiBase = getBictorysApiBase(decryptedApiKey);
+
+    const payload = {
+      amount: Math.round(amount),
+      currency: currency,
+      country: "SN",
+      paymentReference: paymentReference,
+      orderDetails: [
+        {
+          description: description || `Ticket de caisse ${saleNumber}`,
+          amount: Math.round(amount),
+        },
+      ],
+      customerObject: {
+        name: customerName || "Client de passage",
+        phone: customerPhone || undefined,
+      },
+      successRedirectUrl: `${baseUrl}/sales?success=true&ref=${paymentReference}`,
+      errorRedirectUrl: `${baseUrl}/sales?error=true`,
+      metadata: {
+        type: "pos_sale",
+        saleNumber: saleNumber,
+        merchantId: userId,
+      },
+    };
+
+    const response = await fetch(`${apiBase}/pay/v1/charges`, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "X-Api-Key": decryptedApiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const responseData = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const errMsg = responseData?.message || responseData?.error || `Erreur Bictorys (Code ${response.status})`;
+      throw new Error(errMsg);
+    }
+
+    const paymentUrl = 
+      responseData?.redirectUrl || 
+      responseData?.link || 
+      responseData?.data?.redirectUrl || 
+      responseData?.data?.link || 
+      responseData?.url;
+
+    if (!paymentUrl) {
+      throw new Error("L'API Bictorys n'a pas retourné de lien de paiement.");
+    }
+
+    return {
+      success: true,
+      paymentUrl,
+      paymentReference,
+    };
+  } catch (error: any) {
+    return {
+      success: false,
+      error: error.message || "Erreur lors de l'initialisation du paiement Bictorys.",
+    };
+  }
+}
+
 // Rétrocompatibilité pour éviter de casser tout code legacy appelant initiateCinetPayPayment
 export const initiateCinetPayPayment = initiateBictorysPayment;
+

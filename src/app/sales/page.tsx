@@ -27,12 +27,24 @@ import {
   ShieldCheck,
   Package,
   MessageCircle,
-  Send
+  Send,
+  QrCode,
+  Copy,
+  Check,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { WaveLogo, OrangeMoneyLogo, PaymentMethodBadge } from "@/components/ui/payment-logos";
+import QRCode from "react-qr-code";
+import { initiateBictorysSalePayment } from "@/app/actions/payment";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export default function SalesPage() {
   const { 
@@ -51,9 +63,16 @@ export default function SalesPage() {
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [customerName, setCustomerName] = useState("Client de passage");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "wave" | "om" | "card" | "bank_transfer">("wave");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bictorys" | "wave" | "om" | "card" | "bank_transfer">("bictorys");
   const [cashTendered, setCashTendered] = useState<number>(0);
   const [applyTax, setApplyTax] = useState(true);
+
+  // Bictorys Payment Modal state
+  const [bictorysModalOpen, setBictorysModalOpen] = useState(false);
+  const [bictorysPaymentUrl, setBictorysPaymentUrl] = useState<string | null>(null);
+  const [isGeneratingPayment, setIsGeneratingPayment] = useState(false);
+  const [currentSaleNumber, setCurrentSaleNumber] = useState<string>("");
+  const [copiedLink, setCopiedLink] = useState(false);
 
   // Completed sale / Receipt modal
   const [completedSale, setCompletedSale] = useState<Sale | null>(null);
@@ -64,7 +83,15 @@ export default function SalesPage() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleSendTicketWhatsApp = (saleToSend?: Sale) => {
+  const handleCopyPaymentLink = () => {
+    if (!bictorysPaymentUrl) return;
+    navigator.clipboard.writeText(bictorysPaymentUrl);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+    showToast("Lien de paiement Bictorys copié !");
+  };
+
+  const handleSendTicketWhatsApp = (saleToSend?: Sale, customPaymentUrl?: string) => {
     const sale = saleToSend || completedSale;
     if (!sale) return;
     const client = clientsList.find((c) => c.id === sale.clientId);
@@ -74,6 +101,16 @@ export default function SalesPage() {
     const itemsText = sale.items
       .map((it) => `• ${it.name} (x${it.quantity}) : ${formatFCFA(it.totalPrice)}`)
       .join("\n");
+
+    const paymentLinkSection = (customPaymentUrl || bictorysPaymentUrl)
+      ? `\n🔗 *Lien de règlement sécurisé Bictorys (Wave, OM, CB) :*\n${customPaymentUrl || bictorysPaymentUrl}\n`
+      : "";
+
+    const methodLabel = sale.paymentMethod === "bictorys"
+      ? "BICTORYS (WAVE / ORANGE MONEY / CB)"
+      : sale.paymentMethod === "cash"
+      ? "ESPÈCES"
+      : sale.paymentMethod.toUpperCase();
 
     const message = 
 `🧾 *TICKET DE CAISSE DÉMATÉRIALISÉ*
@@ -89,9 +126,9 @@ ${itemsText}
 ---------------------------------------
 *Sous-total HT :* ${formatFCFA(sale.subtotal)}
 *TVA :* ${formatFCFA(sale.taxAmount)}
-*TOTAL PAYÉ TTC :* *${formatFCFA(sale.total)}*
-*Mode de règlement :* ${sale.paymentMethod.toUpperCase()}
----------------------------------------
+*TOTAL TTC :* *${formatFCFA(sale.total)}*
+*Mode de règlement :* ${methodLabel}
+---------------------------------------${paymentLinkSection}
 Merci pour votre confiance et à très bientôt !
 _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
 
@@ -177,11 +214,47 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
     setCashTendered(0);
   };
 
-  // Finalize Sale
-  const handleCheckout = async () => {
+  // Initiate Bictorys Payment (QR Code & Link)
+  const handleInitiateBictorysSale = async () => {
     if (cart.length === 0) return;
+    setIsGeneratingPayment(true);
 
     const saleNumber = `VTE-${new Date().getFullYear()}-${String(salesList.length + 1).padStart(3, "0")}`;
+    setCurrentSaleNumber(saleNumber);
+
+    try {
+      const client = clientsList.find((c) => c.id === selectedClientId);
+      const res = await initiateBictorysSalePayment({
+        saleNumber,
+        amount: total,
+        customerName: customerName || client?.name || "Client de passage",
+        customerPhone: client?.phone,
+      });
+
+      if (res.success && res.paymentUrl) {
+        setBictorysPaymentUrl(res.paymentUrl);
+        setBictorysModalOpen(true);
+      } else {
+        showToast(res.error || "Impossible d'initialiser le paiement Bictorys.");
+      }
+    } catch (err: any) {
+      showToast(err.message || "Erreur de connexion Bictorys.");
+    } finally {
+      setIsGeneratingPayment(false);
+    }
+  };
+
+  const handleConfirmBictorysCheckout = async () => {
+    setBictorysModalOpen(false);
+    await handleCheckout("bictorys");
+  };
+
+  // Finalize Sale
+  const handleCheckout = async (chosenMethod?: "cash" | "bictorys" | "wave" | "om" | "card" | "bank_transfer") => {
+    if (cart.length === 0) return;
+
+    const saleNumber = currentSaleNumber || `VTE-${new Date().getFullYear()}-${String(salesList.length + 1).padStart(3, "0")}`;
+    const activeMethod = chosenMethod || paymentMethod;
 
     const saleItems: SaleItem[] = cart.map((item) => ({
       id: `sitem_${Date.now()}_${item.product.id}`,
@@ -197,7 +270,7 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
       saleNumber,
       clientId: selectedClientId || undefined,
       customerName: customerName || "Client de passage",
-      paymentMethod,
+      paymentMethod: activeMethod,
       subtotal,
       taxAmount,
       total,
@@ -222,6 +295,7 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
 
     setCompletedSale(saleRecord);
     handleClearCart();
+    setCurrentSaleNumber("");
     showToast(`Vente #${saleNumber} validée et stock décompté avec succès !`);
   };
 
@@ -543,54 +617,95 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
               </div>
 
               {/* Payment Methods */}
-              <div className="pt-3 border-t border-border flex flex-col gap-2">
+              <div className="pt-3 border-t border-border flex flex-col gap-2.5">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   Moyen de règlement
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
-                    onClick={() => setPaymentMethod("wave")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
-                      paymentMethod === "wave"
-                        ? "border-[#1dc3f7] bg-[#1dc3f7]/15 text-[#0284c7] shadow-sm ring-2 ring-[#1dc3f7]/40"
-                        : "border-border hover:bg-muted text-muted-foreground"
+                    onClick={() => setPaymentMethod("bictorys")}
+                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
+                      paymentMethod === "bictorys"
+                        ? "border-primary bg-primary/10 text-primary shadow-sm ring-2 ring-primary/30"
+                        : "border-border hover:bg-muted/60 text-muted-foreground"
                     }`}
                   >
-                    <WaveLogo className="w-5 h-5 shadow-sm" />
-                    <span className="font-extrabold text-[#0284c7] dark:text-[#38bdf8]">Wave</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("om")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
-                      paymentMethod === "om"
-                        ? "border-[#ff7900] bg-[#ff7900]/15 text-[#ea580c] shadow-sm ring-2 ring-[#ff7900]/40"
-                        : "border-border hover:bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    <OrangeMoneyLogo className="w-5 h-5 shadow-sm" />
-                    <span className="font-extrabold text-[#ea580c] dark:text-[#fb923c]">Orange M.</span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <CreditCard className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary text-primary-foreground">
+                        Lien / QR
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs block text-foreground">Paiement Bictorys</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">Wave • OM • Free • CB</span>
+                    </div>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("cash")}
-                    className={`py-2 px-2 rounded-xl border text-xs font-bold flex flex-col items-center justify-center gap-1.5 transition-all ${
+                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
                       paymentMethod === "cash"
-                        ? "border-emerald-600 bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 shadow-sm ring-2 ring-emerald-500/40"
-                        : "border-border hover:bg-muted text-muted-foreground"
+                        ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm ring-2 ring-emerald-500/30"
+                        : "border-border hover:bg-muted/60 text-muted-foreground"
                     }`}
                   >
-                    <Banknote className="w-5 h-5 text-emerald-600" />
-                    <span className="font-extrabold text-emerald-700 dark:text-emerald-400">Espèces</span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-600">
+                        <Banknote className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                        Comptoir
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs block text-foreground">Espèces</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">Billets & Rendu</span>
+                    </div>
                   </button>
                 </div>
 
+                {/* If Bictorys : Reassurance & Channel badges */}
+                {paymentMethod === "bictorys" && (
+                  <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 flex flex-col gap-1.5 mt-0.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-foreground flex items-center gap-1.5">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        Paiement sécurisé Bictorys
+                      </span>
+                      <span className="text-[10px] font-bold text-muted-foreground">Automatique</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground leading-tight">
+                      Génère un QR Code dynamique à scanner au comptoir ou un lien sécurisé à envoyer par WhatsApp.
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-0.5 pt-1 border-t border-primary/10">
+                      <div className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded border border-border">
+                        <WaveLogo className="w-3.5 h-3.5" />
+                        <span className="text-[9px] font-bold">Wave</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded border border-border">
+                        <OrangeMoneyLogo className="w-3.5 h-3.5" />
+                        <span className="text-[9px] font-bold">Orange M.</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded border border-border">
+                        <span className="text-[9px] font-black text-rose-600">FM</span>
+                        <span className="text-[9px] font-bold">Free</span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-background px-1.5 py-0.5 rounded border border-border">
+                        <CreditCard className="w-3 h-3 text-primary" />
+                        <span className="text-[9px] font-bold">CB</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* If Cash : Tendered Amount & Change Calculator */}
                 {paymentMethod === "cash" && (
-                  <div className="p-3 rounded-xl bg-muted/60 border border-border flex items-center justify-between gap-3 mt-1">
+                  <div className="p-3 rounded-xl bg-muted/60 border border-border flex items-center justify-between gap-3 mt-0.5">
                     <div>
                       <span className="text-[11px] font-bold text-muted-foreground block">Montant reçu :</span>
                       <Input
@@ -643,14 +758,34 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
               </div>
 
               {/* Big Checkout CTA */}
-              <Button
-                disabled={cart.length === 0}
-                onClick={handleCheckout}
-                className="w-full rounded-2xl py-3.5 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-              >
-                <CheckCircle2 className="w-5 h-5" />
-                <span>Encaisser {formatFCFA(total)}</span>
-              </Button>
+              {paymentMethod === "bictorys" ? (
+                <Button
+                  disabled={cart.length === 0 || isGeneratingPayment}
+                  onClick={handleInitiateBictorysSale}
+                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  {isGeneratingPayment ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span>Génération QR Bictorys...</span>
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="w-4 h-4" />
+                      <span>Générer QR & Lien Bictorys ({formatFCFA(total)})</span>
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button
+                  disabled={cart.length === 0}
+                  onClick={() => handleCheckout("cash")}
+                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span>Valider l'encaissement en espèces ({formatFCFA(total)})</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -831,7 +966,12 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                 <div className="flex justify-between items-center pt-0.5">
                   <span className="text-zinc-600">Règlement :</span>
                   <div className="flex items-center gap-1.5 font-bold">
-                    {completedSale.paymentMethod === "wave" ? (
+                    {completedSale.paymentMethod === "bictorys" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-300 text-[11px] font-extrabold">
+                        <CreditCard className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Bictorys (Wave / OM / CB)</span>
+                      </span>
+                    ) : completedSale.paymentMethod === "wave" ? (
                       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#1dc3f7]/15 text-[#0284c7] border border-[#1dc3f7]/40 text-[11px] font-extrabold">
                         <WaveLogo className="w-4 h-4" />
                         <span>Wave</span>
@@ -977,6 +1117,127 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
           </div>
         </div>
       )}
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          MODAL: ENCAISSEMENT BICTORYS (QR CODE & LIEN DE PAIEMENT)
+      ────────────────────────────────────────────────────────────────────────── */}
+      <Dialog open={bictorysModalOpen} onOpenChange={setBictorysModalOpen}>
+        <DialogContent className="sm:max-w-md p-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <CreditCard className="w-5 h-5 text-primary" />
+              Encaissement Bictorys — {currentSaleNumber}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center gap-4 py-2">
+            {/* Amount card */}
+            <div className="w-full bg-primary/5 rounded-2xl p-4 border border-primary/20 flex flex-col items-center justify-center">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Montant à régler</span>
+              <span className="text-3xl font-black font-mono text-primary">{formatFCFA(total)}</span>
+              <span className="text-xs text-muted-foreground mt-0.5">Client : {customerName}</span>
+            </div>
+
+            {/* QR Code */}
+            {bictorysPaymentUrl && (
+              <div className="p-4 bg-white rounded-2xl border-2 border-primary/20 shadow-inner flex flex-col items-center gap-2">
+                <QRCode value={bictorysPaymentUrl} size={170} />
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
+                  Scanner au comptoir (Wave, OM, CB)
+                </span>
+              </div>
+            )}
+
+            {/* Channels badges */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 bg-card px-2 py-0.5 rounded-lg border border-border">
+                <WaveLogo className="w-4 h-4" />
+                <span className="text-[10px] font-bold">Wave</span>
+              </div>
+              <div className="flex items-center gap-1 bg-card px-2 py-0.5 rounded-lg border border-border">
+                <OrangeMoneyLogo className="w-4 h-4" />
+                <span className="text-[10px] font-bold">Orange M.</span>
+              </div>
+              <div className="flex items-center gap-1 bg-card px-2 py-0.5 rounded-lg border border-border">
+                <span className="text-[10px] font-black text-rose-600">FM</span>
+                <span className="text-[10px] font-bold">Free</span>
+              </div>
+              <div className="flex items-center gap-1 bg-card px-2 py-0.5 rounded-lg border border-border">
+                <CreditCard className="w-3.5 h-3.5 text-primary" />
+                <span className="text-[10px] font-bold">Carte CB</span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="w-full flex flex-col gap-2 pt-1">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyPaymentLink}
+                  className="flex-1 text-xs gap-1.5 h-9"
+                >
+                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedLink ? "Lien copié !" : "Copier le lien"}
+                </Button>
+
+                {bictorysPaymentUrl && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.open(bictorysPaymentUrl, "_blank")}
+                    className="flex-1 text-xs gap-1.5 h-9 text-primary border-primary/30 hover:bg-primary/5"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Ouvrir Bictorys
+                  </Button>
+                )}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const saleDummy: Sale = {
+                    id: `temp_${Date.now()}`,
+                    saleNumber: currentSaleNumber,
+                    customerName: customerName || "Client de passage",
+                    paymentMethod: "bictorys",
+                    subtotal,
+                    taxAmount,
+                    total,
+                    totalCost,
+                    margin: totalMargin,
+                    items: cart.map((item) => ({
+                      id: `s_${item.product.id}`,
+                      name: item.product.name,
+                      quantity: item.quantity,
+                      purchasePrice: item.product.purchasePrice,
+                      unitPrice: item.product.sellingPrice,
+                      totalPrice: item.product.sellingPrice * item.quantity,
+                    })),
+                    createdAt: new Date().toLocaleDateString("fr-FR"),
+                  };
+                  handleSendTicketWhatsApp(saleDummy, bictorysPaymentUrl || undefined);
+                }}
+                className="w-full text-xs gap-2 h-9 bg-[#25D366]/10 text-[#128C7E] hover:bg-[#25D366]/20 border-[#25D366]/30 font-bold"
+              >
+                <MessageCircle className="w-3.5 h-3.5 fill-current" />
+                Envoyer le lien par WhatsApp au client
+              </Button>
+            </div>
+
+            {/* Confirm validation button */}
+            <Button
+              className="w-full h-11 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md flex items-center justify-center gap-2 mt-1"
+              onClick={handleConfirmBictorysCheckout}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Confirmer l'encaissement & Valider le ticket</span>
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -90,6 +90,15 @@ export function PaymentMethodBadge({ method = "cash" }: { method?: string }) {
     );
   }
 
+  if (m === "bictorys" || m === "online") {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold bg-blue-500/15 text-blue-700 dark:text-blue-400 border border-blue-500/30">
+        <span>⚡</span>
+        <span>Bictorys (Wave / OM / CB)</span>
+      </span>
+    );
+  }
+
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted text-foreground">
       {method.toUpperCase()}
