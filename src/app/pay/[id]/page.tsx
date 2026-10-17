@@ -12,15 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CreditCard, Download, CheckCircle2, ShieldCheck, ArrowRight, Smartphone, AlertCircle } from "lucide-react";
+import { CreditCard, Download, CheckCircle2, ShieldCheck, ArrowRight, AlertCircle, X } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { initiateBictorysPayment, getPublicInvoiceDetails } from "@/app/actions/payment";
 
@@ -46,18 +43,20 @@ export default function PublicInvoicePayPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
     // Si l'utilisateur revient depuis la page de paiement Bictorys
-    if (typeof window !== "undefined" && window.location.search.includes("success=true")) {
-      setIsSuccess(true);
-      setPaymentModalOpen(true);
-      window.history.replaceState({}, document.title, window.location.pathname);
+    if (typeof window !== "undefined") {
+      if (window.location.search.includes("success=true")) {
+        setIsSuccess(true);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (window.location.search.includes("error=true")) {
+        setErrorMessage("Le paiement a été interrompu ou n'a pas pu être validé. Vous pouvez réessayer.");
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
     
     // Fetch public invoice details
@@ -65,9 +64,6 @@ export default function PublicInvoicePayPage() {
       const res = await getPublicInvoiceDetails(id);
       if (res.success && res.data) {
         setInvoice(res.data);
-        if (res.data.clientPhone) {
-          setPhoneNumber(res.data.clientPhone);
-        }
       } else {
         setError(res.error || "Facture introuvable.");
       }
@@ -108,6 +104,7 @@ export default function PublicInvoicePayPage() {
   };
 
   const handlePayment = async () => {
+    if (!invoice) return;
     setIsProcessing(true);
     setErrorMessage("");
     try {
@@ -115,9 +112,9 @@ export default function PublicInvoicePayPage() {
         invoiceId: invoice.id,
         amount: total,
         description: `Règlement facture ${invoice.number}`,
-        customerName: invoice.client,
-        customerEmail: invoice.clientEmail,
-        customerPhone: phoneNumber,
+        customerName: invoice.client || "Client",
+        customerEmail: invoice.clientEmail || undefined,
+        customerPhone: invoice.clientPhone || undefined,
       });
 
       if (res.success && res.paymentUrl) {
@@ -136,7 +133,7 @@ export default function PublicInvoicePayPage() {
 
   return (
     <div className="min-h-screen bg-secondary/30 py-8 px-4 sm:px-6">
-      <div className="max-w-4xl mx-auto flex flex-col gap-8">
+      <div className="max-w-4xl mx-auto flex flex-col gap-6">
         
         {/* Top bar for Client */}
         <div className="bg-card rounded-2xl p-6 shadow-sm border border-border flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
@@ -155,14 +152,39 @@ export default function PublicInvoicePayPage() {
             </Button>
             {invoice.status !== 'paid' && (
               <Button 
-                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md"
-                onClick={() => setPaymentModalOpen(true)}
+                className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-md min-w-[200px]"
+                onClick={handlePayment}
+                disabled={isProcessing}
               >
-                Payer maintenant
+                {isProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Redirection Bictorys...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    <span>Payer {formatFCFA(total)}</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
               </Button>
             )}
           </div>
         </div>
+
+        {/* Error message banner */}
+        {errorMessage && (
+          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-2xl text-destructive flex items-center justify-between gap-3 shadow-sm print:hidden">
+            <div className="flex items-center gap-3 text-sm font-medium">
+              <AlertCircle className="w-5 h-5 shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setErrorMessage("")} className="h-8 px-2 text-destructive hover:bg-destructive/10">
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
 
         {/* Invoice Document */}
         <div className="print-area bg-card rounded-2xl border border-border shadow-md overflow-hidden p-8 sm:p-12 print:border-none print:shadow-none print:p-0 print:m-0 print:bg-white">
@@ -286,6 +308,58 @@ export default function PublicInvoicePayPage() {
             </div>
           </div>
 
+          {/* Online Payment Callout Block */}
+          {invoice.status !== 'paid' && (
+            <div className="mt-10 p-6 rounded-2xl bg-gradient-to-br from-primary/5 via-primary/[0.02] to-transparent border border-primary/20 flex flex-col sm:flex-row items-center justify-between gap-6 print:hidden">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                  <h3 className="font-bold text-foreground text-base">Règlement en ligne sécurisé</h3>
+                </div>
+                <p className="text-xs text-muted-foreground max-w-md">
+                  Réglez instantanément avec <strong>Wave</strong>, <strong>Orange Money</strong>, <strong>Free Money</strong> ou <strong>Carte Bancaire</strong> via la passerelle certifiée <strong>Bictorys</strong>.
+                </p>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border shadow-xs">
+                    <WaveLogo className="w-4 h-4" />
+                    <span className="text-[11px] font-semibold text-foreground">Wave</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border shadow-xs">
+                    <OrangeMoneyLogo className="w-4 h-4" />
+                    <span className="text-[11px] font-semibold text-foreground">Orange Money</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border shadow-xs">
+                    <span className="text-[10px] font-black text-rose-600 bg-rose-500/10 px-1 rounded">FM</span>
+                    <span className="text-[11px] font-semibold text-foreground">Free Money</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-card border border-border shadow-xs">
+                    <CreditCard className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[11px] font-semibold text-foreground">Carte Bancaire</span>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                size="lg"
+                className="w-full sm:w-auto h-12 px-6 font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 shrink-0 min-w-[220px]"
+                onClick={handlePayment}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Redirection Bictorys...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Payer la facture</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-border text-center text-xs text-muted-foreground flex flex-col gap-1">
             {hasPremiumFeatures ? (
@@ -307,122 +381,27 @@ export default function PublicInvoicePayPage() {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      <Dialog open={paymentModalOpen} onOpenChange={setPaymentModalOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-bold">
-              <CreditCard className="w-5 h-5 text-primary" />
-              Régler la facture {invoice.number}
-            </DialogTitle>
-            <DialogDescription>
-              Paiement sécurisé et instantané via la passerelle <strong>Bictorys</strong>.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {!isSuccess ? (
-            <div className="flex flex-col gap-5 py-2">
-              {/* Total amount highlight */}
-              <div className="flex flex-col items-center justify-center p-5 bg-primary/5 rounded-2xl border border-primary/20">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Montant à régler</p>
-                <p className="text-3xl font-black font-mono text-foreground">{formatFCFA(total)}</p>
-                <p className="text-xs text-muted-foreground mt-1">Émis par : {invoice.merchant.name}</p>
-              </div>
-
-              {errorMessage && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-xs text-destructive flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              {/* Supported Payment Channels */}
-              <div className="flex flex-col gap-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Moyens de paiement acceptés
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
-                    <WaveLogo className="w-8 h-8 mb-1.5" />
-                    <span className="text-xs font-bold text-foreground">Wave</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
-                    <OrangeMoneyLogo className="w-8 h-8 mb-1.5" />
-                    <span className="text-xs font-bold text-foreground">Orange Money</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
-                    <div className="w-8 h-8 rounded-full bg-rose-500/10 text-rose-600 flex items-center justify-center font-black text-xs mb-1.5">
-                      FM
-                    </div>
-                    <span className="text-xs font-bold text-foreground">Free Money</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-border bg-card shadow-sm hover:border-primary/40 transition-all">
-                    <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1.5">
-                      <CreditCard className="w-4 h-4" />
-                    </div>
-                    <span className="text-xs font-bold text-foreground">Carte Bancaire</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Optional Phone Number */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-foreground flex items-center gap-1">
-                  <Smartphone className="w-3.5 h-3.5 text-muted-foreground" />
-                  Numéro de téléphone (optionnel pour Mobile Money)
-                </label>
-                <input
-                  type="tel"
-                  placeholder="Ex: 77 123 45 67"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  className="w-full px-4 py-2.5 border border-border rounded-xl bg-background text-sm font-medium focus:ring-2 focus:ring-primary/20 focus:outline-none"
-                />
-              </div>
-
-              {/* Pay Button */}
-              <Button 
-                className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
-                onClick={handlePayment}
-                disabled={isProcessing}
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Redirection vers Bictorys...
-                  </>
-                ) : (
-                  <>
-                    Payer avec Bictorys
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-
-              <div className="flex items-center justify-center gap-2 text-[11px] text-muted-foreground">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Paiement crypté et certifié conforme PCI-DSS par Bictorys.</span>
-              </div>
+      {/* Success Dialog when returning from Bictorys */}
+      <Dialog open={isSuccess} onOpenChange={setIsSuccess}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center justify-center py-6 gap-4 text-center">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 rounded-full flex items-center justify-center mb-2 animate-in zoom-in-75">
+              <CheckCircle2 className="w-10 h-10" />
             </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-10 gap-4 text-center">
-              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 rounded-full flex items-center justify-center mb-2 animate-in zoom-in-75">
-                <CheckCircle2 className="w-10 h-10" />
-              </div>
-              <h3 className="text-2xl font-bold text-foreground">Paiement validé avec succès !</h3>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                La facture <strong>{invoice.number}</strong> a bien été enregistrée comme réglée. Un reçu électronique est disponible au téléchargement.
-              </p>
+            <h3 className="text-2xl font-bold text-foreground">Paiement validé avec succès !</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              La facture <strong>{invoice.number}</strong> a bien été enregistrée comme réglée. Merci pour votre règlement !
+            </p>
+            <div className="flex items-center gap-3 w-full mt-2">
               <Button 
                 onClick={handleDownloadPDF} 
-                variant="outline" 
-                className="mt-2 flex items-center gap-2"
+                className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
               >
                 <Download className="w-4 h-4" />
                 Télécharger le reçu (PDF)
               </Button>
             </div>
-          )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
