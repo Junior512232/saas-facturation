@@ -13,22 +13,67 @@ const supabaseAdmin = createClient<Database>(supabaseUrl, supabaseKey);
 
 /**
  * Détermine l'URL de base de l'API Bictorys (Sandbox vs Production)
+ * Priorité absolue au préfixe test_ pour empêcher tout appel en production avec des clés Sandbox
  */
 function getBictorysApiBase(apiKey: string): string {
-  if (process.env.BICTORYS_API_URL) {
-    return process.env.BICTORYS_API_URL;
-  }
-  const normalizedKey = apiKey.toLowerCase();
-  if (
-    normalizedKey.includes("test") ||
-    normalizedKey.startsWith("sk_test_") ||
+  const normalizedKey = (apiKey || "").trim().toLowerCase();
+
+  // 1. Détection prioritaire Sandbox : préfixes test_public-, test_secret-, sk_test_, pk_test_ ou mot "test"
+  const isTestKey =
+    normalizedKey.startsWith("test_") ||
     normalizedKey.startsWith("pk_test_") ||
-    normalizedKey.startsWith("bict_test_")
-  ) {
+    normalizedKey.startsWith("sk_test_") ||
+    normalizedKey.startsWith("bict_test_") ||
+    normalizedKey.includes("test");
+
+  if (isTestKey) {
     return "https://api.test.bictorys.com";
   }
+
+  // 2. Si une URL d'API explicite est configurée dans l'environnement
+  if (process.env.BICTORYS_API_URL) {
+    return process.env.BICTORYS_API_URL.replace(/\/+$/, "");
+  }
+
+  // 3. Par défaut en production
   return "https://api.bictorys.com";
 }
+
+/**
+ * Formate et valide l'objet client selon les exigences strictes de Bictorys (afro.tools ATSS)
+ * Exige country: "SN" et téléphone au format numérique international
+ */
+function formatCustomerObject({
+  name,
+  email,
+  phone,
+  country = "SN",
+}: {
+  name?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+}) {
+  const cust: Record<string, any> = {
+    name: name?.trim() || "Client",
+    country: country || "SN",
+  };
+
+  if (email && email.includes("@")) {
+    cust.email = email.trim();
+  }
+
+  if (phone) {
+    const cleaned = phone.replace(/[^0-9]/g, "");
+    if (cleaned.length >= 8) {
+      const fullPhone = cleaned.startsWith("221") ? cleaned : `221${cleaned}`;
+      cust.phone = Number(fullPhone) || fullPhone;
+    }
+  }
+
+  return cust;
+}
+
 
 /**
  * Récupère les détails publics d'une facture ou d'un ticket de caisse
@@ -309,7 +354,7 @@ export async function initiateBictorysPayment({
     } catch {}
 
     // Fallback sur les clés de plateforme configurées dans les variables d'environnement
-    if (!rawApiKey) {
+    if (!rawApiKey || rawApiKey.includes("sample") || rawApiKey.includes("placeholder") || rawApiKey.trim().length < 8) {
       rawApiKey = process.env.BICTORYS_PLATFORM_API_KEY || process.env.BICTORYS_API_KEY || null;
     }
 
@@ -345,11 +390,12 @@ export async function initiateBictorysPayment({
           amount: Math.round(amount),
         },
       ],
-      customerObject: {
+      customerObject: formatCustomerObject({
         name: customerName || "Client",
-        email: customerEmail || undefined,
-        phone: customerPhone || undefined,
-      },
+        email: customerEmail,
+        phone: customerPhone,
+        country: "SN",
+      }),
       successRedirectUrl: `${baseUrl}/pay/${invoice.id}?success=true&ref=${paymentReference}`,
       errorRedirectUrl: `${baseUrl}/pay/${invoice.id}?error=true`,
       metadata: {
@@ -483,7 +529,7 @@ export async function initiateBictorysSalePayment({
       } catch {}
     }
 
-    if (!rawApiKey) {
+    if (!rawApiKey || rawApiKey.includes("sample") || rawApiKey.includes("placeholder") || rawApiKey.trim().length < 8) {
       rawApiKey = process.env.BICTORYS_PLATFORM_API_KEY || process.env.BICTORYS_API_KEY || null;
     }
 
@@ -518,10 +564,11 @@ export async function initiateBictorysSalePayment({
           amount: Math.round(amount),
         },
       ],
-      customerObject: {
+      customerObject: formatCustomerObject({
         name: customerName || "Client de passage",
-        phone: customerPhone || undefined,
-      },
+        phone: customerPhone,
+        country: "SN",
+      }),
       successRedirectUrl: `${baseUrl}/pay/ticket/${saleNumber}?success=true&ref=${paymentReference}`,
       errorRedirectUrl: `${baseUrl}/pay/ticket/${saleNumber}?error=true`,
       metadata: {
@@ -749,9 +796,12 @@ export async function initiateSubscriptionPayment({
           amount: amount,
         },
       ],
-      customerObject: {
+      customerObject: formatCustomerObject({
+        name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Abonné SaaS",
         email: user.email,
-      },
+        phone: user.user_metadata?.phone || user.phone,
+        country: "SN",
+      }),
       successRedirectUrl: `${baseUrl}/settings/billing?subscription_success=true&plan=${plan}`,
       errorRedirectUrl: `${baseUrl}/settings/billing?error=true`,
       metadata: {
