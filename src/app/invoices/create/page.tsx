@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Plus, Trash2, Save, Send } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Send, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { formatFCFA } from "@/lib/utils";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
+import { canCreateInvoice, getPlanLimits } from "@/lib/plans";
 import { useRouter } from "next/navigation";
 
 interface InvoiceItem {
@@ -19,7 +21,12 @@ interface InvoiceItem {
 
 export default function CreateInvoicePage() {
   const router = useRouter();
-  const { clientsList, addInvoice } = useAppData();
+  const { clientsList, invoicesList, addInvoice } = useAppData();
+  const { user } = useAuth();
+
+  const invoiceQuota = canCreateInvoice(invoicesList.length, user?.plan);
+  const planLimits = getPlanLimits(user?.plan);
+  const nextPlanName = user?.plan === "pro" ? "Business" : "Pro";
 
   const [items, setItems] = useState<InvoiceItem[]>([
     { id: "1", description: "", quantity: 1, unitPrice: 0 },
@@ -56,6 +63,10 @@ export default function CreateInvoicePage() {
   const total = subtotal + taxAmount;
 
   const handleSave = (status: "draft" | "sent" | "paid") => {
+    if (!invoiceQuota.allowed) {
+      alert(`Limite de ${invoiceQuota.limit} factures atteinte sur le forfait ${planLimits.name}. Veuillez passer au forfait supérieur.`);
+      return;
+    }
     if (!clientId) {
       alert("Veuillez sélectionner un client.");
       return;
@@ -82,6 +93,23 @@ export default function CreateInvoicePage() {
     
     router.push("/invoices");
   };
+
+  if (!invoiceQuota.allowed) {
+    return (
+      <div className="p-6 lg:p-10 max-w-3xl mx-auto w-full flex flex-col items-center justify-center text-center mt-20 gap-6">
+        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-amber-600" />
+        </div>
+        <h2 className="text-3xl font-bold tracking-tight">Limite mensuelle atteinte</h2>
+        <p className="text-muted-foreground max-w-md">
+          Vous avez atteint la limite de {invoiceQuota.limit} factures autorisées sur votre forfait <strong>{planLimits.name}</strong>. Passez au forfait <strong>{nextPlanName}</strong> pour facturer sans restriction.
+        </p>
+        <Link href="/settings/billing" className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-blueDark transition-colors">
+          Débloquer le forfait {nextPlanName}
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto w-full flex flex-col gap-8 pb-24">

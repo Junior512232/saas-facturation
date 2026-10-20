@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: email.trim(),
       password,
       options: {
-        data: { company_name: companyName, phone, ninea, plan },
+        data: { company_name: companyName, phone, ninea, plan: "gratuit" },
       },
     });
     if (error) {
@@ -153,18 +153,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = async (updates: Partial<AppUser>) => {
     if (!user) return;
     
-    // Optimistic update
+    // Optimistic update pour l'interface
     setUser({ ...user, ...updates });
     
-    // DB update payload
+    // DB update payload : Le forfait (plan) ne peut PAS être modifié arbitrairement côté client
     const payload: any = {};
     if (updates.name !== undefined) payload.company_name = updates.name;
     if (updates.ninea !== undefined) payload.ninea = updates.ninea;
     if (updates.rccm !== undefined) payload.rccm = updates.rccm;
     if (updates.logo_url !== undefined) payload.logo_url = updates.logo_url;
     if (updates.phone !== undefined) payload.phone = updates.phone;
-    if (updates.plan !== undefined) payload.plan = updates.plan;
-    if (updates.plan_expires_at !== undefined) payload.plan_expires_at = updates.plan_expires_at;
 
     await supabase.from("profiles").update(payload).eq("id", user.id);
   };

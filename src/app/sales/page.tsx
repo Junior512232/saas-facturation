@@ -31,8 +31,12 @@ import {
   QrCode,
   Copy,
   Check,
-  ExternalLink
+  ExternalLink,
+  Lock
 } from "lucide-react";
+import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
+import { canCreateTicket, normalizePlan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +51,7 @@ import {
 } from "@/components/ui/dialog";
 
 export default function SalesPage() {
+  const { user } = useAuth();
   const { 
     productsList, 
     salesList, 
@@ -54,6 +59,16 @@ export default function SalesPage() {
     clientsList, 
     companySettings 
   } = useAppData();
+
+  // Quota tickets mensuels (15 max sur Gratuit, illimité sur Pro / Business)
+  const now = new Date();
+  const curMonth = (now.getMonth() + 1).toString().padStart(2, "0");
+  const curYear = now.getFullYear().toString();
+  const thisMonthSalesCount = salesList.filter((s) => {
+    if (!s.createdAt) return false;
+    return s.createdAt.includes(`/${curMonth}/${curYear}`) || s.createdAt.includes(`-${curMonth}-${curYear}`);
+  }).length;
+  const ticketQuota = canCreateTicket(thisMonthSalesCount, user?.plan);
 
   const [activeTab, setActiveTab] = useState<"pos" | "history">("pos");
   const [searchTerm, setSearchTerm] = useState("");
@@ -220,6 +235,10 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
   // Initiate Bictorys Payment (QR Code & Link)
   const handleInitiateBictorysSale = async () => {
     if (cart.length === 0) return;
+    if (!ticketQuota.allowed) {
+      showToast("Limite mensuelle atteinte : 15 tickets max sur le forfait Gratuit. Passez en Pro !");
+      return;
+    }
     setIsGeneratingPayment(true);
 
     const saleNumber = `VTE-${new Date().getFullYear()}-${String(salesList.length + 1).padStart(3, "0")}`;
@@ -272,6 +291,10 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
   // Finalize Sale
   const handleCheckout = async (chosenMethod?: "cash" | "bictorys" | "wave" | "om" | "card" | "bank_transfer") => {
     if (cart.length === 0) return;
+    if (!ticketQuota.allowed) {
+      showToast("Limite mensuelle atteinte : 15 tickets max sur le forfait Gratuit. Passez en Pro !");
+      return;
+    }
 
     const saleNumber = currentSaleNumber || `VTE-${new Date().getFullYear()}-${String(salesList.length + 1).padStart(3, "0")}`;
     const activeMethod = chosenMethod || paymentMethod;
@@ -360,16 +383,24 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
         {/* Header & Tabs */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 flex-wrap">
               <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Ventes & Caisse Rapide</h1>
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-xs py-0.5">
                 Caisse Directe
               </Badge>
+              {normalizePlan(user?.plan) === "gratuit" && (
+                <Badge 
+                  variant="outline" 
+                  className={`${!ticketQuota.allowed ? "bg-amber-500/10 text-amber-600 border-amber-500/30 font-bold" : "bg-muted text-muted-foreground border-border"} text-xs py-0.5`}
+                >
+                  Tickets : {thisMonthSalesCount}/15 {ticketQuota.allowed ? "(Gratuit)" : "(Plafond atteint)"}
+                </Badge>
+              )}
             </div>
-          <p className="text-muted-foreground text-sm mt-1">
-            Encaissez au comptoir par Wave, Orange Money ou Espèces avec déstockage instantané.
-          </p>
-        </div>
+            <p className="text-muted-foreground text-sm mt-1">
+              Encaissez au comptoir par Wave, Orange Money ou Espèces avec déstockage instantané.
+            </p>
+          </div>
 
         {/* View Toggle */}
         <div className="flex items-center bg-muted p-1 rounded-2xl text-xs font-bold shadow-inner">
@@ -799,7 +830,22 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
               </div>
 
               {/* Big Checkout CTA */}
-              {paymentMethod === "bictorys" ? (
+              {!ticketQuota.allowed ? (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 font-bold">
+                    <Lock className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>Plafond de 15 tickets de caisse atteint</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed">
+                    Le forfait Gratuit est limité à 15 tickets par mois. Débloquez les encaissements et tickets illimités dès le forfait Pro.
+                  </p>
+                  <Link href="/settings/billing">
+                    <Button size="sm" className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl mt-1">
+                      Débloquer le Forfait Pro (10 000 FCFA)
+                    </Button>
+                  </Link>
+                </div>
+              ) : paymentMethod === "bictorys" ? (
                 <Button
                   disabled={cart.length === 0 || isGeneratingPayment}
                   onClick={handleInitiateBictorysSale}

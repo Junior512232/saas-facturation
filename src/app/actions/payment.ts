@@ -727,22 +727,10 @@ export async function initiateSubscriptionPayment({
       process.env.BICTORYS_API_KEY;
 
     if (!platformApiKey) {
-      console.warn("BICTORYS_PLATFORM_API_KEY non configurée. Simulation de l'abonnement.");
-      const nextMonth = new Date();
-      nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-      await supabaseAdmin
-        .from("profiles")
-        .update({
-          plan: plan,
-          plan_expires_at: nextMonth.toISOString(),
-        } as any)
-        .eq("id", user.id);
-
+      console.error("BICTORYS_PLATFORM_API_KEY non configurée sur le serveur.");
       return {
-        success: true,
-        simulated: true,
-        message: `Abonnement ${plan.toUpperCase()} activé avec succès !`,
+        success: false,
+        error: "La passerelle de paiement d'abonnement est temporairement indisponible. Veuillez contacter l'administrateur.",
       };
     }
 

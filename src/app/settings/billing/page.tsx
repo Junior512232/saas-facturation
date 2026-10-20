@@ -31,24 +31,14 @@ export default function BillingPage() {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("subscription_success") === "true") {
-        const plan = urlParams.get("plan") || "pro";
-        setSuccess(`Félicitations ! Votre forfait ${plan.toUpperCase()} a été activé avec succès via Bictorys.`);
-        
-        // Mettre à jour le profil local
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        updateProfile({
-          plan: plan,
-          plan_expires_at: nextMonth.toISOString(),
-        }).catch(console.error);
-
+        setSuccess("Règlement reçu ! Votre forfait est en cours d'activation via la passerelle sécurisée.");
         window.history.replaceState({}, document.title, window.location.pathname);
       } else if (urlParams.get("error") === "true") {
         setError("Le paiement de l'abonnement n'a pas pu aboutir ou a été interrompu.");
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
-  }, [updateProfile]);
+  }, []);
 
   const handleSubscribe = async (planName: "pro" | "business") => {
     setLoadingPlan(planName);
@@ -57,23 +47,11 @@ export default function BillingPage() {
     try {
       const res = await initiateSubscriptionPayment({ plan: planName });
       
-      if (res.success) {
-        if (res.paymentUrl) {
-          // Redirection vers le checkout Bictorys
-          window.location.href = res.paymentUrl;
-        } else if (res.simulated) {
-          // Mode simulation (ex: dev local sans clé Bictorys configurée)
-          const nextMonth = new Date();
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-          await updateProfile({
-            plan: planName,
-            plan_expires_at: nextMonth.toISOString(),
-          });
-          setSuccess(res.message || `Félicitations ! Votre forfait ${planName.toUpperCase()} est actif.`);
-          setLoadingPlan(null);
-        }
+      if (res.success && res.paymentUrl) {
+        // Redirection vers le guichet sécurisé Bictorys
+        window.location.href = res.paymentUrl;
       } else {
-        setError(res.error || "Impossible d'initialiser le paiement Bictorys.");
+        setError(res.error || "Impossible d'initialiser le paiement sécurisé de l'abonnement.");
         setLoadingPlan(null);
       }
     } catch (err: any) {

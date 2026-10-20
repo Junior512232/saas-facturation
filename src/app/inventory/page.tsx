@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
+import { canAddProduct, normalizePlan } from "@/lib/plans";
 import { Product, StockMovement } from "@/lib/data";
 import { formatFCFA } from "@/lib/utils";
 import { 
@@ -22,13 +25,16 @@ import {
   Layers, 
   Barcode, 
   ShoppingBag,
-  Filter
+  Filter,
+  Lock,
+  Sparkles
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function InventoryPage() {
+  const { user } = useAuth();
   const { 
     productsList, 
     addProduct, 
@@ -116,8 +122,14 @@ export default function InventoryPage() {
 
   const totalPotentialMargin = totalStockSaleValue - totalStockPurchaseValue;
 
+  const productQuota = canAddProduct(productsList.length, user?.plan);
+
   // Open modal for new product
   const handleOpenAddModal = () => {
+    if (!productQuota.allowed) {
+      showToast("Limite atteinte : 10 articles max sur le forfait Gratuit. Passez en Pro pour un catalogue illimité !");
+      return;
+    }
     setEditingProduct(null);
     setFormData({
       name: "",
@@ -169,6 +181,10 @@ export default function InventoryPage() {
       });
       showToast(`Article "${formData.name}" mis à jour avec succès.`);
     } else {
+      if (!productQuota.allowed) {
+        showToast("Limite atteinte : 10 articles max sur le forfait Gratuit. Passez en Pro.");
+        return;
+      }
       await addProduct({
         name: formData.name,
         sku: formData.sku || undefined,
@@ -224,11 +240,19 @@ export default function InventoryPage() {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Stocks & Inventaire</h1>
             <Badge variant="outline" className="bg-brand-blue/10 text-brand-blue border-brand-blue/20 text-xs py-0.5">
               Temps réel
             </Badge>
+            {normalizePlan(user?.plan) === "gratuit" && (
+              <Badge 
+                variant="outline" 
+                className={`${!productQuota.allowed ? "bg-amber-500/10 text-amber-600 border-amber-500/30 font-bold" : "bg-muted text-muted-foreground border-border"} text-xs py-0.5`}
+              >
+                Stock : {productsList.length}/10 {productQuota.allowed ? "(Gratuit)" : "(Plafond atteint)"}
+              </Badge>
+            )}
           </div>
           <p className="text-muted-foreground text-sm mt-1">
             Gérez vos références articles, suivez les niveaux d'approvisionnement et prévenez les ruptures de stock.
@@ -245,15 +269,44 @@ export default function InventoryPage() {
             <span className="hidden sm:inline">Historique mouvements</span>
           </Button>
 
-          <Button
-            onClick={handleOpenAddModal}
-            className="rounded-xl flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shadow-sm active:scale-95 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            Nouvel Article
-          </Button>
+          {!productQuota.allowed ? (
+            <Link href="/settings/billing">
+              <Button
+                className="rounded-xl flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Passer Pro (Limite atteinte)</span>
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              onClick={handleOpenAddModal}
+              className="rounded-xl flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold shadow-sm active:scale-95 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nouvel Article</span>
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Quota limit warning banner for Free plan */}
+      {!productQuota.allowed && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-3">
+            <Lock className="w-5 h-5 flex-shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold">Limite de catalogue atteinte ({productsList.length}/10 articles) : </span>
+              Le forfait Gratuit permet de gérer jusqu'à 10 articles. Passez au forfait Pro pour un catalogue illimité et des alertes de réapprovisionnement.
+            </div>
+          </div>
+          <Link href="/settings/billing">
+            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 rounded-xl">
+              Débloquer Pro (10 000 FCFA)
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* Top Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

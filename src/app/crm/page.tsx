@@ -27,6 +27,9 @@ import {
   Calendar
 } from "lucide-react";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
+import { PlanGate } from "@/components/ui/plan-gate";
+import { hasFeature } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Deal, DealStage } from "@/lib/data";
@@ -41,6 +44,7 @@ const STAGES: { id: DealStage; label: string; color: string; bgBadge: string }[]
 
 export default function CrmPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const { dealsList, addDeal, updateDealStage, deleteDeal, addClient, companySettings } = useAppData();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -123,6 +127,39 @@ export default function CrmPage() {
     });
     router.push("/invoices/new");
   };
+
+  if (!hasFeature("hasCrm", user?.plan)) {
+    return (
+      <div className="space-y-6 pb-12">
+        <div className="flex items-center gap-2 pb-2 border-b border-border">
+          <span className="p-2 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <UserCheck className="w-5 h-5" />
+          </span>
+          <div>
+            <h1 className="text-2xl font-black text-foreground tracking-tight">
+              CRM & Pipeline Commercial
+            </h1>
+            <p className="text-xs text-muted-foreground">
+              Suivi de prospects, opportunités de closing et intégration WhatsApp.
+            </p>
+          </div>
+        </div>
+
+        <PlanGate
+          requiredPlan="business"
+          currentPlan={user?.plan}
+          title="Module CRM réservé au Forfait Business"
+          description="Accélérez votre prospection commerciale avec le pipeline Kanban, le suivi de closing et la conversion directe en factures."
+          features={[
+            "Pipeline Kanban visuel (Prospects, Contact, Devis, Closing)",
+            "Relances directes par WhatsApp en un clic",
+            "Conversion automatique d'une signature en client et facture",
+            "Suivi de la valeur totale du pipeline et taux de closing",
+          ]}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 pb-12">

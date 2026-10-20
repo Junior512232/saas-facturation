@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PlanGate } from "@/components/ui/plan-gate";
+import { hasFeature } from "@/lib/plans";
 
 export default function ReportsPage() {
   const { 
@@ -137,6 +139,8 @@ export default function ReportsPage() {
     setTimeout(() => setExported(false), 3000);
   };
 
+  const canViewPnl = hasFeature("hasAdvancedReports", user?.plan);
+
   return (
     <div className="p-6 lg:p-10 max-w-7xl mx-auto w-full flex flex-col gap-8 animate-in fade-in duration-300">
       {/* Toast Export Notification */}
@@ -214,7 +218,12 @@ export default function ReportsPage() {
           }`}
         >
           <FileText className="w-4 h-4" />
-          Compte de Résultat (P&L)
+          <span>Compte de Résultat (P&L)</span>
+          {!canViewPnl && (
+            <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-600 dark:text-purple-300">
+              Business
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveReportTab("stock_margins")}
@@ -435,86 +444,101 @@ export default function ReportsPage() {
           TAB 2: COMPTE DE RÉSULTAT SYNTHÉTIQUE (P&L OHADA)
       ────────────────────────────────────────────────────────────────────────── */}
       {activeReportTab === "pnl" && (
-        <div className="rounded-3xl border border-border bg-card p-6 md:p-10 shadow-sm flex flex-col gap-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-xl font-extrabold text-foreground">Compte de Résultat Simplifié (P&L)</h3>
-                <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                  Exercice 2026
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Conforme au système comptable OHADA pour TPE & PME.
-              </p>
-            </div>
-
-            <div className="text-right">
-              <span className="text-xs text-muted-foreground">Bénéfice Commercial Net :</span>
-              <p className="text-2xl font-black font-mono text-emerald-600">
-                +{formatFCFA(grossCommercialMargin)}
-              </p>
-            </div>
-          </div>
-
-          {/* Structured P&L Table */}
-          <div className="flex flex-col gap-6 font-mono text-sm">
-            {/* Section A: Produits d'Exploitation */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-primary font-sans">
-                1. Produits d'Exploitation (Chiffre d'affaires)
-              </h4>
-              <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col gap-2.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-foreground">Ventes comptoir (Caisse Rapide)</span>
-                  <span className="font-bold text-foreground">{formatFCFA(directSalesAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-foreground">Facturation B2B & Prestations encaissées</span>
-                  <span className="font-bold text-foreground">{formatFCFA(paidInvoicesAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-border/60 text-foreground">
-                  <span>TOTAL PRODUITS D'EXPLOITATION (CA HT)</span>
-                  <span className="text-primary font-extrabold">{formatFCFA(totalEncaissedRevenue)}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Section B: Coûts Directs & Achats */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 font-sans">
-                2. Coûts des Marchandises Vendues (COGS)
-              </h4>
-              <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col gap-2.5">
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-foreground">Coût d'achat des produits sortis du stock</span>
-                  <span className="text-rose-600 font-semibold">-{formatFCFA(totalCostOfGoodsSold)}</span>
-                </div>
-                <div className="flex justify-between items-center text-xs">
-                  <span className="text-foreground">Frais estimés de transactions mobiles (Wave / OM 1%)</span>
-                  <span className="text-rose-600 font-semibold">-{formatFCFA(Math.round(totalEncaissedRevenue * 0.01))}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-border/60 text-foreground">
-                  <span>TOTAL COÛTS D'ACHAT & CHARGES DIRECTES</span>
-                  <span className="text-rose-600 font-extrabold">
-                    -{formatFCFA(totalCostOfGoodsSold + Math.round(totalEncaissedRevenue * 0.01))}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Section C: Solde Intermédiaire de Gestion */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/5 to-card border border-emerald-500/30 flex items-center justify-between">
+        !canViewPnl ? (
+          <PlanGate
+            requiredPlan="business"
+            currentPlan={user?.plan}
+            title="Compte de Résultat Simplifié (P&L OHADA)"
+            description="Le compte de résultat OHADA, le calcul de marge brute d'exploitation et l'analyse détaillée des coûts de marchandises sont réservés aux abonnés Business."
+            features={[
+              "Marge commerciale brute et coûts des marchandises (COGS)",
+              "Comptabilisation automatique des commissions mobiles (Wave / Orange Money)",
+              "États financiers synthétiques conformes au référentiel OHADA",
+              "Export PDF et Excel certifié pour expert-comptable",
+            ]}
+          />
+        ) : (
+          <div className="rounded-3xl border border-border bg-card p-6 md:p-10 shadow-sm flex flex-col gap-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
               <div>
-                <p className="text-sm font-bold text-foreground font-sans">MARGE COMMERCIALE BRUTE</p>
-                <p className="text-xs text-muted-foreground font-sans">Taux de marge brute d'exploitation : {grossMarginPercent}%</p>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-xl font-extrabold text-foreground">Compte de Résultat Simplifié (P&L)</h3>
+                  <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                    Exercice 2026
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Conforme au système comptable OHADA pour TPE & PME.
+                </p>
               </div>
-              <span className="text-2xl font-black text-emerald-600 font-mono">
-                +{formatFCFA(grossCommercialMargin - Math.round(totalEncaissedRevenue * 0.01))}
-              </span>
+
+              <div className="text-right">
+                <span className="text-xs text-muted-foreground">Bénéfice Commercial Net :</span>
+                <p className="text-2xl font-black font-mono text-emerald-600">
+                  +{formatFCFA(grossCommercialMargin)}
+                </p>
+              </div>
+            </div>
+
+            {/* Structured P&L Table */}
+            <div className="flex flex-col gap-6 font-mono text-sm">
+              {/* Section A: Produits d'Exploitation */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-primary font-sans">
+                  1. Produits d'Exploitation (Chiffre d'affaires)
+                </h4>
+                <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col gap-2.5">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-foreground">Ventes comptoir (Caisse Rapide)</span>
+                    <span className="font-bold text-foreground">{formatFCFA(directSalesAmount)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-foreground">Facturation B2B & Prestations encaissées</span>
+                    <span className="font-bold text-foreground">{formatFCFA(paidInvoicesAmount)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-border/60 text-foreground">
+                    <span>TOTAL PRODUITS D'EXPLOITATION (CA HT)</span>
+                    <span className="text-primary font-extrabold">{formatFCFA(totalEncaissedRevenue)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section B: Coûts Directs & Achats */}
+              <div className="flex flex-col gap-3">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-amber-600 font-sans">
+                  2. Coûts des Marchandises Vendues (COGS)
+                </h4>
+                <div className="p-4 rounded-2xl bg-muted/30 border border-border flex flex-col gap-2.5">
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-foreground">Coût d'achat des produits sortis du stock</span>
+                    <span className="text-rose-600 font-semibold">-{formatFCFA(totalCostOfGoodsSold)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-foreground">Frais estimés de transactions mobiles (Wave / OM 1%)</span>
+                    <span className="text-rose-600 font-semibold">-{formatFCFA(Math.round(totalEncaissedRevenue * 0.01))}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm font-bold pt-2 border-t border-border/60 text-foreground">
+                    <span>TOTAL COÛTS D'ACHAT & CHARGES DIRECTES</span>
+                    <span className="text-rose-600 font-extrabold">
+                      -{formatFCFA(totalCostOfGoodsSold + Math.round(totalEncaissedRevenue * 0.01))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section C: Solde Intermédiaire de Gestion */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-primary/5 to-card border border-emerald-500/30 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-foreground font-sans">MARGE COMMERCIALE BRUTE</p>
+                  <p className="text-xs text-muted-foreground font-sans">Taux de marge brute d'exploitation : {grossMarginPercent}%</p>
+                </div>
+                <span className="text-2xl font-black text-emerald-600 font-mono">
+                  +{formatFCFA(grossCommercialMargin - Math.round(totalEncaissedRevenue * 0.01))}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
 
       {/* ──────────────────────────────────────────────────────────────────────────

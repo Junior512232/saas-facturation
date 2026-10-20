@@ -23,15 +23,21 @@ import {
   Eye,
   AlertCircle,
   MessageCircle,
-  Send
+  Send,
+  Lock
 } from "lucide-react";
+import Link from "next/link";
 import { useAppData } from "@/context/AppDataContext";
+import { useAuth } from "@/context/AuthContext";
+import { canAddPayroll, getPlanLimits, normalizePlan } from "@/lib/plans";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import type { Employee, Payroll } from "@/lib/data";
 import { WaveLogo, OrangeMoneyLogo, PaymentMethodBadge } from "@/components/ui/payment-logos";
 
 export default function PayrollPage() {
+  const { user } = useAuth();
   const { 
     employeesList, 
     payrollsList, 
@@ -45,6 +51,13 @@ export default function PayrollPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMonth, setSelectedMonth] = useState(10);
   const [selectedYear, setSelectedYear] = useState(2026);
+
+  // Quota bulletins de paie mensuels
+  const thisMonthPayrollCount = payrollsList.filter(
+    (p) => p.periodMonth === selectedMonth && p.periodYear === selectedYear
+  ).length;
+  const payrollQuota = canAddPayroll(thisMonthPayrollCount, user?.plan);
+  const planLimits = getPlanLimits(user?.plan);
 
   // Modals
   const [showPayslipModal, setShowPayslipModal] = useState<Payroll | null>(null);
@@ -100,6 +113,10 @@ export default function PayrollPage() {
 
   const handleCreatePayroll = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!payrollQuota.allowed) {
+      alert(`Limite de ${payrollQuota.limit} bulletin(s) de paie par mois atteinte sur votre forfait ${planLimits.name}. Passez au forfait supérieur pour continuer.`);
+      return;
+    }
     const emp = employeesList.find((e) => e.id === selectedEmpId);
     if (!emp) return;
 
@@ -187,7 +204,7 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-border">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
               <Briefcase className="w-5 h-5" />
             </span>
@@ -197,6 +214,12 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
             <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20">
               OHADA • UEMOA
             </span>
+            <Badge 
+              variant="outline" 
+              className={`${!payrollQuota.allowed ? "bg-amber-500/10 text-amber-600 border-amber-500/30 font-bold" : "bg-muted text-muted-foreground border-border"} text-xs py-0.5`}
+            >
+              Bulletins : {thisMonthPayrollCount} / {planLimits.maxPayrollsPerMonth} ({planLimits.name})
+            </Badge>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             Édition des fiches de paie conformes, gestion du personnel et déclarations sociales (IPRES & CSS).
@@ -204,13 +227,24 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button 
-            onClick={() => setShowNewPayrollModal(true)}
-            className="flex-1 sm:flex-none text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold gap-1.5 shadow-md shadow-purple-600/20"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Nouveau Bulletin</span>
-          </Button>
+          {!payrollQuota.allowed ? (
+            <Link href="/settings/billing">
+              <Button 
+                className="flex-1 sm:flex-none text-xs bg-amber-600 hover:bg-amber-700 text-white font-bold gap-1.5 shadow-md"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Passer {user?.plan === "pro" ? "Business" : "Pro"} (Limite atteinte)</span>
+              </Button>
+            </Link>
+          ) : (
+            <Button 
+              onClick={() => setShowNewPayrollModal(true)}
+              className="flex-1 sm:flex-none text-xs bg-purple-600 hover:bg-purple-700 text-white font-bold gap-1.5 shadow-md shadow-purple-600/20"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Nouveau Bulletin</span>
+            </Button>
+          )}
           <Button 
             onClick={() => setShowNewEmployeeModal(true)}
             variant="outline"
@@ -221,6 +255,24 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
           </Button>
         </div>
       </div>
+
+      {/* Quota limit warning banner for Payroll */}
+      {!payrollQuota.allowed && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-3">
+            <Lock className="w-5 h-5 flex-shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold">Plafond de paie atteint ({thisMonthPayrollCount}/{planLimits.maxPayrollsPerMonth} bulletins ce mois) : </span>
+              Le forfait {planLimits.name} est limité à {planLimits.maxPayrollsPerMonth} bulletin(s) par mois. Passez au forfait supérieur pour rémunérer l'ensemble de votre personnel.
+            </div>
+          </div>
+          <Link href="/settings/billing">
+            <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shrink-0 rounded-xl">
+              Augmenter la limite
+            </Button>
+          </Link>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

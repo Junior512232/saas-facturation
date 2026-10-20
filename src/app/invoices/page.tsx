@@ -28,6 +28,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { canCreateInvoice, getPlanLimits, normalizePlan } from "@/lib/plans";
+import { Lock } from "lucide-react";
 
 export default function InvoicesPage() {
   const { invoicesList, clientsList } = useAppData();
@@ -36,9 +38,9 @@ export default function InvoicesPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
 
-  const isFreePlan = !user?.plan || user.plan === "gratuit";
-  const INVOICE_LIMIT = 5;
-  const hasReachedLimit = isFreePlan && invoicesList.length >= INVOICE_LIMIT;
+  const invoiceQuota = canCreateInvoice(invoicesList.length, user?.plan);
+  const planLimits = getPlanLimits(user?.plan);
+  const hasReachedLimit = !invoiceQuota.allowed;
 
   const filteredInvoices = invoicesList
     .filter((invoice) => 
@@ -59,14 +61,24 @@ export default function InvoicesPage() {
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">Factures</h2>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-3xl font-bold tracking-tight text-foreground">Factures</h2>
+            {normalizePlan(user?.plan) !== "business" && (
+              <Badge 
+                variant="outline" 
+                className={`${hasReachedLimit ? "bg-amber-500/10 text-amber-600 border-amber-500/30 font-bold" : "bg-muted text-muted-foreground border-border"} text-xs py-0.5`}
+              >
+                Factures : {invoicesList.length} / {invoiceQuota.limit} ({planLimits.name})
+              </Badge>
+            )}
+          </div>
           <p className="text-muted-foreground">Gérez et suivez toutes vos factures émises.</p>
         </div>
         {hasReachedLimit ? (
           <Link href="/settings/billing">
-            <Button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white">
-              <FileText className="w-4 h-4" />
-              Passer Pro (Limite atteinte)
+            <Button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold">
+              <Lock className="w-4 h-4" />
+              <span>Passer {user?.plan === "pro" ? "Business" : "Pro"} (Limite atteinte)</span>
             </Button>
           </Link>
         ) : (

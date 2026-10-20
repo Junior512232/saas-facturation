@@ -7,6 +7,7 @@ import { useAppData } from "@/context/AppDataContext";
 import { useAuth } from "@/context/AuthContext";
 import { useSyncStore } from "@/lib/syncStore";
 import { formatFCFA } from "@/lib/utils";
+import { canCreateInvoice, getPlanLimits } from "@/lib/plans";
 import { Invoice, InvoiceItem } from "@/lib/data";
 import { ArrowLeft, Plus, Trash2, GripVertical, AlertCircle } from "lucide-react";
 
@@ -114,22 +115,22 @@ export default function NewInvoicePage() {
 
   const { user } = useAuth();
   
-  const isFreePlan = !user?.plan || user.plan === "gratuit";
-  const INVOICE_LIMIT = 5;
-  const hasReachedLimit = isFreePlan && invoices.length >= INVOICE_LIMIT;
+  const invoiceQuota = canCreateInvoice(invoices.length, user?.plan);
+  const planLimits = getPlanLimits(user?.plan);
+  const nextPlanName = user?.plan === "pro" ? "Business" : "Pro";
 
-  if (hasReachedLimit) {
+  if (!invoiceQuota.allowed) {
     return (
       <div className="p-6 lg:p-10 max-w-3xl mx-auto w-full flex flex-col items-center justify-center text-center mt-20 gap-6">
-        <div className="w-20 h-20 bg-brand-cream rounded-full flex items-center justify-center">
-          <AlertCircle className="w-10 h-10 text-brand-blue" />
+        <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center">
+          <AlertCircle className="w-10 h-10 text-amber-600" />
         </div>
         <h2 className="text-3xl font-bold tracking-tight">Limite mensuelle atteinte</h2>
         <p className="text-muted-foreground max-w-md">
-          Vous avez atteint la limite de {INVOICE_LIMIT} factures autorisées sur le forfait Gratuit. Passez à l'offre <strong>Pro (10 000 FCFA)</strong> pour débloquer 150 factures/mois, les tickets de caisse illimités et la gestion des bulletins de paie.
+          Vous avez émis vos {invoiceQuota.limit} factures autorisées sur le forfait <strong>{planLimits.name}</strong>. Passez au forfait <strong>{nextPlanName}</strong> pour débloquer davantage de factures, de tickets de caisse et de fonctionnalités avancées.
         </p>
         <Link href="/settings/billing" className="bg-brand-blue text-white px-6 py-3 rounded-xl font-bold hover:bg-brand-blueDark transition-colors">
-          Débloquer l'offre Pro (Dès 10 000 FCFA)
+          Débloquer le forfait {nextPlanName}
         </Link>
       </div>
     );
