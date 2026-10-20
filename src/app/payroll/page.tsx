@@ -63,6 +63,11 @@ export default function PayrollPage() {
   const [showPayslipModal, setShowPayslipModal] = useState<Payroll | null>(null);
   const [showNewEmployeeModal, setShowNewEmployeeModal] = useState(false);
   const [showNewPayrollModal, setShowNewPayrollModal] = useState(false);
+  const [settlingPayroll, setSettlingPayroll] = useState<Payroll | null>(null);
+  const [settlingMethod, setSettlingMethod] = useState<"wave" | "om" | "bank_transfer" | "cash">("wave");
+  const [settlingRef, setSettlingRef] = useState("");
+  const [settlingSuccessMessage, setSettlingSuccessMessage] = useState("");
+  const [copiedPhone, setCopiedPhone] = useState(false);
 
   // New Employee form state
   const [newEmpName, setNewEmpName] = useState("");
@@ -156,9 +161,25 @@ export default function PayrollPage() {
     setPayrollNotes("");
   };
 
-  const handlePayViaWave = async (payrollId: string) => {
-    await updatePayrollStatus(payrollId, "paid");
+  const handleOpenSettlement = (p: Payroll) => {
+    setSettlingPayroll(p);
+    setSettlingMethod(p.paymentMethod || "wave");
+    setSettlingRef("");
   };
+
+  const handleConfirmSettlement = async () => {
+    if (!settlingPayroll) return;
+    await updatePayrollStatus(
+      settlingPayroll.id, 
+      "paid", 
+      settlingMethod, 
+      new Date().toLocaleDateString("fr-FR")
+    );
+    setSettlingSuccessMessage(`Virement de salaire effectué avec succès pour ${settlingPayroll.employeeName} (${settlingPayroll.netSalary.toLocaleString("fr-FR")} FCFA via ${settlingMethod.toUpperCase()}).`);
+    setSettlingPayroll(null);
+    setTimeout(() => setSettlingSuccessMessage(""), 5000);
+  };
+
 
   const handleSendPayrollWhatsApp = (payrollToSend?: Payroll) => {
     const p = payrollToSend || showPayslipModal;
@@ -199,6 +220,14 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
 
   return (
     <div className="space-y-6 pb-12 print:p-0 print:m-0">
+      {/* Toast de confirmation de décaissement de salaire */}
+      {settlingSuccessMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-emerald-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-300 border border-emerald-500 print:hidden">
+          <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+          <span className="text-xs font-bold">{settlingSuccessMessage}</span>
+        </div>
+      )}
+
       {/* Main Payroll Dashboard (Hidden during print when payslip is displayed) */}
       <div className={`space-y-6 ${showPayslipModal ? "print:hidden" : ""}`}>
         {/* Header */}
@@ -447,7 +476,7 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
                           {p.status !== "paid" && (
                             <Button
                               size="sm"
-                              onClick={() => handlePayViaWave(p.id)}
+                              onClick={() => handleOpenSettlement(p)}
                               className="h-7 px-2.5 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1 shadow-sm"
                             >
                               <span>Régler</span>
@@ -1090,6 +1119,215 @@ _Certifié conforme aux règles du Code du Travail du Sénégal et du Système C
           </div>
         </div>
       )}
+
+      {/* MODAL 4: RÈGLEMENT DU SALAIRE (DÉCAISSEMENT ENTREPRISE) */}
+      {settlingPayroll && (() => {
+        const emp = employeesList.find((e) => e.id === settlingPayroll.employeeId);
+        const rawPhone = emp?.phone || "";
+        const cleanPhone = rawPhone.replace(/[^0-9]/g, "");
+
+        const handleCopyPhone = () => {
+          if (cleanPhone) {
+            navigator.clipboard.writeText(cleanPhone);
+            setCopiedPhone(true);
+            setTimeout(() => setCopiedPhone(false), 2000);
+          }
+        };
+
+        const handleOpenWaveApp = () => {
+          window.open("https://pay.wave.com", "_blank");
+        };
+
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200 print:hidden">
+            <div className="w-full max-w-lg bg-card text-foreground rounded-3xl p-6 sm:p-7 border border-border shadow-2xl relative space-y-5">
+              {/* Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-border">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+                    <DollarSign className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-extrabold text-base text-foreground">
+                      Règlement du Salaire — Décaissement
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      Versement de salaire émis par l'entreprise vers le salarié
+                    </p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setSettlingPayroll(null)} 
+                  className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Montant Net et Salarié Beneficiaire */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-500/10 via-purple-500/5 to-transparent border border-emerald-500/20 space-y-3">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Salarié Bénéficiaire</span>
+                    <h4 className="text-base font-black text-foreground">{settlingPayroll.employeeName}</h4>
+                    <p className="text-xs text-muted-foreground">{settlingPayroll.position || "Employé"} • {settlingPayroll.department}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Net à décaisser</span>
+                    <p className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
+                      {settlingPayroll.netSalary.toLocaleString("fr-FR")} FCFA
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
+                  <span className="text-muted-foreground">Période de paie :</span>
+                  <span className="font-bold text-foreground font-mono">
+                    Mois de {String(settlingPayroll.periodMonth).padStart(2, "0")}/{settlingPayroll.periodYear}
+                  </span>
+                </div>
+
+                {cleanPhone && (
+                  <div className="flex items-center justify-between text-xs bg-background/80 p-2.5 rounded-xl border border-border">
+                    <span className="text-muted-foreground flex items-center gap-1.5">
+                      📱 Téléphone de versement : <strong className="text-foreground font-mono">{rawPhone}</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopyPhone}
+                      className="text-[11px] font-bold text-brand-blue hover:underline"
+                    >
+                      {copiedPhone ? "Copié !" : "Copier le numéro"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Choix du mode de décaissement */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-muted-foreground uppercase block">
+                  Mode de versement du salaire
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setSettlingMethod("wave")}
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
+                      settlingMethod === "wave"
+                        ? "bg-[#1dc3f7]/15 border-[#1dc3f7] text-[#008db9] dark:text-[#38bdf8] shadow-sm"
+                        : "bg-card border-border hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <WaveLogo className="w-5 h-5 shrink-0" />
+                    <div>
+                      <div>Wave Money</div>
+                      <span className="text-[10px] font-normal opacity-80">Instantané sans frais</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSettlingMethod("om")}
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
+                      settlingMethod === "om"
+                        ? "bg-[#ff7900]/15 border-[#ff7900] text-[#ea580c] dark:text-[#fb923c] shadow-sm"
+                        : "bg-card border-border hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <OrangeMoneyLogo className="w-5 h-5 shrink-0" />
+                    <div>
+                      <div>Orange Money</div>
+                      <span className="text-[10px] font-normal opacity-80">Transfert direct OM</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSettlingMethod("bank_transfer")}
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
+                      settlingMethod === "bank_transfer"
+                        ? "bg-purple-500/15 border-purple-500 text-purple-600 dark:text-purple-300 shadow-sm"
+                        : "bg-card border-border hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <Building2 className="w-5 h-5 shrink-0 text-purple-500" />
+                    <div>
+                      <div>Virement Bancaire</div>
+                      <span className="text-[10px] font-normal opacity-80">Ordre de virement RIB</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setSettlingMethod("cash")}
+                    className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition-all text-left ${
+                      settlingMethod === "cash"
+                        ? "bg-emerald-500/15 border-emerald-500 text-emerald-600 dark:text-emerald-400 shadow-sm"
+                        : "bg-card border-border hover:bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    <span className="text-base">💵</span>
+                    <div>
+                      <div>Espèces</div>
+                      <span className="text-[10px] font-normal opacity-80">Main propre avec décharge</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Raccourci d'action rapide pour Wave si sélectionné */}
+              {settlingMethod === "wave" && (
+                <div className="p-3 bg-[#1dc3f7]/10 rounded-2xl border border-[#1dc3f7]/30 flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 text-[#008db9] dark:text-[#38bdf8]">
+                    <WaveLogo className="w-4 h-4 shrink-0" />
+                    <span>Lancer le virement sur Wave</span>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleOpenWaveApp}
+                    className="h-8 text-xs font-bold border-[#1dc3f7]/40 text-[#008db9] dark:text-[#38bdf8] hover:bg-[#1dc3f7]/20"
+                  >
+                    Ouvrir Wave
+                  </Button>
+                </div>
+              )}
+
+              {/* Référence ou note de virement */}
+              <div>
+                <label className="text-[11px] font-bold text-muted-foreground uppercase block mb-1">
+                  Référence de transaction / Quittance de paie (facultatif)
+                </label>
+                <Input
+                  value={settlingRef}
+                  onChange={(e) => setSettlingRef(e.target.value)}
+                  placeholder="Ex: TRF-WAV-9842 ou Virement N° 12"
+                  className="text-xs font-mono"
+                />
+              </div>
+
+              {/* Bouton de confirmation */}
+              <div className="flex items-center gap-2.5 pt-2 border-t border-border">
+                <Button
+                  variant="outline"
+                  onClick={() => setSettlingPayroll(null)}
+                  className="flex-1 rounded-xl text-xs font-bold h-11"
+                >
+                  Annuler
+                </Button>
+
+                <Button
+                  onClick={handleConfirmSettlement}
+                  className="flex-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold h-11 gap-2 shadow-lg shadow-emerald-600/20"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Confirmer le versement</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -61,7 +61,7 @@ interface AppDataContextProps {
   updateEmployee: (id: string, updates: Partial<Employee>) => Promise<void>;
   deleteEmployee: (id: string) => Promise<void>;
   addPayroll: (payroll: Omit<Payroll, "id">) => Promise<void>;
-  updatePayrollStatus: (id: string, status: "draft" | "pending" | "paid") => Promise<void>;
+  updatePayrollStatus: (id: string, status: "draft" | "pending" | "paid", paymentMethod?: "wave" | "om" | "bank_transfer" | "cash", paymentDate?: string) => Promise<void>;
   addDeal: (deal: Omit<Deal, "id" | "createdAt">) => Promise<void>;
   updateDealStage: (id: string, stage: DealStage) => Promise<void>;
   deleteDeal: (id: string) => Promise<void>;
@@ -919,14 +919,20 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updatePayrollStatus = async (id: string, status: "draft" | "pending" | "paid") => {
+  const updatePayrollStatus = async (
+    id: string, 
+    status: "draft" | "pending" | "paid", 
+    paymentMethod?: "wave" | "om" | "bank_transfer" | "cash",
+    paymentDate?: string
+  ) => {
     setPayrollsList((prev) => {
       const updated = prev.map((p) =>
         p.id === id
           ? {
               ...p,
               status,
-              paymentDate: status === "paid" ? new Date().toLocaleDateString("fr-FR") : p.paymentDate,
+              paymentMethod: paymentMethod || p.paymentMethod,
+              paymentDate: paymentDate || (status === "paid" ? new Date().toLocaleDateString("fr-FR") : p.paymentDate),
             }
           : p
       );
