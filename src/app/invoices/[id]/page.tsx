@@ -62,10 +62,14 @@ export default function InvoiceDetailPage() {
   const handleWhatsAppShare = () => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const paymentLink = `${baseUrl}/pay/${id}`;
+    const rawPhone = (invoice as any)?.clientPhone || (invoice as any)?.phone || "";
+    const phone = rawPhone ? rawPhone.replace(/[^0-9]/g, "") : "";
     
     const message = `Bonjour ${invoice.client},\n\nVoici votre facture ${invoice.number} d'un montant de ${formatFCFA(total)}.\n\nVous pouvez la consulter et la régler en toute sécurité via Wave ou Orange Money en cliquant sur le lien ci-dessous :\n\n${paymentLink}\n\nMerci de votre confiance !`;
     
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = phone 
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
+      : `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 

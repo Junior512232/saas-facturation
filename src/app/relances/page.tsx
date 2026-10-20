@@ -51,7 +51,8 @@ export default function RelancesWhatsAppPage() {
 
   const generateWhatsAppMessage = (invoice: typeof invoicesList[0], type: "friendly" | "due" | "urgent") => {
     const compName = companySettings?.companyName || "iziFlow";
-    const paymentLink = `https://iziflow.sn/pay/${invoice.id}`;
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://saas-facturation-ughf.vercel.app";
+    const paymentLink = `${baseUrl}/pay/${invoice.id}`;
 
     if (type === "friendly") {
       return `Bonjour ${invoice.client} 👋,\n\nC'est un rappel amical de la part de *${compName}* concernant votre facture *N° ${invoice.number}* d'un montant de *${invoice.amount.toLocaleString("fr-FR")} FCFA*, arrivant à échéance le ${invoice.dueDate}.\n\nVous pouvez effectuer votre règlement instantanément par *Wave* ou *Orange Money* via ce lien sécurisé :\n👉 ${paymentLink}\n\nMerci pour votre confiance !`;

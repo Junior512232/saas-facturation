@@ -38,7 +38,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { WaveLogo, OrangeMoneyLogo, PaymentMethodBadge } from "@/components/ui/payment-logos";
 import QRCode from "react-qr-code";
-import { initiateBictorysSalePayment } from "@/app/actions/payment";
+import { initiateBictorysSalePayment, createPosSaleInvoice } from "@/app/actions/payment";
 import {
   Dialog,
   DialogContent,
@@ -102,9 +102,11 @@ export default function SalesPage() {
       .map((it) => `• ${it.name} (x${it.quantity}) : ${formatFCFA(it.totalPrice)}`)
       .join("\n");
 
-    const paymentLinkSection = (customPaymentUrl || bictorysPaymentUrl)
-      ? `\n🔗 *Lien de règlement sécurisé Bictorys (Wave, OM, CB) :*\n${customPaymentUrl || bictorysPaymentUrl}\n`
-      : "";
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://saas-facturation-ughf.vercel.app";
+    const ticketPublicUrl = `${baseUrl}/pay/ticket/${sale.saleNumber}`;
+    const paymentLink = customPaymentUrl || (bictorysPaymentUrl && !bictorysPaymentUrl.includes("sandbox_pay") ? bictorysPaymentUrl : ticketPublicUrl);
+
+    const paymentLinkSection = `\n🔗 *Consulter ou régler votre ticket en ligne :*\n${paymentLink}\n`;
 
     const methodLabel = sale.paymentMethod === "bictorys"
       ? "BICTORYS (WAVE / ORANGE MONEY / CB)"
@@ -224,6 +226,23 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
     setCurrentSaleNumber(saleNumber);
 
     try {
+      // Pré-enregistrer le ticket dans Supabase pour consultation et paiement immédiats
+      await createPosSaleInvoice({
+        saleNumber,
+        clientId: selectedClientId || undefined,
+        customerName: customerName || "Client de passage",
+        paymentMethod: "bictorys",
+        subtotal,
+        taxAmount,
+        total,
+        items: cart.map((it) => ({
+          name: it.product.name,
+          quantity: it.quantity,
+          unitPrice: it.product.sellingPrice,
+          totalPrice: it.product.sellingPrice * it.quantity,
+        })),
+      });
+
       const client = clientsList.find((c) => c.id === selectedClientId);
       const res = await initiateBictorysSalePayment({
         saleNumber,
@@ -281,6 +300,27 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
     };
 
     await addSale(newSaleData);
+
+    // Synchronisation en base pour consultation et reçu permanent
+    try {
+      await createPosSaleInvoice({
+        saleNumber,
+        clientId: selectedClientId || undefined,
+        customerName: customerName || "Client de passage",
+        paymentMethod: activeMethod,
+        subtotal,
+        taxAmount,
+        total,
+        items: saleItems.map((it) => ({
+          name: it.name,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          totalPrice: it.totalPrice,
+        })),
+      });
+    } catch (e) {
+      console.warn("Synchronisation du ticket:", e);
+    }
 
     const saleRecord: Sale = {
       ...newSaleData,

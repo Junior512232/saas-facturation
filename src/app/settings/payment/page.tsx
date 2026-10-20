@@ -132,6 +132,16 @@ export default function PaymentSettingsPage() {
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/10 text-indigo-600 border border-indigo-500/30">
             <span className="w-2 h-2 rounded-full bg-indigo-500" /> Visa / Mastercard
           </span>
+          <a
+            href="https://afro.tools/providers/bictorys"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all shadow-xs"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Spécification afro.tools</span>
+            <ExternalLink className="w-3 h-3 ml-0.5" />
+          </a>
         </div>
       </div>
 
