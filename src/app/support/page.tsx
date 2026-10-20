@@ -389,14 +389,14 @@ Envoyé depuis l'application iziFlow`;
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+            <div className="flex flex-col gap-2.5 pt-2">
               <Button
                 type="submit"
                 disabled={isSubmitting || !subject.trim() || !message.trim()}
-                className="flex-1 bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold text-xs h-11 rounded-xl gap-2 shadow-md shadow-[#25D366]/20 transition-all active:scale-[0.98]"
+                className="w-full bg-[#25D366] hover:bg-[#1ebe5b] text-slate-950 font-bold text-xs h-11 rounded-xl gap-2 shadow-md shadow-[#25D366]/20 transition-all active:scale-[0.98] flex items-center justify-center"
               >
-                <MessageCircle className="w-4 h-4 fill-current" />
-                <span>Envoyer sur WhatsApp (+221 77 493 73 49)</span>
+                <MessageCircle className="w-4 h-4 fill-current shrink-0" />
+                <span className="truncate">Envoyer sur WhatsApp (+221 77 493 73 49)</span>
               </Button>
 
               <Button
@@ -404,11 +404,11 @@ Envoyé depuis l'application iziFlow`;
                 disabled={isSubmitting || !subject.trim() || !message.trim()}
                 onClick={() => handleSendTicket("email")}
                 variant="outline"
-                className="sm:w-auto px-4 h-11 rounded-xl text-xs font-bold gap-1.5 border-border hover:bg-muted"
+                className="w-full h-10 rounded-xl text-xs font-semibold gap-2 border-border hover:bg-muted text-muted-foreground hover:text-foreground transition-all flex items-center justify-center"
                 title="Envoyer par email à massalndiaye23@gmail.com"
               >
-                <Mail className="w-4 h-4" />
-                <span>Email</span>
+                <Mail className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span className="truncate">Ou envoyer par Email (massalndiaye23@gmail.com)</span>
               </Button>
             </div>
 
