@@ -147,21 +147,8 @@ export default function LandingPage() {
           2. HERO SECTION (Punchy, Direct, Modern, Izimelo Aesthetic)
       ────────────────────────────────────────────────────────────────────────── */}
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden">
-        {/* Hero Background Image with Clear Opacity & Transparency Overlay */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-          <img
-            src="/hero-bg.jpg"
-            alt="Gestion d'entreprise et facturation iziFlow"
-            className="w-full h-full object-cover object-center opacity-60 md:opacity-75 filter brightness-95 contrast-105"
-          />
-          {/* Transparent Gradient Overlays for High Legibility */}
-          <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[0.5px]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-transparent to-slate-950" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/70" />
-        </div>
-
         {/* Glow ambient background effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-tr from-indigo-600/30 via-violet-600/25 to-sky-500/15 blur-[130px] rounded-full pointer-events-none z-[1]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-tr from-indigo-600/30 via-violet-600/25 to-sky-500/15 blur-[130px] rounded-full pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-5 text-center relative z-10 flex flex-col items-center gap-6">
           {/* Top Pill Badge */}
@@ -170,13 +157,13 @@ export default function LandingPage() {
             <span>Le n°1 de la gestion commerciale & facturation en Afrique</span>
           </div>
 
-          {/* Main Headline with High Contrast Shadow */}
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.08] text-white max-w-4xl drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]">
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-[1.08] text-white max-w-4xl">
             Pilotez votre entreprise en <span className="bg-gradient-to-r from-indigo-400 via-violet-300 to-sky-400 bg-clip-text text-transparent">3 minutes chrono</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-base sm:text-lg md:text-xl text-slate-100 max-w-2xl font-normal leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.85)]">
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-2xl font-normal leading-relaxed">
             Ventes au comptoir, déstockage automatique, facturation certifiée avec cachet d'entreprise et encaissement Wave & Orange Money. La suite tout-en-un conforme OHADA.
           </p>
 
@@ -199,7 +186,7 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-300 font-semibold -mt-2 drop-shadow-md">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-300 font-semibold -mt-2">
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Gratuit &amp; Sans CB</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Conforme OHADA &amp; Sénégal</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Support WhatsApp 7j/7</span>
@@ -220,34 +207,9 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <span className="font-medium drop-shadow-sm">
+            <span className="font-medium">
               Rejoint par plus de <strong>7 000 commerçants et PME</strong> au Sénégal, Côte d'Ivoire & Cameroun
             </span>
-          </div>
-
-          {/* Real Office Experience Photo Banner with Glass Frame */}
-          <div className="w-full max-w-4xl mx-auto pt-4">
-            <div className="relative rounded-3xl overflow-hidden border border-white/20 bg-slate-900/60 backdrop-blur-xl shadow-2xl shadow-black/80 group">
-              <div className="relative aspect-[16/9] sm:aspect-[21/9] w-full overflow-hidden">
-                <img
-                  src="/hero-bg.jpg"
-                  alt="Une bonne gestion, c'est une entreprise qui grandit - iziFlow"
-                  className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 select-none"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-                
-                {/* Floating Quote Badge */}
-                <div className="absolute bottom-4 left-4 right-4 sm:right-auto sm:max-w-md bg-slate-950/90 backdrop-blur-md p-4 rounded-2xl border border-white/15 text-left shadow-2xl">
-                  <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold mb-1">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>L'expérience iziFlow au quotidien</span>
-                  </div>
-                  <p className="text-white text-xs sm:text-sm font-semibold leading-relaxed">
-                    « Une bonne gestion, c'est une entreprise qui grandit. Des factures plus simples, plus de temps pour vous. »
-                  </p>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Smartphone App Showcase (Fintech Style) */}
