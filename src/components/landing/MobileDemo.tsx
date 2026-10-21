@@ -1,355 +1,391 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   CheckCircle2, 
-  Send, 
   Sparkles, 
-  ArrowRight, 
-  FileText, 
-  CheckCheck, 
-  Smartphone,
-  Play,
-  RotateCcw
+  Receipt, 
+  ShoppingBag, 
+  Briefcase,
+  Layers, 
+  Package,
+  ShieldCheck, 
+  Play, 
+  Pause, 
+  RotateCcw,
+  CheckCheck,
+  ArrowRight
 } from "lucide-react";
-import { formatFCFA } from "@/lib/utils";
 
-// Logo Wave SVG officiel
-function WaveIcon({ className = "w-5 h-5" }: { className?: string }) {
+// Logo Wave SVG
+function WaveIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <div className={`rounded-full bg-[#1dc3f7] flex items-center justify-center text-white font-black text-[10px] ${className}`}>
+    <div className={`rounded-full bg-[#1dc3f7] flex items-center justify-center text-white font-black text-[10px] shrink-0 ${className}`}>
       W
     </div>
   );
 }
 
 // Logo WhatsApp SVG
-function WhatsAppIcon({ className = "w-5 h-5" }: { className?: string }) {
+function WhatsAppIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <svg className={`shrink-0 ${className}`} viewBox="0 0 24 24" fill="currentColor">
       <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.587 1.961.947 2.801.947h.005c3.18 0 5.767-2.586 5.768-5.766 0-3.18-2.586-5.768-5.778-5.768zm7.322 5.767c-.002 3.992-3.25 7.241-7.246 7.241-1.258 0-2.451-.334-3.51-.955l-4.103 1.076 1.096-4c-.694-1.111-1.077-2.399-1.079-3.722.002-3.992 3.25-7.241 7.246-7.241 3.995 0 7.244 3.248 7.246 7.241z"/>
     </svg>
   );
 }
 
-interface MobileDemoProps {
-  videoSrc?: string; // Permet à l'utilisateur de charger sa vidéo Loom/Screen Studio s'il le souhaite
+interface ScreenItem {
+  id: string;
+  tabLabel: string;
+  shortTag: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  icon: any;
+  highlightText: string;
+  statBadge: {
+    label: string;
+    value: string;
+    color: string;
+  };
 }
 
-export function MobileDemo({ videoSrc }: MobileDemoProps) {
-  const [step, setStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
+const SCREENS: ScreenItem[] = [
+  {
+    id: "invoice",
+    tabLabel: "Facture & WhatsApp",
+    shortTag: "Facture VTE-003",
+    title: "Facturation Certifiée & Envoi WhatsApp",
+    subtitle: "Modèle conforme OHADA avec cachet d'entreprise, envoyé sur WhatsApp en 1 clic et payable par Wave ou Orange Money.",
+    image: "/mockups/invoice_detail.jpg",
+    icon: Receipt,
+    highlightText: "Bouton WhatsApp officiel • Reçu direct client",
+    statBadge: {
+      label: "Statut facture",
+      value: "Payée (Wave)",
+      color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+    }
+  },
+  {
+    id: "pos",
+    tabLabel: "Caisse & Ventes",
+    shortTag: "POS 205 320 F",
+    title: "Caisse Rapide & Déstockage Comptoir",
+    subtitle: "Terminal tactile pour encaisser au comptoir, imprimer les tickets thermiques et suivre la marge brute en temps réel.",
+    image: "/mockups/pos_caisse.jpg",
+    icon: ShoppingBag,
+    highlightText: "+72 000 FCFA de bénéfice commercial net",
+    statBadge: {
+      label: "Total Encaissé",
+      value: "205 320 FCFA",
+      color: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30"
+    }
+  },
+  {
+    id: "payroll",
+    tabLabel: "Paie & RH",
+    shortTag: "Social & IPRES",
+    title: "Bulletins de Salaires & Cotisations IPRES",
+    subtitle: "Édition de fiches de paie conformes OHADA / Code du travail sénégalais avec barème IPRES & CSS automatique.",
+    image: "/mockups/payroll_rh.jpg",
+    icon: Briefcase,
+    highlightText: "Masse salariale : 2 173 548 FCFA",
+    statBadge: {
+      label: "Cotisations IPRES/CSS",
+      value: "348 452 FCFA",
+      color: "bg-sky-500/15 text-sky-300 border-sky-500/30"
+    }
+  },
+  {
+    id: "modules",
+    tabLabel: "Hub Modules",
+    shortTag: "CRM & Relances",
+    title: "Modules Commerciaux & Pipeline CRM",
+    subtitle: "Activez votre pipeline de prospects, planifiez les relances WhatsApp d'impayés et gérez votre catalogue d'articles.",
+    image: "/mockups/dashboard_modules.jpg",
+    icon: Layers,
+    highlightText: "Pipeline CRM • Relances WhatsApp • Stocks",
+    statBadge: {
+      label: "Suite Complète",
+      value: "5 Modules Actifs",
+      color: "bg-purple-500/15 text-purple-300 border-purple-500/30"
+    }
+  },
+  {
+    id: "stock",
+    tabLabel: "Stocks & Articles",
+    shortTag: "Catalogue",
+    title: "Catalogue Produits & Alertes Rupture",
+    subtitle: "Fiche article complète avec code SKU, prix d'achat, prix de vente et décompte automatique lors des encaissements.",
+    image: "/mockups/stock_modal.jpg",
+    icon: Package,
+    highlightText: "Terminal TPE Wave & QR Code en stock",
+    statBadge: {
+      label: "Déstockage",
+      value: "100% Automatique",
+      color: "bg-amber-500/15 text-amber-300 border-amber-500/30"
+    }
+  }
+];
 
-  // Cycle automatique de 12-15 secondes (4,5 secondes par étape)
+export function MobileDemo() {
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-cycle through screens every 4.5 seconds when isPlaying is true
   useEffect(() => {
-    if (!isPlaying || videoSrc) return;
-    const interval = setInterval(() => {
-      setStep((prev) => (prev + 1) % 3);
+    if (!isPlaying) return;
+    timerRef.current = setInterval(() => {
+      setActiveIdx((prev) => (prev + 1) % SCREENS.length);
     }, 4500);
-    return () => clearInterval(interval);
-  }, [isPlaying, videoSrc]);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPlaying]);
+
+  const activeScreen = SCREENS[activeIdx];
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-sm mx-auto">
+    <div className="relative w-full max-w-5xl mx-auto flex flex-col items-center">
       
-      {/* Contrôles d'étapes (Timeline en haut du smartphone) */}
-      {!videoSrc && (
-        <div className="flex items-center justify-between w-full px-2 gap-1.5 bg-brand-creamDark/60 p-1.5 rounded-2xl border border-brand-border">
-          <button 
-            onClick={() => { setStep(0); setIsPlaying(false); }}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
-              step === 0 
-                ? "bg-white text-brand-dark shadow-sm scale-[1.02]" 
-                : "text-brand-muted hover:text-brand-dark"
-            }`}
-          >
-            <span>1. Facture</span>
-          </button>
+      {/* ──────────────────────────────────────────────────────────────────
+          1. TOP PILL SELECTOR (Switch between real app screens)
+      ────────────────────────────────────────────────────────────────── */}
+      <div className="w-full flex flex-col items-center gap-3 mb-8">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 text-xs backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <span className="font-semibold text-white">Application Mobile en direct</span>
+          <span className="text-slate-500">•</span>
+          <span className="text-slate-400">Captures réelles sur smartphone</span>
+        </div>
 
-          <button 
-            onClick={() => { setStep(1); setIsPlaying(false); }}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
-              step === 1 
-                ? "bg-[#25D366] text-white shadow-sm scale-[1.02]" 
-                : "text-brand-muted hover:text-brand-dark"
-            }`}
-          >
-            <span>2. WhatsApp</span>
-          </button>
+        {/* Scrollable Tabs */}
+        <div className="flex items-center justify-start sm:justify-center gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800/90 backdrop-blur-xl max-w-full overflow-x-auto scrollbar-none shadow-xl">
+          {SCREENS.map((screen, idx) => {
+            const Icon = screen.icon;
+            const isActive = activeIdx === idx;
+            return (
+              <button
+                key={screen.id}
+                onClick={() => {
+                  setActiveIdx(idx);
+                  setIsPlaying(false);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-600/30 scale-102"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-white" : "text-slate-400"}`} />
+                <span>{screen.tabLabel}</span>
+              </button>
+            );
+          })}
 
-          <button 
-            onClick={() => { setStep(2); setIsPlaying(false); }}
-            className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 ${
-              step === 2 
-                ? "bg-[#1dc3f7] text-white shadow-sm scale-[1.02]" 
-                : "text-brand-muted hover:text-brand-dark"
-            }`}
+          {/* Play / Pause toggle */}
+          <button
+            onClick={() => setIsPlaying((p) => !p)}
+            title={isPlaying ? "Mettre en pause l'animation" : "Lancer le défilement automatique"}
+            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors ml-1"
           >
-            <span>3. Reçu Wave</span>
+            {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-indigo-400 fill-current" />}
           </button>
         </div>
-      )}
 
-      {/* Cadre de Téléphone Mobile (iPhone CSS) */}
-      <div className="relative mx-auto w-[295px] h-[590px] bg-zinc-950 rounded-[3rem] p-3 shadow-2xl ring-1 ring-zinc-800/80 shadow-brand-dark/20">
-        
-        {/* Bordure interne / Écran */}
-        <div className="relative w-full h-full bg-slate-100 rounded-[2.4rem] overflow-hidden flex flex-col select-none border border-zinc-800">
-          
-          {/* Dynamic Island / Encoche */}
-          <div className="absolute top-2 inset-x-0 z-50 flex justify-center pointer-events-none">
-            <div className="h-6 w-28 bg-black rounded-full flex items-center justify-between px-3">
-              <div className="w-2.5 h-2.5 rounded-full bg-zinc-900 border border-zinc-800" />
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            </div>
-          </div>
-
-          {/* Barres de progression Stories (12-15s en boucle) */}
-          {!videoSrc && (
-            <div className="absolute top-9 inset-x-4 z-40 flex gap-1.5">
-              <div className="h-1 flex-1 bg-black/10 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full bg-brand-blue rounded-full transition-all duration-300 ${
-                    step === 0 ? "w-full animate-in" : step > 0 ? "w-full" : "w-0"
-                  }`} 
-                />
-              </div>
-              <div className="h-1 flex-1 bg-black/10 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full bg-[#25D366] rounded-full transition-all duration-300 ${
-                    step === 1 ? "w-full animate-in" : step > 1 ? "w-full" : "w-0"
-                  }`} 
-                />
-              </div>
-              <div className="h-1 flex-1 bg-black/10 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full bg-[#1dc3f7] rounded-full transition-all duration-300 ${
-                    step === 2 ? "w-full animate-in" : "w-0"
-                  }`} 
-                />
-              </div>
-            </div>
-          )}
-
-          {/* CONTENU : SOIT VIDÉO EXTERNE SOIT ANIMATION CSS */}
-          {videoSrc ? (
-            <div className="w-full h-full pt-8 flex items-center justify-center bg-black">
-              <video 
-                src={videoSrc} 
-                autoPlay 
-                loop 
-                muted 
-                playsInline 
-                className="w-full h-full object-cover" 
+        {/* Story-like progress indicator pills */}
+        <div className="flex items-center gap-1.5 w-full max-w-xs px-4">
+          {SCREENS.map((_, i) => (
+            <div 
+              key={i} 
+              className="h-1 flex-1 bg-slate-800 rounded-full overflow-hidden cursor-pointer"
+              onClick={() => { setActiveIdx(i); setIsPlaying(false); }}
+            >
+              <div 
+                className={`h-full rounded-full transition-all duration-300 ${
+                  activeIdx === i 
+                    ? "bg-gradient-to-r from-indigo-500 to-violet-400 w-full" 
+                    : activeIdx > i 
+                    ? "bg-indigo-600/60 w-full" 
+                    : "w-0"
+                }`}
               />
             </div>
-          ) : (
-            <div className="relative w-full h-full pt-12 flex flex-col overflow-hidden">
-
-              {/* ======================================================== */}
-              {/* ÉTAPE 1 : CRÉATION DE FACTURE (Saisie express & Calcul TVA) */}
-              {/* ======================================================== */}
-              <div className={`absolute inset-0 pt-12 px-3.5 pb-4 flex flex-col justify-between transition-all duration-700 ease-in-out ${
-                step === 0 ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-full pointer-events-none"
-              }`}>
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-6 h-6 rounded-lg bg-brand-blue flex items-center justify-center text-white text-[10px] font-black">
-                        iF
-                      </div>
-                      <span className="text-[11px] font-bold text-zinc-800">Éditer Facture</span>
-                    </div>
-                    <span className="text-[9px] font-mono font-bold bg-zinc-200 text-zinc-700 px-2 py-0.5 rounded-full">
-                      #FAC-042
-                    </span>
-                  </div>
-
-                  {/* Formulaire de création express */}
-                  <div className="bg-white rounded-2xl p-3 shadow-sm border border-zinc-200/80 space-y-2.5">
-                    <div>
-                      <span className="text-[9px] text-zinc-400 font-bold block mb-0.5">CLIENT</span>
-                      <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5 flex items-center justify-between">
-                        <span className="text-xs font-bold text-zinc-800">Amadou Diallo</span>
-                        <span className="text-[10px] text-emerald-600 font-semibold">Dakar, SN</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <span className="text-[9px] text-zinc-400 font-bold block mb-0.5">PRESTATION</span>
-                      <div className="bg-zinc-50 border border-zinc-200 rounded-lg px-2.5 py-1.5">
-                        <p className="text-xs font-semibold text-zinc-800">Stratégie Commerciale</p>
-                        <p className="text-[10px] text-zinc-500 font-mono">150 000 FCFA</p>
-                      </div>
-                    </div>
-
-                    {/* Calcul TVA 18% automatique */}
-                    <div className="border-t border-dashed border-zinc-200 pt-2 space-y-1 text-[10px]">
-                      <div className="flex justify-between text-zinc-500">
-                        <span>Sous-total HT</span>
-                        <span className="font-mono">150 000 FCFA</span>
-                      </div>
-                      <div className="flex justify-between text-brand-blue font-semibold">
-                        <span>TVA Automatique (18%)</span>
-                        <span className="font-mono">+27 000 FCFA</span>
-                      </div>
-                      <div className="flex justify-between items-center text-zinc-900 font-bold pt-1 border-t border-zinc-100">
-                        <span className="text-xs">Total TTC</span>
-                        <span className="text-sm font-black text-brand-blue font-mono">177 000 FCFA</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bouton d'action avec simulation de clic */}
-                <div className="space-y-1.5">
-                  <div className="w-full bg-brand-blue text-white rounded-xl py-2.5 font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-blue/30 active:scale-95 transition-all">
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Générer &amp; Envoyer</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </div>
-                  <p className="text-[9px] text-center text-zinc-400 font-medium">
-                    ⚡ Facture 100% conforme OHADA &amp; TVA
-                  </p>
-                </div>
-              </div>
-
-              {/* ======================================================== */}
-              {/* ÉTAPE 2 : ENVOI PAR WHATSAPP (Message client direct & lien) */}
-              {/* ======================================================== */}
-              <div className={`absolute inset-0 pt-12 px-3 pb-4 flex flex-col justify-between bg-[#efeae2] transition-all duration-700 ease-in-out ${
-                step === 1 ? "opacity-100 translate-x-0" : step === 0 ? "opacity-0 translate-x-full pointer-events-none" : "opacity-0 -translate-x-full pointer-events-none"
-              }`}>
-                {/* Header WhatsApp */}
-                <div>
-                  <div className="bg-[#075e54] -mx-3 -mt-3 p-2.5 px-3 text-white flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-zinc-200 flex items-center justify-center text-zinc-700 font-bold text-xs">
-                        AD
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold leading-tight">Amadou Diallo</p>
-                        <p className="text-[9px] text-emerald-200 leading-tight">en ligne</p>
-                      </div>
-                    </div>
-                    <WhatsAppIcon className="w-4 h-4 text-emerald-300" />
-                  </div>
-
-                  {/* Date badge */}
-                  <div className="flex justify-center my-2.5">
-                    <span className="bg-white/80 text-[9px] font-semibold text-zinc-600 px-2 py-0.5 rounded-md shadow-2xs">
-                      Aujourd'hui
-                    </span>
-                  </div>
-
-                  {/* Bulle WhatsApp reçue avec le lien de paiement */}
-                  <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-sm border border-zinc-200 max-w-[90%] space-y-2">
-                    <p className="text-[11px] text-zinc-800 leading-relaxed">
-                      Bonjour M. Diallo 👋<br />
-                      Voici votre facture <strong>#FAC-042</strong> d'un montant de <strong>177 000 FCFA</strong>.
-                    </p>
-
-                    {/* Carte d'aperçu de paiement dans WhatsApp */}
-                    <div className="bg-slate-50 border border-zinc-200 rounded-xl p-2.5 space-y-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded-md bg-brand-blue text-white flex items-center justify-center text-[8px] font-bold">
-                          iF
-                        </div>
-                        <span className="text-[10px] font-bold text-zinc-800">iziFacture • Paiement Sécurisé</span>
-                      </div>
-                      <div className="flex justify-between items-center text-[10px]">
-                        <span className="text-zinc-500">Montant à régler :</span>
-                        <span className="font-bold font-mono text-zinc-900">177 000 FCFA</span>
-                      </div>
-                      
-                      {/* Bouton cliquable Wave dans le message */}
-                      <div className="bg-[#1dc3f7] text-white rounded-lg py-1.5 px-2 flex items-center justify-center gap-1 font-bold text-[10px] shadow-xs">
-                        <WaveIcon className="w-3.5 h-3.5" />
-                        <span>Payer par Wave en 1 clic</span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-1 text-[9px] text-zinc-400">
-                      <span>12:45</span>
-                      <CheckCheck className="w-3 h-3 text-sky-500" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/90 p-2 rounded-xl text-center shadow-xs">
-                  <p className="text-[10px] font-bold text-zinc-700 flex items-center justify-center gap-1">
-                    <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366]" />
-                    Le client clique et valide sur son téléphone
-                  </p>
-                </div>
-              </div>
-
-              {/* ======================================================== */}
-              {/* ÉTAPE 3 : PAIEMENT WAVE REÇU (Notification & confirmation) */}
-              {/* ======================================================== */}
-              <div className={`absolute inset-0 pt-12 px-3.5 pb-4 flex flex-col justify-between bg-white transition-all duration-700 ease-in-out ${
-                step === 2 ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-              }`}>
-                {/* Notification Push Wave instantanée */}
-                <div>
-                  <div className="bg-zinc-900 text-white rounded-2xl p-3 shadow-lg border border-zinc-800 mb-3 animate-in fade-in slide-in-from-top-4 duration-500">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <WaveIcon className="w-4 h-4" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#1dc3f7]">Notification Wave</span>
-                      <span className="text-[8px] text-zinc-400 ml-auto">À l'instant</span>
-                    </div>
-                    <p className="text-[11px] font-semibold text-white">
-                      Vous avez reçu <strong className="text-[#1dc3f7] font-mono">177 000 FCFA</strong> de Amadou Diallo.
-                    </p>
-                    <p className="text-[9px] text-zinc-400 mt-0.5">Réf: #FAC-042 validée automatiquement</p>
-                  </div>
-
-                  {/* Facture marquée PAYÉE dans iziFacture */}
-                  <div className="bg-emerald-50/70 border border-emerald-200 rounded-2xl p-4 text-center mt-2">
-                    <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center mx-auto mb-2 shadow-md shadow-emerald-500/20">
-                      <CheckCircle2 className="w-7 h-7" />
-                    </div>
-                    <span className="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full mb-1">
-                      Paiement Validé
-                    </span>
-                    <h3 className="text-base font-black text-zinc-900">177 000 FCFA</h3>
-                    <p className="text-[10px] text-zinc-500 mt-0.5">Facture #FAC-042 soldée</p>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="bg-slate-50 border border-zinc-200 rounded-xl p-2.5 flex items-center justify-between text-xs">
-                    <span className="text-zinc-500 text-[10px] font-medium">Solde actualisé :</span>
-                    <span className="font-black text-emerald-600 font-mono">+177 000 FCFA</span>
-                  </div>
-
-                  <button 
-                    onClick={() => setStep(0)}
-                    className="w-full bg-zinc-900 text-white rounded-xl py-2 font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-black transition-all"
-                  >
-                    <RotateCcw className="w-3 h-3" />
-                    <span>Revoir le parcours</span>
-                  </button>
-                </div>
-              </div>
-
-            </div>
-          )}
-
-          {/* Barre Home en bas du téléphone */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-24 h-1 bg-zinc-400 rounded-full z-50 pointer-events-none" />
+          ))}
         </div>
       </div>
 
-      {/* Légende sous le téléphone */}
-      <div className="text-center">
-        <p className="text-xs font-semibold text-brand-dark flex items-center justify-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-brand-blue" />
-          <span>Parcours en 3 étapes : Création &rarr; WhatsApp &rarr; Wave reçu</span>
-        </p>
-        <p className="text-[11px] text-brand-muted mt-0.5">
-          Durée : ~12 secondes • 100% automatisé
-        </p>
+      {/* ──────────────────────────────────────────────────────────────────
+          2. SMARTPHONE DEVICE & SURROUNDING FINTECH BADGES
+      ────────────────────────────────────────────────────────────────── */}
+      <div className="relative w-full flex items-center justify-center py-4">
+
+        {/* Ambient Radial Glow Behind Device */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[480px] h-[520px] bg-gradient-to-tr from-indigo-600/30 via-violet-600/25 to-sky-500/20 blur-[90px] rounded-full pointer-events-none -z-10" />
+
+        {/* ── FLOATING FINTECH BADGE LEFT (Wave Payment Received) ── */}
+        <div className="hidden lg:flex absolute left-4 xl:left-8 top-1/4 -translate-y-1/2 flex-col gap-3 z-20 animate-in fade-in slide-in-from-left-6 duration-700">
+          <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-2xl shadow-black/60 max-w-[240px] text-left">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <WaveIcon className="w-5 h-5 shadow-sm" />
+                <span className="text-[10px] font-bold tracking-wider uppercase text-[#1dc3f7]">Encaissement Wave</span>
+              </div>
+              <span className="text-[9px] text-slate-400 font-medium">À l'instant</span>
+            </div>
+            <p className="text-lg font-black font-mono text-emerald-400 leading-tight">
+              +205 320 FCFA
+            </p>
+            <p className="text-[11px] text-slate-300 mt-1 font-medium">
+              Facture <strong>VTE-2026-003</strong> soldée
+            </p>
+            <div className="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+              <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+                <CheckCircle2 className="w-3 h-3" /> Reçu Bictorys
+              </span>
+              <span>Comptoir POS</span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-xl max-w-[240px] text-left">
+            <div className="flex items-center gap-2 text-violet-400 text-xs font-bold mb-1">
+              <Briefcase className="w-3.5 h-3.5" />
+              <span>Paie &amp; Cotisations</span>
+            </div>
+            <p className="text-[11px] text-slate-300">
+              Masse salariale : <strong className="text-white font-mono">2 173 548 FCFA</strong>
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">IPRES/CSS : 348 452 FCFA</p>
+          </div>
+        </div>
+
+        {/* ── FLOATING FINTECH BADGE RIGHT (WhatsApp Receipt Sent) ── */}
+        <div className="hidden lg:flex absolute right-4 xl:right-8 top-1/3 -translate-y-1/2 flex-col gap-3 z-20 animate-in fade-in slide-in-from-right-6 duration-700">
+          <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl shadow-2xl shadow-black/60 max-w-[250px] text-left">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1.5 text-[#25D366]">
+                <WhatsAppIcon className="w-4 h-4" />
+                <span className="text-[10px] font-bold tracking-wider uppercase">Relance WhatsApp</span>
+              </div>
+              <CheckCheck className="w-3.5 h-3.5 text-sky-400" />
+            </div>
+            <p className="text-xs font-bold text-white leading-snug">
+              Facture PDF &amp; Reçu transmis au client
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1 font-mono">
+              +221 77 493 73 49
+            </p>
+            <div className="mt-2.5 pt-2 border-t border-slate-800 flex items-center justify-between text-[10px]">
+              <span className="text-slate-400">Ndiaye Agency</span>
+              <span className="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full">1-Clic</span>
+            </div>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-xl max-w-[250px] text-left">
+            <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold mb-1">
+              <ShieldCheck className="w-4 h-4" />
+              <span>Conformité Fiscale</span>
+            </div>
+            <p className="text-[11px] text-slate-300">
+              Système Comptable <strong>OHADA &amp; NINEA</strong>
+            </p>
+            <p className="text-[10px] text-slate-400 mt-0.5">TVA 18% &amp; QR Code certifié</p>
+          </div>
+        </div>
+
+        {/* ── THE IPHONE SMARTPHONE FRAME ── */}
+        <div className="relative group">
+          
+          {/* External phone chassis (Titanium dark finish) */}
+          <div className="relative w-[285px] sm:w-[325px] md:w-[340px] aspect-[472/1024] bg-[#0b0f17] rounded-[48px] p-2.5 sm:p-3 shadow-[0_25px_70px_rgba(0,0,0,0.85)] border-[6px] sm:border-[8px] border-slate-800/90 ring-1 ring-white/15 select-none transition-transform duration-300 group-hover:scale-[1.01]">
+            
+            {/* Side volume / power buttons simulation */}
+            <div className="absolute -left-[11px] top-24 w-[3px] h-10 bg-slate-700 rounded-l-sm" />
+            <div className="absolute -left-[11px] top-38 w-[3px] h-12 bg-slate-700 rounded-l-sm" />
+            <div className="absolute -right-[11px] top-32 w-[3px] h-14 bg-slate-700 rounded-r-sm" />
+
+            {/* Inner screen bezel */}
+            <div className="relative w-full h-full bg-black rounded-[38px] overflow-hidden border border-slate-900 flex flex-col">
+              
+              {/* Dynamic Island Pill */}
+              <div className="absolute top-2 inset-x-0 z-40 flex justify-center pointer-events-none">
+                <div className="h-5 sm:h-6 w-24 sm:w-28 bg-black rounded-full flex items-center justify-between px-2.5 sm:px-3 border border-slate-900 shadow-md">
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center">
+                    <div className="w-1 h-1 rounded-full bg-indigo-950" />
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                </div>
+              </div>
+
+              {/* Real App Screenshot Image */}
+              <div className="relative w-full h-full overflow-hidden bg-slate-950">
+                {SCREENS.map((screen, idx) => (
+                  <div
+                    key={screen.id}
+                    className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
+                      activeIdx === idx ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                    }`}
+                  >
+                    <img
+                      src={screen.image}
+                      alt={screen.title}
+                      className="w-full h-full object-cover object-top select-none"
+                      loading={idx === 0 ? "eager" : "lazy"}
+                    />
+                  </div>
+                ))}
+
+                {/* Subtle Glass Specular Glare Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-white/[0.08] pointer-events-none z-20" />
+              </div>
+
+              {/* Bottom Home Indicator Bar */}
+              <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-28 h-1 bg-white/40 rounded-full z-40 pointer-events-none backdrop-blur-sm" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          3. ACTIVE SCREEN DETAILS & CAPTION CARD
+      ────────────────────────────────────────────────────────────────── */}
+      <div className="w-full max-w-xl mx-auto mt-6 text-center">
+        <div className="p-5 rounded-3xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-xl shadow-xl flex flex-col items-center gap-2.5">
+          <div className="flex items-center gap-2">
+            <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${activeScreen.statBadge.color}`}>
+              {activeScreen.statBadge.label} : {activeScreen.statBadge.value}
+            </span>
+            <span className="text-[10px] text-slate-400 bg-slate-800/70 px-2 py-0.5 rounded-full font-medium">
+              {activeScreen.shortTag}
+            </span>
+          </div>
+
+          <h3 className="text-base sm:text-lg font-black text-white">
+            {activeScreen.title}
+          </h3>
+
+          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-lg">
+            {activeScreen.subtitle}
+          </p>
+
+          {/* Quick interactive navigation links */}
+          <div className="pt-2 flex items-center gap-3 text-xs text-indigo-400 font-semibold">
+            <button 
+              onClick={() => {
+                setActiveIdx((prev) => (prev + 1) % SCREENS.length);
+                setIsPlaying(false);
+              }}
+              className="flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              <span>Écran suivant ({SCREENS[(activeIdx + 1) % SCREENS.length].tabLabel})</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
       </div>
 
     </div>

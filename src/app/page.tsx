@@ -29,6 +29,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatFCFA } from "@/lib/utils";
+import { MobileDemo } from "@/components/landing/MobileDemo";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -185,6 +186,11 @@ export default function LandingPage() {
             <span>
               Rejoint par plus de <strong>7 000 commerçants et PME</strong> au Sénégal, Côte d'Ivoire & Cameroun
             </span>
+          </div>
+
+          {/* Smartphone App Showcase (Fintech Style) */}
+          <div className="w-full pt-8 md:pt-14">
+            <MobileDemo />
           </div>
         </div>
       </section>
