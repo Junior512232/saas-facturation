@@ -147,8 +147,20 @@ export default function LandingPage() {
           2. HERO SECTION (Punchy, Direct, Modern, Izimelo Aesthetic)
       ────────────────────────────────────────────────────────────────────────── */}
       <section className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden">
+        {/* Hero Background Image with Opacity & Transparency Overlay */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden select-none">
+          <img
+            src="/images/hero-bg.jpg"
+            alt="Gestion d'entreprise et facturation iziFlow"
+            className="w-full h-full object-cover object-top opacity-20 sm:opacity-25 filter brightness-90 contrast-105"
+          />
+          {/* Smooth multi-stop transparency gradients to blend into slate-950 */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/75 via-slate-950/85 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/80" />
+        </div>
+
         {/* Glow ambient background effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-tr from-indigo-600/25 via-violet-600/20 to-sky-500/10 blur-[130px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-gradient-to-tr from-indigo-600/25 via-violet-600/20 to-sky-500/10 blur-[130px] rounded-full pointer-events-none z-[1]" />
 
         <div className="max-w-5xl mx-auto px-5 text-center relative z-10 flex flex-col items-center gap-6">
           {/* Top Pill Badge */}
