@@ -43,7 +43,7 @@ export default function LandingPage() {
   useEffect(() => {
     setMounted(true);
     const handleScroll = () => {
-      setShowFloatingCta(window.scrollY > 450);
+      setShowFloatingCta(window.scrollY > 250);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -132,9 +132,9 @@ export default function LandingPage() {
                 </Link>
                 <Link
                   href="/register"
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-full shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center gap-1.5"
+                  className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center gap-1.5 border border-indigo-400/30"
                 >
-                  <span>Commencer</span>
+                  <span>Créer ma première facture — gratuit</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </>
@@ -173,7 +173,7 @@ export default function LandingPage() {
               href="/register"
               className="w-full sm:w-auto relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-base px-9 py-4 rounded-2xl shadow-2xl shadow-indigo-600/50 hover:shadow-indigo-500/60 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-indigo-400/30"
             >
-              <span>Commencer gratuitement</span>
+              <span>Créer ma première facture — gratuit</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
 
@@ -187,7 +187,7 @@ export default function LandingPage() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-300 font-semibold -mt-2">
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Gratuit &amp; Sans CB</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Sans engagement</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Conforme OHADA &amp; Sénégal</span>
             <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Support WhatsApp 7j/7</span>
           </div>
@@ -495,6 +495,21 @@ export default function LandingPage() {
               </div>
             )}
           </div>
+
+          {/* Inter-section Primary CTA */}
+          <div className="mt-8 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+              <p className="text-white font-bold text-sm">Prêt à tester l'ensemble de ces modules en direct ?</p>
+              <p className="text-xs text-slate-400">Éditez votre premier document conforme OHADA en moins de 3 minutes.</p>
+            </div>
+            <Link
+              href="/register"
+              className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-indigo-400/30"
+            >
+              <span>Créer ma première facture — gratuit</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -552,6 +567,21 @@ export default function LandingPage() {
                 Documents conformes aux règles de l'OHADA et de la DGI au Sénégal : mentions obligatoires (NINEA, RCCM), calcul automatique de TVA 18% et QR code d'authentification certifié.
               </p>
             </div>
+          </div>
+
+          {/* Inter-section Primary CTA */}
+          <div className="mt-8 pt-6 border-t border-indigo-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div>
+              <p className="text-white font-bold text-sm">Sécurisé, certifié et 100% conforme aux normes UEMOA</p>
+              <p className="text-xs text-slate-400">Lancez-vous dès aujourd'hui en toute sérénité.</p>
+            </div>
+            <Link
+              href="/register"
+              className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-indigo-400/30"
+            >
+              <span>Créer ma première facture — gratuit</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </section>
@@ -675,6 +705,20 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-14 flex flex-col items-center justify-center text-center gap-3">
+          <Link
+            href="/register"
+            className="w-full sm:w-auto relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm sm:text-base px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-600/40 hover:shadow-indigo-500/50 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="text-[11px] text-slate-400 font-medium">
+            Accès immédiat à tous les modules • Configuration en 3 min
+          </p>
+        </div>
       </section>
 
       {/* ──────────────────────────────────────────────────────────────────────────
@@ -732,6 +776,20 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-12 flex flex-col items-center justify-center text-center gap-3">
+          <Link
+            href="/register"
+            className="w-full sm:w-auto relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm sm:text-base px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-600/40 hover:shadow-indigo-500/50 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <p className="text-[11px] text-slate-400 font-medium">
+            Rejoignez plus de 7 000 entrepreneurs et commerçants satisfaits
+          </p>
         </div>
       </section>
 
@@ -793,8 +851,8 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Partage de lien de paiement manuel</li>
               </ul>
             </div>
-            <Link href="/register" className="mt-8 w-full py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold text-center block transition-colors">
-              Commencer gratuitement
+            <Link href="/register" className="mt-8 w-full py-3 bg-slate-800/80 hover:bg-slate-700/90 text-slate-200 hover:text-white rounded-xl text-xs font-semibold text-center block border border-slate-700/80 transition-colors">
+              Choisir le forfait Gratuit
             </Link>
           </div>
 
@@ -845,8 +903,8 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Support prioritaire WhatsApp 7j/7</li>
               </ul>
             </div>
-            <Link href="/register" className="mt-8 w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-indigo-600/30 transition-all">
-              Choisir le forfait Pro (10 000 FCFA)
+            <Link href="/register" className="mt-8 w-full py-3 bg-indigo-950/70 hover:bg-indigo-900/90 text-indigo-200 hover:text-white rounded-xl text-xs font-semibold text-center block border border-indigo-500/50 hover:border-indigo-400 transition-colors">
+              Choisir le forfait Pro
             </Link>
           </div>
 
@@ -894,10 +952,25 @@ export default function LandingPage() {
                 <li className="flex items-center gap-2"><Check className="w-4 h-4 text-emerald-400 shrink-0" /> Support VIP dédié Téléphone &amp; WhatsApp 7j/7</li>
               </ul>
             </div>
-            <Link href="/register" className="mt-8 w-full py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold text-center block shadow-lg shadow-purple-600/30 transition-all">
-              Choisir le forfait Business (25 000 FCFA)
+            <Link href="/register" className="mt-8 w-full py-3 bg-slate-800/80 hover:bg-slate-700/90 text-slate-200 hover:text-white rounded-xl text-xs font-semibold text-center block border border-slate-700/80 transition-colors">
+              Choisir le forfait Business
             </Link>
           </div>
+        </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
+          <div>
+            <p className="text-white font-bold text-sm">Vous préférez tester avant de choisir ?</p>
+            <p className="text-xs text-slate-400">Découvrez l'expérience complète sans engagement financier.</p>
+          </div>
+          <Link
+            href="/register"
+            className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -965,6 +1038,21 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-12 pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <p className="text-white font-bold text-sm">Faites grandir votre activité avec un outil pensé pour vous</p>
+            <p className="text-xs text-slate-400">Gagnez du temps sur l'administratif dès aujourd'hui.</p>
+          </div>
+          <Link
+            href="/register"
+            className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -1069,6 +1157,21 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-900/40 p-6 rounded-2xl border border-slate-800 text-center sm:text-left">
+          <div>
+            <p className="text-white font-bold text-sm">Passez de la théorie à la pratique en 3 minutes</p>
+            <p className="text-xs text-slate-400">Appliquez les règles OHADA en générant votre premier document certifié.</p>
+          </div>
+          <Link
+            href="/register"
+            className="w-full sm:w-auto shrink-0 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs sm:text-sm px-6 py-3 rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
       </section>
 
       {/* ──────────────────────────────────────────────────────────────────────────
@@ -1111,6 +1214,18 @@ export default function LandingPage() {
             );
           })}
         </div>
+
+        {/* Inter-section Primary CTA */}
+        <div className="mt-12 text-center flex flex-col items-center gap-3">
+          <p className="text-xs text-slate-400">Prêt à tester par vous-même ? Aucun engagement requis.</p>
+          <Link
+            href="/register"
+            className="w-full sm:w-auto relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-sm sm:text-base px-8 py-3.5 rounded-2xl shadow-xl shadow-indigo-600/40 hover:shadow-indigo-500/50 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-indigo-400/30"
+          >
+            <span>Créer ma première facture — gratuit</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
       </section>
 
       {/* ──────────────────────────────────────────────────────────────────────────
@@ -1130,9 +1245,9 @@ export default function LandingPage() {
             <div className="pt-2">
               <Link
                 href="/register"
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm sm:text-base px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all active:scale-95 border border-indigo-400/30"
               >
-                <span>Créer mon compte gratuit</span>
+                <span>Créer ma première facture — gratuit</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
@@ -1201,21 +1316,21 @@ export default function LandingPage() {
       </footer>
 
       {/* ──────────────────────────────────────────────────────────────────────────
-          10. FLOATING STICKY CTA BAR (Appears on scroll)
+          10. FLOATING STICKY CTA BAR (Appears on scroll & sticky on mobile)
       ────────────────────────────────────────────────────────────────────────── */}
       {showFloatingCta && (
-        <div className="fixed bottom-5 left-5 right-20 sm:left-auto sm:right-28 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
-          <div className="flex items-center gap-3 bg-slate-900/95 border border-indigo-500/40 backdrop-blur-xl p-2 sm:px-4 sm:py-2.5 rounded-full shadow-2xl shadow-indigo-600/30">
-            <div className="hidden sm:flex items-center gap-2">
+        <div className="fixed bottom-4 left-3 right-16 sm:left-auto sm:right-28 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center gap-3 bg-slate-900/95 border border-indigo-500/40 backdrop-blur-xl p-1.5 sm:px-4 sm:py-2.5 rounded-2xl sm:rounded-full shadow-2xl shadow-indigo-600/30">
+            <div className="hidden md:flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-xs font-black text-white">izi<span className="text-indigo-400">Flow</span></span>
               <span className="text-[11px] text-slate-400">• Facturation en 3 min</span>
             </div>
             <Link
               href="/register"
-              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-full shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center gap-1.5"
+              className="w-full sm:w-auto px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-xs rounded-xl sm:rounded-full shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-1.5 border border-indigo-400/30"
             >
-              <span>Commencer gratuitement</span>
+              <span>Créer ma première facture — gratuit</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>

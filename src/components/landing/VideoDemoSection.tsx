@@ -252,9 +252,9 @@ export function VideoDemoSection() {
 
           <Link
             href="/register"
-            className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 border border-indigo-400/30"
           >
-            <span>Créer ma première facture gratuite</span>
+            <span>Créer ma première facture — gratuit</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
