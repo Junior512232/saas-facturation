@@ -300,7 +300,7 @@ export function MobileDemo() {
         <div className="relative group">
           
           {/* External phone chassis (Titanium dark finish) */}
-          <div className="relative w-[285px] sm:w-[325px] md:w-[340px] aspect-[472/1024] bg-[#0b0f17] rounded-[48px] p-2.5 sm:p-3 shadow-[0_25px_70px_rgba(0,0,0,0.85)] border-[6px] sm:border-[8px] border-slate-800/90 ring-1 ring-white/15 select-none transition-transform duration-300 group-hover:scale-[1.01]">
+          <div className="relative w-[285px] sm:w-[325px] md:w-[340px] h-[618px] sm:h-[705px] md:h-[738px] bg-[#0b0f17] rounded-[48px] p-2.5 sm:p-3 shadow-[0_25px_70px_rgba(0,0,0,0.85)] border-[6px] sm:border-[8px] border-slate-800/90 ring-1 ring-white/15 select-none transition-transform duration-300 group-hover:scale-[1.01]">
             
             {/* Side volume / power buttons simulation */}
             <div className="absolute -left-[11px] top-24 w-[3px] h-10 bg-slate-700 rounded-l-sm" />
@@ -332,8 +332,8 @@ export function MobileDemo() {
                     <img
                       src={screen.image}
                       alt={screen.title}
-                      className="w-full h-full object-cover object-top select-none"
-                      loading={idx === 0 ? "eager" : "lazy"}
+                      className="w-full h-full object-cover object-top select-none block"
+                      loading="eager"
                     />
                   </div>
                 ))}

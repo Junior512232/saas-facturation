@@ -30,37 +30,53 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatFCFA } from "@/lib/utils";
 import { MobileDemo } from "@/components/landing/MobileDemo";
+import { LiveChatWidget } from "@/components/landing/LiveChatWidget";
+import { VideoDemoSection } from "@/components/landing/VideoDemoSection";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
   const [mounted, setMounted] = useState(false);
   const [activeShowcaseTab, setActiveShowcaseTab] = useState<"pos" | "invoices" | "stock" | "signature" | "reports">("pos");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [showFloatingCta, setShowFloatingCta] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const handleScroll = () => {
+      setShowFloatingCta(window.scrollY > 450);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const faqs = [
     {
+      q: "Est-ce que mes données et mes transactions sont sécurisées ?",
+      a: "Absolument. Vos données sont chiffrées de bout en bout avec le protocole bancaire SSL/TLS 256 bits et hébergées sur des serveurs sécurisés avec sauvegardes automatiques quotidiennes. Pour les paiements, nous nous appuyons sur des passerelles agréées par la BCEAO (comme Bictorys, Wave et Orange Money). Aucune donnée bancaire sensible n'est stockée sur nos serveurs."
+    },
+    {
+      q: "Puis-je utiliser l'application sans connexion internet ? (Mode hors-ligne)",
+      a: "Oui, parfaitement ! Conçu spécifiquement pour les réalités d'Afrique de l'Ouest, iziFlow intègre un mode hors-ligne intelligent (PWA). Vous pouvez continuer à saisir des encaissements au comptoir et délivrer des tickets de caisse même en cas de coupure réseau. Dès que la connexion est rétablie, vos données et vos niveaux de stocks se synchronisent automatiquement en arrière-plan."
+    },
+    {
+      q: "Comment se passe le support si j'ai un problème ?",
+      a: "Vous bénéficiez d'un support humain et ultra-réactif basé à Dakar, disponible 7j/7 directement sur WhatsApp (+221 77 493 73 49), par téléphone et par email (massalndiaye23@gmail.com). Nous répondons généralement en moins de 10 minutes et nous pouvons vous accompagner pas-à-pas lors d'un appel vidéo pour configurer votre compte."
+    },
+    {
+      q: "Puis-je importer mes anciennes données Excel ?",
+      a: "Oui, en 1 clic ! Vous pouvez importer directement vos fichiers Excel ou CSV existants : catalogue d'articles, liste de clients, prix et niveaux de stock initiaux. Nous fournissons des modèles Excel prêts à l'emploi et notre équipe peut vous assister gratuitement lors de la migration."
+    },
+    {
       q: "iziFlow est-il conforme aux normes fiscales OHADA et au Sénégal ?",
-      a: "Oui, parfaitement ! iziFlow intègre les mentions légales obligatoires OHADA (NINEA, RCCM), le calcul automatique de la TVA à 18% (ou exonération), et génère un QR code d'authentification certifié sur chaque document."
+      a: "Oui, à 100%. iziFlow intègre les mentions légales obligatoires OHADA (NINEA, RCCM), le calcul automatique de la TVA à 18% (ou exonération), et génère un QR code d'authentification certifié et inviolable sur chaque document."
     },
     {
       q: "Comment fonctionne l'encaissement direct par Wave et Orange Money ?",
-      a: "Sur le terminal de caisse comme sur les factures numériques, vos clients peuvent payer directement via leur compte Wave ou Orange Money. Vous pouvez également intégrer vos propres passerelles (Bictorys, Wave Merchant) pour recevoir l'argent instantanément sur votre compte professionnel."
-    },
-    {
-      q: "Mes stocks sont-ils automatiquement mis à jour lors d'une vente ?",
-      a: "Absolument. Dès qu'une vente est validée en caisse ou qu'une facture de marchandises est émise, les quantités sont décomptées en temps réel. Dès qu'un article passe sous le seuil d'alerte, une notification visuelle vous prévient pour éviter toute rupture."
+      a: "Sur le terminal de caisse comme sur les factures numériques partagées sur WhatsApp, vos clients règlent directement via leur compte Wave ou Orange Money. Grâce à la passerelle agréée Bictorys, l'argent arrive instantanément sur votre compte professionnel avec confirmation automatique."
     },
     {
       q: "Comment fonctionne le cachet d'entreprise et la signature électronique ?",
-      a: "Vous pouvez soit uploader l'image de votre tampon physique scanné, soit utiliser notre générateur magique de tampon officiel vectoriel. Vous tracez ensuite votre signature numérique au doigt ou à la souris : ils sont alors automatiquement apposés en bas de vos factures et devis PDF."
-    },
-    {
-      q: "Puis-je utiliser iziFlow sur mon smartphone ou tablette ?",
-      a: "Oui, iziFlow est entièrement 'Mobile-First' et 'Tablet-Ready'. Vous pouvez l'utiliser comme terminal de caisse tactile au comptoir ou créer une facture sur votre téléphone pendant vos déplacements."
+      a: "Vous pouvez soit uploader l'image de votre tampon physique scanné, soit utiliser notre générateur magique de tampon officiel vectoriel. Vous tracez ensuite votre signature numérique au doigt ou à la souris : ils sont automatiquement apposés en bas de vos factures et devis PDF."
     }
   ];
 
@@ -87,11 +103,13 @@ export default function LandingPage() {
           </Link>
 
           {/* Center Links (Desktop) */}
-          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold text-slate-300">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
             <a href="#showcase" className="hover:text-white transition-colors">Démonstration</a>
-            <a href="#features" className="hover:text-white transition-colors">Modules & Caisse</a>
+            <a href="#demo" className="hover:text-white transition-colors">Vidéo</a>
+            <a href="#features" className="hover:text-white transition-colors">Modules</a>
             <a href="#pricing" className="hover:text-white transition-colors">Tarifs</a>
-            <a href="#testimonials" className="hover:text-white transition-colors">Témoignages</a>
+            <a href="#about" className="hover:text-white transition-colors">À propos</a>
+            <a href="#resources" className="hover:text-white transition-colors">Guides</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
           </nav>
 
@@ -149,23 +167,29 @@ export default function LandingPage() {
             Ventes au comptoir, déstockage automatique, facturation certifiée avec cachet d'entreprise et encaissement Wave & Orange Money. La suite tout-en-un conforme OHADA.
           </p>
 
-          {/* Dual CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-2 w-full sm:w-auto">
+          {/* Dual CTAs - Much More Prominent */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 mt-3 w-full sm:w-auto">
             <Link
               href="/register"
-              className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-sm px-8 py-4 rounded-2xl shadow-xl shadow-indigo-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto relative group overflow-hidden bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-extrabold text-base px-9 py-4 rounded-2xl shadow-2xl shadow-indigo-600/50 hover:shadow-indigo-500/60 transition-all active:scale-95 flex items-center justify-center gap-2.5 border border-indigo-400/30"
             >
-              <span>Créer mon compte gratuit</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Commencer gratuitement</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
 
             <Link
               href="/login"
-              className="w-full sm:w-auto bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold text-sm px-6 py-4 rounded-2xl transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto bg-slate-900/90 hover:bg-slate-800 text-slate-200 border border-slate-800 font-semibold text-sm px-7 py-4 rounded-2xl transition-all flex items-center justify-center gap-2"
             >
               <Play className="w-4 h-4 text-indigo-400 fill-current" />
               <span>Tester la démo en 1 clic</span>
             </Link>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400 font-medium -mt-2">
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Gratuit &amp; Sans CB</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Conforme OHADA &amp; Sénégal</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-emerald-400" /> Support WhatsApp 7j/7</span>
           </div>
 
           {/* Social Proof */}
@@ -252,25 +276,32 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Mock Card Preview */}
-                <div className="md:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 shadow-xl text-left font-mono">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-800 text-xs">
-                    <span className="font-bold text-white">COMMANDE #VTE-2026-089</span>
-                    <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full font-sans text-[10px] font-bold">Payé • Wave</span>
+                {/* Real Mockup Visual Preview */}
+                <div className="md:col-span-6 relative rounded-3xl border border-slate-800 bg-slate-950/90 p-3 shadow-2xl overflow-hidden group">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/80 text-xs mb-2">
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <ShoppingBag className="w-4 h-4 text-emerald-400" />
+                      <span>Caisse Rapide &amp; Déstockage</span>
+                    </span>
+                    <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-[10px]">
+                      Capture Réelle
+                    </Badge>
                   </div>
-                  <div className="py-3 space-y-2 text-xs">
-                    <div className="flex justify-between text-slate-300">
-                      <span>2x Terminal TPE Wave</span>
-                      <span className="font-bold text-white">150 000 FCFA</span>
+                  <div className="relative rounded-2xl overflow-hidden max-h-[360px] bg-slate-900 border border-slate-800/80">
+                    <img 
+                      src="/mockups/pos_caisse.jpg" 
+                      alt="Caisse Rapide POS iziFlow" 
+                      className="w-full h-full object-cover object-top" 
+                    />
+                    <div className="absolute bottom-2.5 inset-x-2.5 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs flex justify-between items-center shadow-lg">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Total Encaissé Caisse</p>
+                        <p className="font-black text-white font-mono text-sm">205 320 FCFA</p>
+                      </div>
+                      <span className="font-bold text-emerald-400 font-mono text-xs bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                        +72 000 FCFA marge
+                      </span>
                     </div>
-                    <div className="flex justify-between text-slate-300">
-                      <span>1x Rouleaux Papier 80mm</span>
-                      <span className="font-bold text-white">12 000 FCFA</span>
-                    </div>
-                  </div>
-                  <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-sm font-bold text-white">
-                    <span>TOTAL TTC</span>
-                    <span className="text-xl text-indigo-400">162 000 FCFA</span>
                   </div>
                 </div>
               </div>
@@ -295,18 +326,32 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="md:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 shadow-xl text-left">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <div>
-                      <p className="font-black text-sm text-white">iziFlow Entreprise</p>
-                      <p className="text-[10px] text-slate-400">NINEA : 001234567 2V3</p>
-                    </div>
-                    <Badge variant="outline" className="font-mono text-xs">FAC-2026-0042</Badge>
+                {/* Real Mockup Visual Preview */}
+                <div className="md:col-span-6 relative rounded-3xl border border-slate-800 bg-slate-950/90 p-3 shadow-2xl overflow-hidden group">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/80 text-xs mb-2">
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <Receipt className="w-4 h-4 text-indigo-400" />
+                      <span>Facture Certifiée &amp; WhatsApp</span>
+                    </span>
+                    <Badge className="bg-indigo-500/10 text-indigo-400 border-indigo-500/30 text-[10px]">
+                      Capture Réelle
+                    </Badge>
                   </div>
-                  <div className="py-4 text-xs space-y-1 text-slate-300">
-                    <p>Client : <strong className="text-white">CANSAAS AGENCY</strong></p>
-                    <p>Échéance : 15 Novembre 2026</p>
-                    <p className="text-xl font-bold font-mono text-emerald-400 pt-2">1 450 000 FCFA</p>
+                  <div className="relative rounded-2xl overflow-hidden max-h-[360px] bg-slate-900 border border-slate-800/80">
+                    <img 
+                      src="/mockups/invoice_detail.jpg" 
+                      alt="Facture Détail WhatsApp iziFlow" 
+                      className="w-full h-full object-cover object-top" 
+                    />
+                    <div className="absolute bottom-2.5 inset-x-2.5 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs flex justify-between items-center shadow-lg">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Facture VTE-2026-003</p>
+                        <p className="font-bold text-white text-xs">Ndiaye Agency • Dakar</p>
+                      </div>
+                      <span className="font-bold text-emerald-400 text-xs bg-emerald-500/15 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                        Payée • Wave
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -331,20 +376,32 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="md:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 shadow-xl text-left space-y-3 font-mono text-xs">
-                  <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-white">Terminal TPE Wave</p>
-                      <span className="text-[10px] text-slate-400">18 unités en stock</span>
-                    </div>
-                    <span className="text-emerald-400 font-bold">En stock</span>
+                {/* Real Mockup Visual Preview */}
+                <div className="md:col-span-6 relative rounded-3xl border border-slate-800 bg-slate-950/90 p-3 shadow-2xl overflow-hidden group">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/80 text-xs mb-2">
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <Package className="w-4 h-4 text-amber-400" />
+                      <span>Fiche Article &amp; Déstockage Live</span>
+                    </span>
+                    <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 text-[10px]">
+                      Capture Réelle
+                    </Badge>
                   </div>
-                  <div className="p-3 bg-slate-900 rounded-xl border border-amber-500/30 flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-white">Papier Thermique 80mm</p>
-                      <span className="text-[10px] text-amber-400 font-bold">Reste 4 packs (Seuil: 8)</span>
+                  <div className="relative rounded-2xl overflow-hidden max-h-[360px] bg-slate-900 border border-slate-800/80">
+                    <img 
+                      src="/mockups/stock_modal.jpg" 
+                      alt="Catalogue Stock iziFlow" 
+                      className="w-full h-full object-cover object-top" 
+                    />
+                    <div className="absolute bottom-2.5 inset-x-2.5 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs flex justify-between items-center shadow-lg">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Terminal TPE Wave (ART-2649)</p>
+                        <p className="font-bold text-white text-xs">Suivi de stock actif</p>
+                      </div>
+                      <span className="font-bold text-amber-400 text-xs bg-amber-500/15 px-2.5 py-1 rounded-lg border border-amber-500/30">
+                        Synchronisé Caisse
+                      </span>
                     </div>
-                    <span className="text-amber-400 font-bold">Alerte</span>
                   </div>
                 </div>
               </div>
@@ -407,22 +464,94 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="md:col-span-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-5 shadow-xl text-left font-mono space-y-2 text-xs">
-                  <div className="flex justify-between text-slate-400">
-                    <span>Produits d'Exploitation</span>
-                    <span className="font-bold text-white">35 450 000 FCFA</span>
+                {/* Real Mockup Visual Preview */}
+                <div className="md:col-span-6 relative rounded-3xl border border-slate-800 bg-slate-950/90 p-3 shadow-2xl overflow-hidden group">
+                  <div className="flex items-center justify-between px-3 py-2 border-b border-slate-800/80 text-xs mb-2">
+                    <span className="font-bold text-white flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4 text-sky-400" />
+                      <span>Salaires &amp; Cotisations IPRES/CSS</span>
+                    </span>
+                    <Badge className="bg-sky-500/10 text-sky-400 border-sky-500/30 text-[10px]">
+                      Capture Réelle
+                    </Badge>
                   </div>
-                  <div className="flex justify-between text-rose-400">
-                    <span>Coût des Ventes (Achats)</span>
-                    <span>-14 200 000 FCFA</span>
-                  </div>
-                  <div className="pt-2 border-t border-slate-800 flex justify-between items-center text-sm font-bold text-emerald-400">
-                    <span>MARGE COMMERCIALE BRUTE</span>
-                    <span className="text-lg">+21 250 000 FCFA</span>
+                  <div className="relative rounded-2xl overflow-hidden max-h-[360px] bg-slate-900 border border-slate-800/80">
+                    <img 
+                      src="/mockups/payroll_rh.jpg" 
+                      alt="Bulletins de paie RH iziFlow" 
+                      className="w-full h-full object-cover object-top" 
+                    />
+                    <div className="absolute bottom-2.5 inset-x-2.5 bg-slate-950/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs flex justify-between items-center shadow-lg">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Masse Salariale Nette</p>
+                        <p className="font-black text-white font-mono text-sm">2 173 548 FCFA</p>
+                      </div>
+                      <span className="font-bold text-sky-400 font-mono text-xs bg-sky-500/15 px-2.5 py-1 rounded-lg border border-sky-500/30">
+                        IPRES : 348 452 FCFA
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          3.5 INTERACTIVE VIDEO DEMO SECTION (30-60 Seconds Walkthrough)
+      ────────────────────────────────────────────────────────────────────────── */}
+      <div id="demo">
+        <VideoDemoSection />
+      </div>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          SECURITY & TRUST SECTION (Bictorys Approved Gateway & Banking Security)
+      ────────────────────────────────────────────────────────────────────────── */}
+      <section className="max-w-6xl mx-auto px-5 py-16 border-t border-slate-900">
+        <div className="rounded-3xl border border-indigo-500/30 bg-gradient-to-b from-indigo-950/40 via-slate-900/60 to-slate-900/60 p-8 md:p-12 shadow-2xl relative overflow-hidden">
+          <div className="max-w-3xl mx-auto text-center space-y-4 mb-10">
+            <Badge className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 text-xs">
+              Sécurité Bancaire &amp; Agréments
+            </Badge>
+            <h2 className="text-2xl md:text-4xl font-black text-white tracking-tight">
+              Vos paiements et données financières en toute sécurité
+            </h2>
+            <p className="text-sm md:text-base text-slate-300 leading-relaxed">
+              Pour garantir la protection absolue de vos fonds, iziFlow s'associe à des établissements agréés et certifiés par la Banque Centrale (BCEAO).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-2xl bg-slate-950/80 border border-slate-800 text-left space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-white">Passerelle Agréée Bictorys</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Toutes les transactions Wave, Orange Money et cartes bancaires transitent via l'infrastructure sécurisée de Bictorys, opérateur de paiement agréé en zone UEMOA.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-950/80 border border-slate-800 text-left space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <Lock className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-white">Chiffrement Bancaire 256 bits</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Toutes les données fiscales, fiches de paie et coordonnées clients sont chiffrées de bout en bout (SSL/TLS 256 bits). Aucune donnée bancaire sensible n'est stockée sur nos serveurs.
+              </p>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-slate-950/80 border border-slate-800 text-left space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-sky-500/10 flex items-center justify-center text-sky-400">
+                <Building className="w-5 h-5" />
+              </div>
+              <h4 className="text-base font-bold text-white">Conformité Fiscale OHADA</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Documents conformes aux règles de l'OHADA et de la DGI au Sénégal : mentions obligatoires (NINEA, RCCM), calcul automatique de TVA 18% et QR code d'authentification certifié.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -773,7 +902,177 @@ export default function LandingPage() {
       </section>
 
       {/* ──────────────────────────────────────────────────────────────────────────
-          7. FAQ ACCORDION (Like Izimelo "Questions Fréquentes")
+          7. ABOUT US & MISSION SECTION ("Qui sommes-nous ?")
+      ────────────────────────────────────────────────────────────────────────── */}
+      <section id="about" className="max-w-6xl mx-auto px-5 py-20 border-t border-slate-900">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 items-center">
+          <div className="md:col-span-6 space-y-5 text-left">
+            <Badge variant="outline" className="text-xs bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+              Notre Mission &amp; Notre Équipe
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+              Conçu à Dakar pour libérer les entrepreneurs africains
+            </h2>
+            <p className="text-sm md:text-base text-slate-300 leading-relaxed">
+              Nous avons fondé <strong>iziFlow</strong> avec une conviction simple : les commerçants, indépendants et PME d'Afrique méritent des logiciels aussi puissants et élégants que ceux des multinationales, sans la lourdeur des ERP complexes.
+            </p>
+            <p className="text-xs md:text-sm text-slate-400 leading-relaxed">
+              Basée à Dakar avec une présence en Côte d'Ivoire et au Cameroun, notre équipe réunit ingénieurs logiciels, experts fiscaux OHADA et spécialistes du paiement mobile money. Nous construisons au quotidien l'outil le plus fiable pour gérer vos ventes, vos stocks et vos factures.
+            </p>
+
+            <div className="pt-2 grid grid-cols-3 gap-4 border-t border-slate-800 text-left">
+              <div>
+                <p className="text-2xl font-black text-white font-mono">7 000+</p>
+                <p className="text-[11px] text-slate-400">PME &amp; Commerces</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-indigo-400 font-mono">100%</p>
+                <p className="text-[11px] text-slate-400">Conforme OHADA</p>
+              </div>
+              <div>
+                <p className="text-2xl font-black text-emerald-400 font-mono">7j / 7</p>
+                <p className="text-[11px] text-slate-400">Support WhatsApp</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="md:col-span-6 rounded-3xl bg-slate-900/60 border border-slate-800 p-6 md:p-8 space-y-4">
+            <h4 className="text-base font-bold text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-indigo-400" />
+              <span>Nos Engagements de Confiance</span>
+            </h4>
+            <div className="space-y-3 text-xs text-slate-300">
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-start gap-3">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white block">Souveraineté et sécurité de vos données</strong>
+                  <span className="text-slate-400">Vos chiffres d'affaires et informations clients vous appartiennent à 100%. Aucune revente de données.</span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-start gap-3">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white block">Accompagnement humain à chaque étape</strong>
+                  <span className="text-slate-400">Une équipe disponible sur WhatsApp pour vous former, importer vos anciens fichiers Excel et répondre à vos questions fiscales.</span>
+                </div>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-start gap-3">
+                <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-white block">Évolution continue sans frais cachés</strong>
+                  <span className="text-slate-400">Mises à jour automatiques au fil des nouvelles réglementations fiscales de l'UEMOA.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          8. RESOURCES & BLOG GUIDES ("Guides Pratiques & Fiscalité")
+      ────────────────────────────────────────────────────────────────────────── */}
+      <section id="resources" className="max-w-6xl mx-auto px-5 py-20 border-t border-slate-900">
+        <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+          <Badge variant="outline" className="text-xs bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+            Ressources &amp; Guides Pratiques
+          </Badge>
+          <h2 className="text-3xl md:text-5xl font-black text-white tracking-tight">
+            Tout comprendre sur la fiscalité et la gestion en Afrique
+          </h2>
+          <p className="text-sm md:text-base text-slate-400">
+            Des fiches pratiques et guides concrets pour gérer votre comptabilité sans prise de tête.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
+          {/* Article 1 */}
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between group">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20 inline-block">
+                Fiscalité Sénégal
+              </span>
+              <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                Comment calculer et déclarer sa TVA à 18% au Sénégal en 2026
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Taux normal, régimes d'exonération, calcul du montant HT vers TTC et dates limites de déclaration auprès de la DGI.
+              </p>
+            </div>
+            <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Lecture : 4 min</span>
+              <span className="text-indigo-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                Lire le guide &rarr;
+              </span>
+            </div>
+          </div>
+
+          {/* Article 2 */}
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between group">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 inline-block">
+                Norme OHADA
+              </span>
+              <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+                Les 7 mentions obligatoires sur vos factures d'entreprise en zone UEMOA
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                NINEA, numéro RCCM, adresse légale, QR code et cachet d'entreprise : évitez les sanctions lors d'un contrôle fiscal.
+              </p>
+            </div>
+            <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Lecture : 5 min</span>
+              <span className="text-emerald-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                Lire le guide &rarr;
+              </span>
+            </div>
+          </div>
+
+          {/* Article 3 */}
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-sky-500/40 transition-all flex flex-col justify-between group">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-sky-400 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20 inline-block">
+                Caisse &amp; POS
+              </span>
+              <h3 className="text-sm font-bold text-white group-hover:text-sky-300 transition-colors">
+                Encaisser par Wave &amp; Orange Money au comptoir sans erreur de caisse
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Pourquoi connecter sa caisse directement aux passerelles mobile money élimine les écarts de stock et les impayés.
+              </p>
+            </div>
+            <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Lecture : 3 min</span>
+              <span className="text-sky-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                Lire le guide &rarr;
+              </span>
+            </div>
+          </div>
+
+          {/* Article 4 */}
+          <div className="p-6 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-violet-500/40 transition-all flex flex-col justify-between group">
+            <div className="space-y-3">
+              <span className="text-[10px] font-bold text-violet-400 bg-violet-500/10 px-2.5 py-0.5 rounded-full border border-violet-500/20 inline-block">
+                Paie &amp; Social
+              </span>
+              <h3 className="text-sm font-bold text-white group-hover:text-violet-300 transition-colors">
+                Bulletins de paie au Sénégal : Comprendre les cotisations IPRES et CSS
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Régime général des retraites, accidents du travail et allocations familiales : tout le barème social décrypté.
+              </p>
+            </div>
+            <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500">
+              <span>Lecture : 6 min</span>
+              <span className="text-violet-400 font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                Lire le guide &rarr;
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          9. FAQ ACCORDION (Questions Fréquentes)
       ────────────────────────────────────────────────────────────────────────── */}
       <section id="faq" className="max-w-4xl mx-auto px-5 py-20 border-t border-slate-900">
         <div className="text-center mb-12 space-y-3">
@@ -900,6 +1199,33 @@ export default function LandingPage() {
           </p>
         </div>
       </footer>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          10. FLOATING STICKY CTA BAR (Appears on scroll)
+      ────────────────────────────────────────────────────────────────────────── */}
+      {showFloatingCta && (
+        <div className="fixed bottom-5 left-5 right-20 sm:left-auto sm:right-28 z-40 animate-in fade-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center gap-3 bg-slate-900/95 border border-indigo-500/40 backdrop-blur-xl p-2 sm:px-4 sm:py-2.5 rounded-full shadow-2xl shadow-indigo-600/30">
+            <div className="hidden sm:flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-xs font-black text-white">izi<span className="text-indigo-400">Flow</span></span>
+              <span className="text-[11px] text-slate-400">• Facturation en 3 min</span>
+            </div>
+            <Link
+              href="/register"
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs rounded-full shadow-lg shadow-indigo-600/30 transition-all active:scale-95 flex items-center gap-1.5"
+            >
+              <span>Commencer gratuitement</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          11. LIVE WHATSAPP CHAT WIDGET
+      ────────────────────────────────────────────────────────────────────────── */}
+      <LiveChatWidget />
     </div>
   );
 }
