@@ -31,7 +31,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatFCFA } from "@/lib/utils";
 import { MobileDemo } from "@/components/landing/MobileDemo";
 import { LiveChatWidget } from "@/components/landing/LiveChatWidget";
-import { VideoDemoSection } from "@/components/landing/VideoDemoSection";
+import { ProductVideoSection } from "@/components/landing/ProductVideoSection";
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -104,8 +104,8 @@ export default function LandingPage() {
 
           {/* Center Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-300">
-            <a href="#showcase" className="hover:text-white transition-colors">Démonstration</a>
-            <a href="#demo" className="hover:text-white transition-colors">Vidéo</a>
+            <a href="#demo" className="hover:text-white transition-colors">Démo Produit</a>
+            <a href="#showcase" className="hover:text-white transition-colors">Modules en direct</a>
             <a href="#features" className="hover:text-white transition-colors">Modules</a>
             <a href="#pricing" className="hover:text-white transition-colors">Tarifs</a>
             <a href="#about" className="hover:text-white transition-colors">À propos</a>
@@ -218,6 +218,11 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ──────────────────────────────────────────────────────────────────────────
+          2.5 SECTION DÉMO PRODUIT (Vidéo Réelle WhatsApp)
+      ────────────────────────────────────────────────────────────────────────── */}
+      <ProductVideoSection />
 
       {/* ──────────────────────────────────────────────────────────────────────────
           3. INTERACTIVE PRODUCT SHOWCASE (Like Izimelo Audio/Video Selector)
@@ -512,13 +517,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* ──────────────────────────────────────────────────────────────────────────
-          3.5 INTERACTIVE VIDEO DEMO SECTION (30-60 Seconds Walkthrough)
-      ────────────────────────────────────────────────────────────────────────── */}
-      <div id="demo">
-        <VideoDemoSection />
-      </div>
 
       {/* ──────────────────────────────────────────────────────────────────────────
           SECURITY & TRUST SECTION (Bictorys Approved Gateway & Banking Security)
