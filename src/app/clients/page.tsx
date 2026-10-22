@@ -12,9 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, Search, Filter, MoreHorizontal, Mail, Phone } from "lucide-react";
+import { Users, Search, Filter, MoreHorizontal, Mail, Phone, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CreateClientDialog } from "@/components/clients/create-client-dialog";
+import { exportClientsToCSV } from "@/lib/export";
 import Link from "next/link";
 import {
   DropdownMenu,
@@ -66,20 +67,33 @@ export default function ClientsPage() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="w-full sm:w-auto flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
-            <Filter className="w-4 h-4" />
-            Trier
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
-              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioItem value="date">Plus récents</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="revenue">Chiffre d'affaires</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => exportClientsToCSV(filteredClients)}
+            disabled={filteredClients.length === 0}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors"
+            title="Exporter les clients affichés au format Excel/CSV"
+          >
+            <Download className="w-4 h-4 text-emerald-500" />
+            <span>Exporter ({filteredClients.length})</span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex-1 sm:flex-initial flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
+              <Filter className="w-4 h-4" />
+              Trier
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+                <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioItem value="date">Plus récents</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="revenue">Chiffre d'affaires</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Clients Table */}

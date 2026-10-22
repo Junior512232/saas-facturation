@@ -15,9 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { FileText, Plus, Search, Filter } from "lucide-react";
+import { FileText, Plus, Search, Filter, Download } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
+import { exportInvoicesToCSV } from "@/lib/export";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -103,30 +104,43 @@ export default function InvoicesPage() {
           />
         </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger className="w-full sm:w-auto flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
-            <Filter className="w-4 h-4" />
-            Filtres
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
-              <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Button
+            variant="outline"
+            onClick={() => exportInvoicesToCSV(filteredInvoices)}
+            disabled={filteredInvoices.length === 0}
+            className="flex-1 sm:flex-initial flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors"
+            title="Exporter les factures affichées au format Excel/CSV"
+          >
+            <Download className="w-4 h-4 text-emerald-500" />
+            <span>Exporter ({filteredInvoices.length})</span>
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex-1 sm:flex-initial flex items-center justify-center gap-2 border border-border bg-background hover:bg-muted hover:text-foreground h-10 px-4 rounded-xl text-sm font-medium transition-colors">
+              <Filter className="w-4 h-4" />
+              Filtres
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuRadioGroup value={statusFilter} onValueChange={setStatusFilter}>
+                <DropdownMenuLabel>Filtrer par statut</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="paid">Payée</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="sent">Envoyée</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="draft">Brouillon</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="overdue">En retard</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuRadioItem value="all">Tous</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="paid">Payée</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="sent">Envoyée</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="draft">Brouillon</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="overdue">En retard</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
-              <DropdownMenuLabel>Trier par</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuRadioItem value="date">Date d'émission</DropdownMenuRadioItem>
-              <DropdownMenuRadioItem value="amount">Montant (Décroissant)</DropdownMenuRadioItem>
-            </DropdownMenuRadioGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuRadioGroup value={sortBy} onValueChange={setSortBy}>
+                <DropdownMenuLabel>Trier par</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuRadioItem value="date">Date d'émission</DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="amount">Montant (Décroissant)</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Invoices Table */}
