@@ -150,7 +150,7 @@ export default function LandingPage() {
           {/* Top Pill Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-950/80 border border-indigo-500/30 text-indigo-300 text-xs font-semibold backdrop-blur-md shadow-lg shadow-indigo-600/10">
             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Le n°1 de la gestion commerciale & facturation en Afrique</span>
+            <span>La solution de gestion commerciale pensée pour l'Afrique de l'Ouest</span>
           </div>
 
           {/* Main Headline */}
@@ -433,41 +433,101 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6">
-            <p className="text-sm text-slate-300 italic leading-relaxed">
-              "Avant iziFlow, je passais mes dimanches soirs à recalculer la TVA sur Excel pour mes clients B2B à Dakar. Maintenant, en 3 clics sur mon téléphone, c'est envoyé avec le cachet officiel sur WhatsApp."
-            </p>
-            <div className="flex items-center gap-3">
-              <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop" alt="Sarah K." />
-              <div>
-                <p className="text-sm font-bold text-white">Sarah K.</p>
-                <p className="text-xs text-slate-400">Fondatrice, Agency Cansaas (Dakar)</p>
+          {/* Témoignage 1 : Dakar */}
+          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6 hover:border-slate-700 transition-all">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                  ))}
+                </div>
+                <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20">
+                  🇸🇳 Dakar, Sénégal
+                </span>
+              </div>
+              <p className="text-sm text-slate-300 italic leading-relaxed">
+                "Avant iziFlow, je passais mes dimanches soirs à recalculer la TVA sur Excel pour mes clients B2B à Dakar. Maintenant, en 3 clics sur mon téléphone, c'est envoyé avec le cachet officiel sur WhatsApp."
+              </p>
+            </div>
+            <div className="flex items-center gap-3.5 pt-4 border-t border-slate-800/80">
+              <img
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-indigo-500/40"
+                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80"
+                alt="Sarah Kane (Sarah K. • Dakar)"
+              />
+              <div className="text-left">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-white">Sarah Kane</p>
+                  <span className="text-[10px] text-slate-400 font-medium">(Sarah K.)</span>
+                </div>
+                <p className="text-xs text-slate-400">Fondatrice, Agency Cansaas • Dakar</p>
               </div>
             </div>
           </div>
 
-          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6">
-            <p className="text-sm text-slate-300 italic leading-relaxed">
-              "Le module de caisse rapide au comptoir a changé notre vie en boutique. On encaisse par Wave en 5 secondes, le stock est déduit et on sait exactement combien de marge on a fait dans la journée."
-            </p>
-            <div className="flex items-center gap-3">
-              <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop" alt="Moussa D." />
-              <div>
-                <p className="text-sm font-bold text-white">Moussa D.</p>
-                <p className="text-xs text-slate-400">Gérant, Boutique Le Relais (Abidjan)</p>
+          {/* Témoignage 2 : Abidjan */}
+          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6 hover:border-slate-700 transition-all">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                  ))}
+                </div>
+                <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                  🇨🇮 Abidjan, Côte d'Ivoire
+                </span>
+              </div>
+              <p className="text-sm text-slate-300 italic leading-relaxed">
+                "Le module de caisse rapide au comptoir a changé notre vie en boutique. On encaisse par Wave en 5 secondes, le stock est déduit et on sait exactement combien de marge on a fait dans la journée."
+              </p>
+            </div>
+            <div className="flex items-center gap-3.5 pt-4 border-t border-slate-800/80">
+              <img
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-emerald-500/40"
+                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80"
+                alt="Moussa Diakité (Moussa D. • Abidjan)"
+              />
+              <div className="text-left">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-white">Moussa Diakité</p>
+                  <span className="text-[10px] text-slate-400 font-medium">(Moussa D.)</span>
+                </div>
+                <p className="text-xs text-slate-400">Gérant, Boutique Le Relais • Abidjan</p>
               </div>
             </div>
           </div>
 
-          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6">
-            <p className="text-sm text-slate-300 italic leading-relaxed">
-              "Mon expert-comptable était ravi quand je lui ai transmis le compte de résultat synthétique exporté directement depuis iziFlow. Tout est carré, conforme et clair."
-            </p>
-            <div className="flex items-center gap-3">
-              <img className="w-10 h-10 rounded-full object-cover" src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop" alt="Aïcha T." />
-              <div>
-                <p className="text-sm font-bold text-white">Aïcha T.</p>
-                <p className="text-xs text-slate-400">Directrice, SeneService SARL (Thiès)</p>
+          {/* Témoignage 3 : Thiès */}
+          <div className="p-7 rounded-3xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between gap-6 hover:border-slate-700 transition-all">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                  ))}
+                </div>
+                <span className="text-[10px] font-bold text-sky-300 bg-sky-500/10 px-2.5 py-0.5 rounded-full border border-sky-500/20">
+                  🇸🇳 Thiès, Sénégal
+                </span>
+              </div>
+              <p className="text-sm text-slate-300 italic leading-relaxed">
+                "Mon expert-comptable était ravi quand je lui ai transmis le compte de résultat synthétique exporté directement depuis iziFlow. Tout est carré, conforme et clair."
+              </p>
+            </div>
+            <div className="flex items-center gap-3.5 pt-4 border-t border-slate-800/80">
+              <img
+                className="w-11 h-11 rounded-full object-cover ring-2 ring-sky-500/40"
+                src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=150&auto=format&fit=crop&q=80"
+                alt="Aïcha Touré (Aïcha T. • Thiès)"
+              />
+              <div className="text-left">
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-bold text-white">Aïcha Touré</p>
+                  <span className="text-[10px] text-slate-400 font-medium">(Aïcha T.)</span>
+                </div>
+                <p className="text-xs text-slate-400">Directrice, SeneService SARL • Thiès</p>
               </div>
             </div>
           </div>
