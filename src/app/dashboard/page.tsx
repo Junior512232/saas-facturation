@@ -5,6 +5,7 @@ import { useAppData } from "@/context/AppDataContext";
 import { useAuth } from "@/context/AuthContext";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { RecentInvoices } from "@/components/dashboard/recent-invoices";
+import { OnboardingChecklist } from "@/components/dashboard/onboarding-checklist";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -27,7 +28,7 @@ import {
 import { formatFCFA } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const { invoicesList, clientsList } = useAppData();
+  const { invoicesList, clientsList, productsList, companySettings } = useAppData();
   const { user } = useAuth();
 
   // --- Stats calculées à partir des vraies données ---
@@ -92,6 +93,16 @@ export default function DashboardPage() {
           Nouvelle facture
         </Link>
       </div>
+
+      {/* Onboarding Checklist for New Accounts */}
+      <OnboardingChecklist
+        companySettings={companySettings}
+        invoicesCount={invoicesList.length}
+        clientsCount={clientsList.length}
+        productsCount={productsList?.length || 0}
+        userName={user?.name}
+        userNinea={user?.ninea}
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
