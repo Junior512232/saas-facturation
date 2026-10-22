@@ -41,8 +41,9 @@ function RegisterContent() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.toLowerCase().endsWith("@gmail.com")) {
-      setError("L'adresse email doit être une adresse @gmail.com.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setError("Veuillez saisir une adresse email valide (ex: contact@societe.com).");
       return;
     }
     if (password.length < 6) {
@@ -216,7 +217,7 @@ function RegisterContent() {
 
                 <div>
                   <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1.5">
-                    Adresse Email Pro (@gmail.com) *
+                    Adresse Email Professionnelle *
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
@@ -225,7 +226,7 @@ function RegisterContent() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre.societe@gmail.com"
+                      placeholder="contact@votre-entreprise.com"
                       className="pl-10 text-xs sm:text-sm bg-slate-950/70 border-slate-800 text-white placeholder:text-slate-600 rounded-xl focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
                     />
                   </div>
