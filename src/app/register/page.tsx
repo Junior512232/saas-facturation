@@ -309,6 +309,17 @@ function RegisterContent() {
                   )}
                 </Button>
 
+                <p className="text-[11px] text-slate-400 text-center leading-relaxed">
+                  En créant un compte, vous acceptez nos{" "}
+                  <Link href="/cgu" target="_blank" className="text-indigo-400 underline hover:text-indigo-300">
+                    Conditions d'Utilisation
+                  </Link>{" "}
+                  et notre{" "}
+                  <Link href="/privacy" target="_blank" className="text-indigo-400 underline hover:text-indigo-300">
+                    Politique de Confidentialité
+                  </Link>.
+                </p>
+
                 {error && (
                   <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 text-center font-medium">
                     {error}

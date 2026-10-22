@@ -1054,8 +1054,8 @@ export default function LandingPage() {
           <div>
             <p className="font-bold text-white uppercase text-[11px] tracking-wider mb-3">Légal & Contact</p>
             <ul className="space-y-2 text-[11px]">
-              <li><a href="#" className="hover:text-white transition-colors">Conditions Générales d'Utilisation</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Politique de Confidentialité</a></li>
+              <li><Link href="/cgu" className="hover:text-white transition-colors">Conditions Générales d'Utilisation</Link></li>
+              <li><Link href="/privacy" className="hover:text-white transition-colors">Politique de Confidentialité</Link></li>
               <li><a href="mailto:contact@iziflow.sn" className="hover:text-white transition-colors">contact@iziflow.sn</a></li>
               <li><span className="text-slate-500">Conforme Système Comptable OHADA</span></li>
             </ul>
