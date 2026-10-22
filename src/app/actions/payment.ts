@@ -425,11 +425,27 @@ export async function initiateBictorysPayment({
 
     const responseData = await response.json().catch(() => null);
 
+    const isTestKey =
+      decryptedApiKey.toLowerCase().startsWith("test_") ||
+      decryptedApiKey.toLowerCase().startsWith("pk_test_") ||
+      decryptedApiKey.toLowerCase().startsWith("sk_test_") ||
+      decryptedApiKey.toLowerCase().startsWith("bict_test_") ||
+      decryptedApiKey.toLowerCase().includes("test");
+
     if (!response.ok) {
       console.error("Erreur réponse API Bictorys:", response.status, responseData);
-      const errMsg = responseData?.message || responseData?.error || responseData?.detail || `Erreur Bictorys (Code ${response.status})`;
-      // En cas d'erreur de clé Bictorys (sandbox expirée, etc.), fallback vers simulation sandbox pour ne pas bloquer l'utilisateur
-      console.warn("Basculement vers la simulation de paiement Bictorys suite à l'erreur API");
+      const errMsg = responseData?.details || responseData?.message || responseData?.error || responseData?.title || `Erreur Bictorys (Code ${response.status})`;
+      
+      // En production réelle, retourner l'erreur exacte Bictorys sans simuler
+      if (!isTestKey) {
+        return {
+          success: false,
+          error: `Échec passerelle Bictorys : ${errMsg}`,
+        };
+      }
+
+      // En mode sandbox/test uniquement, proposer la simulation interactive
+      console.warn("Basculement vers la simulation sandbox Bictorys (mode test détecté)");
       return {
         success: true,
         paymentUrl: `${baseUrl}/pay/${invoice.id}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
@@ -447,7 +463,13 @@ export async function initiateBictorysPayment({
       responseData?.url;
 
     if (!paymentUrl) {
-      console.error("Réponse Bictorys inattendue:", responseData);
+      console.error("Réponse Bictorys inattendue (pas d'URL de paiement):", responseData);
+      if (!isTestKey) {
+        return {
+          success: false,
+          error: "Lien de redirection Bictorys manquant dans la réponse du serveur.",
+        };
+      }
       return {
         success: true,
         paymentUrl: `${baseUrl}/pay/${invoice.id}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
@@ -594,8 +616,22 @@ export async function initiateBictorysSalePayment({
 
     const responseData = await response.json().catch(() => null);
 
+    const isTestKey =
+      decryptedApiKey.toLowerCase().startsWith("test_") ||
+      decryptedApiKey.toLowerCase().startsWith("pk_test_") ||
+      decryptedApiKey.toLowerCase().startsWith("sk_test_") ||
+      decryptedApiKey.toLowerCase().startsWith("bict_test_") ||
+      decryptedApiKey.toLowerCase().includes("test");
+
     if (!response.ok) {
-      console.warn("Erreur API Bictorys Ticket, fallback vers simulation:", response.status, responseData);
+      console.error("Erreur API Bictorys Ticket:", response.status, responseData);
+      const errMsg = responseData?.details || responseData?.message || responseData?.error || responseData?.title || `Erreur Bictorys (${response.status})`;
+      if (!isTestKey) {
+        return {
+          success: false,
+          error: `Échec paiement ticket Bictorys : ${errMsg}`,
+        };
+      }
       return {
         success: true,
         paymentUrl: `${baseUrl}/pay/ticket/${saleNumber}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
@@ -612,6 +648,12 @@ export async function initiateBictorysSalePayment({
       responseData?.url;
 
     if (!paymentUrl) {
+      if (!isTestKey) {
+        return {
+          success: false,
+          error: "Lien de redirection Bictorys manquant dans la réponse du serveur.",
+        };
+      }
       return {
         success: true,
         paymentUrl: `${baseUrl}/pay/ticket/${saleNumber}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
