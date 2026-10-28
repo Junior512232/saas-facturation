@@ -119,13 +119,23 @@ export async function POST(req: Request) {
     }
 
     // --- CAS 2 : Règlement Facture Client ou Ticket de Caisse POS ---
-    const invoiceIdentifier = 
+    let invoiceIdentifier = 
       metadata.invoiceId || 
       metadata.invoiceNumber || 
       metadata.saleNumber || 
-      (paymentReference.startsWith("INV-") ? paymentReference.split("-")[1] : null) ||
-      (paymentReference.startsWith("TICKET-") ? paymentReference.replace("TICKET-", "").split("-")[0] : null) ||
-      paymentReference;
+      null;
+
+    if (!invoiceIdentifier && paymentReference) {
+      if (paymentReference.startsWith("TICKET-")) {
+        // Ex: TICKET-VTE-2026-001-123456 -> VTE-2026-001
+        invoiceIdentifier = paymentReference.replace(/^TICKET-/, "").replace(/-[0-9]{4,15}$/, "");
+      } else if (paymentReference.startsWith("INV-")) {
+        // Ex: INV-FAC-2026-001-123456 -> FAC-2026-001
+        invoiceIdentifier = paymentReference.replace(/^INV-/, "").replace(/-[0-9]{4,15}$/, "");
+      } else {
+        invoiceIdentifier = paymentReference;
+      }
+    }
 
     if (!invoiceIdentifier) {
       console.warn("[Webhook Bictorys] Requête sans référence de facture ou ticket.");

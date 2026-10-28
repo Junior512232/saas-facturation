@@ -78,9 +78,21 @@ export default function SalesPage() {
   const [cart, setCart] = useState<{ product: Product; quantity: number }[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<string>("");
   const [customerName, setCustomerName] = useState("Client de passage");
+  const [customerPhone, setCustomerPhone] = useState<string>("");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "bictorys" | "wave" | "om" | "card" | "bank_transfer">("bictorys");
   const [cashTendered, setCashTendered] = useState<number>(0);
   const [applyTax, setApplyTax] = useState(true);
+
+  // WhatsApp Automated Payment Link state
+  const [isSendingWhatsAppLink, setIsSendingWhatsAppLink] = useState(false);
+  const [whatsAppModalOpen, setWhatsAppModalOpen] = useState(false);
+  const [activePendingTicket, setActivePendingTicket] = useState<{
+    saleNumber: string;
+    customerName: string;
+    customerPhone: string;
+    total: number;
+    url: string;
+  } | null>(null);
 
   // Bictorys Payment Modal state
   const [bictorysModalOpen, setBictorysModalOpen] = useState(false);
@@ -96,6 +108,13 @@ export default function SalesPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleCopyText = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2500);
+    showToast("Lien copié !");
   };
 
   const handleCopyPaymentLink = () => {
@@ -290,6 +309,131 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
   const handleConfirmBictorysCheckout = async () => {
     setBictorysModalOpen(false);
     await handleCheckout("bictorys");
+  };
+
+  /**
+   * Envoi d'un lien de paiement WhatsApp au client
+   * Le ticket est créé en statut 'sent' (en attente de règlement automatique).
+   * Lorsque le client paie via Bictorys sur son smartphone, le webhook valide automatiquement l'encaissement !
+   */
+  const handleSendWhatsAppPaymentLink = async () => {
+    if (cart.length === 0) return;
+    if (!ticketQuota.allowed) {
+      showToast("Limite mensuelle atteinte : 15 tickets max sur le forfait Gratuit. Passez en Pro !");
+      return;
+    }
+
+    setIsSendingWhatsAppLink(true);
+    const saleNumber = currentSaleNumber || `VTE-${new Date().getFullYear()}-${String(salesList.length + 1).padStart(3, "0")}`;
+    const cleanPhone = (customerPhone || "").replace(/[^0-9]/g, "");
+    const comp = companySettings?.companyName || "iziFlow SARL";
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://saas-facturation-ughf.vercel.app";
+    const ticketUrl = `${baseUrl}/pay/ticket/${saleNumber}`;
+
+    const saleItems: SaleItem[] = cart.map((item) => ({
+      id: `sitem_${Date.now()}_${item.product.id}`,
+      productId: item.product.id,
+      name: item.product.name,
+      quantity: item.quantity,
+      purchasePrice: item.product.purchasePrice,
+      unitPrice: item.product.sellingPrice,
+      totalPrice: item.product.sellingPrice * item.quantity,
+    }));
+
+    // 1. Synchronisation dans Supabase avec statut 'sent' (en attente de règlement automatique Bictorys)
+    try {
+      await createPosSaleInvoice({
+        saleNumber,
+        clientId: selectedClientId || undefined,
+        customerName: customerName || "Client de passage",
+        customerPhone: cleanPhone,
+        paymentMethod: "whatsapp",
+        status: "sent",
+        subtotal,
+        taxAmount,
+        total,
+        items: saleItems.map((it) => ({
+          name: it.name,
+          quantity: it.quantity,
+          unitPrice: it.unitPrice,
+          totalPrice: it.totalPrice,
+        })),
+      });
+    } catch (e) {
+      console.warn("Synchronisation du ticket WhatsApp:", e);
+    }
+
+    // 2. Ajout au journal des ventes local avec statut 'sent'
+    const newSaleData: Omit<Sale, "id" | "createdAt"> = {
+      saleNumber,
+      clientId: selectedClientId || undefined,
+      customerName: customerName || "Client de passage",
+      customerPhone: cleanPhone,
+      paymentMethod: "whatsapp",
+      status: "sent",
+      paymentUrl: ticketUrl,
+      subtotal,
+      taxAmount,
+      total,
+      totalCost,
+      margin: totalMargin,
+      items: saleItems,
+    };
+
+    await addSale(newSaleData);
+
+    // 3. Message WhatsApp
+    const itemsText = cart
+      .map((it) => `• ${it.product.name} (x${it.quantity}) : ${formatFCFA(it.product.sellingPrice * it.quantity)}`)
+      .join("\n");
+
+    const message = 
+`🧾 *COMMANDE & LIEN DE PAIEMENT SÉCURISÉ*
+*${comp}*
+---------------------------------------
+*Commande N° :* ${saleNumber}
+*Date :* ${new Date().toLocaleDateString("fr-FR")}
+*Client :* ${customerName || "Client de passage"}
+
+*Articles commandés :*
+${itemsText}
+
+---------------------------------------
+*TOTAL TTC :* *${formatFCFA(total)}*
+---------------------------------------
+
+👉 *Cliquez sur ce lien pour choisir votre moyen de paiement et régler :*
+${ticketUrl}
+
+⚡ *Moyens de règlement disponibles :*
+• *Bictorys* : Validation 100% automatique (Wave, Orange Money, Free Money, Carte CB)
+• *Wave Direct* (Comptoir)
+• *Orange Money Direct* (Comptoir)
+• *Règlement Espèces*
+
+Votre ticket certifié sera immédiatement délivré dès validation du paiement.
+Merci pour votre confiance !
+_Émis par iziFlow Suite Commerciale • www.iziflow.sn_`;
+
+    const whatsappUrl = cleanPhone 
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`
+      : `https://api.whatsapp.com/send?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, "_blank");
+
+    setActivePendingTicket({
+      saleNumber,
+      customerName: customerName || "Client de passage",
+      customerPhone: cleanPhone,
+      total,
+      url: ticketUrl,
+    });
+    setWhatsAppModalOpen(true);
+
+    handleClearCart();
+    setCurrentSaleNumber("");
+    setIsSendingWhatsAppLink(false);
+    showToast(`Lien de paiement envoyé pour la commande #${saleNumber} !`);
   };
 
   // Finalize Sale
@@ -631,7 +775,10 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                     onChange={(e) => {
                       setSelectedClientId(e.target.value);
                       const cl = clientsList.find((c) => c.id === e.target.value);
-                      if (cl) setCustomerName(cl.name);
+                      if (cl) {
+                        setCustomerName(cl.name);
+                        if (cl.phone) setCustomerPhone(cl.phone);
+                      }
                     }}
                     className="px-3 py-2 text-xs bg-background border border-border rounded-xl focus:outline-none"
                   >
@@ -640,6 +787,18 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
+                </div>
+
+                {/* WhatsApp Phone Input */}
+                <div className="relative">
+                  <Input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="Numéro WhatsApp client (ex: 77 123 45 67)..."
+                    className="text-xs font-mono rounded-xl pl-8"
+                  />
+                  <MessageCircle className="w-3.5 h-3.5 text-[#25D366] absolute left-2.5 top-1/2 -translate-y-1/2" />
                 </div>
               </div>
 
@@ -935,51 +1094,59 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                     </Button>
                   </Link>
                 </div>
-              ) : paymentMethod === "bictorys" ? (
-                <Button
-                  disabled={cart.length === 0 || isGeneratingPayment}
-                  onClick={handleInitiateBictorysSale}
-                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  {isGeneratingPayment ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Génération QR Bictorys...</span>
-                    </>
-                  ) : (
-                    <>
-                      <QrCode className="w-4 h-4" />
-                      <span>Générer QR & Lien Bictorys ({formatFCFA(total)})</span>
-                    </>
-                  )}
-                </Button>
-              ) : paymentMethod === "wave" ? (
-                <Button
-                  disabled={cart.length === 0}
-                  onClick={() => handleCheckout("wave")}
-                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-[#007da3] hover:bg-[#006a8a] text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  <WaveLogo className="w-5 h-5 shrink-0" />
-                  <span>Valider l'encaissement Wave Direct ({formatFCFA(total)})</span>
-                </Button>
-              ) : paymentMethod === "om" ? (
-                <Button
-                  disabled={cart.length === 0}
-                  onClick={() => handleCheckout("om")}
-                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-[#ea580c] hover:bg-[#c2410c] text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  <OrangeMoneyLogo className="w-5 h-5 shrink-0" />
-                  <span>Valider l'encaissement Orange Money ({formatFCFA(total)})</span>
-                </Button>
               ) : (
-                <Button
-                  disabled={cart.length === 0}
-                  onClick={() => handleCheckout("cash")}
-                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  <CheckCircle2 className="w-5 h-5" />
-                  <span>Valider l'encaissement en espèces ({formatFCFA(total)})</span>
-                </Button>
+                <div className="flex flex-col gap-2.5">
+                  {/* ACTION PRINCIPALE : ENVOI LIEN WHATSAPP AUTOMATISÉ */}
+                  <Button
+                    disabled={cart.length === 0 || isSendingWhatsAppLink}
+                    onClick={handleSendWhatsAppPaymentLink}
+                    className="w-full rounded-2xl py-5 text-sm font-bold bg-[#25D366] hover:bg-[#20ba59] text-white shadow-xl shadow-[#25D366]/20 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-1 border-0"
+                  >
+                    {isSendingWhatsAppLink ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                        <span>Génération du lien sécurisé...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 text-sm font-extrabold">
+                          <MessageCircle className="w-4 h-4 fill-current shrink-0" />
+                          <span>Envoyer le lien WhatsApp au client ({formatFCFA(total)})</span>
+                        </div>
+                        <span className="text-[11px] text-white/90 font-medium">
+                          ⚡ Choix client (Bictorys, Wave, OM) • Validation 100% Automatique
+                        </span>
+                      </>
+                    )}
+                  </Button>
+
+                  {/* ACTIONS SECONDAIRES DE CAISSE EN DIRECT */}
+                  <div className="flex items-center gap-2 pt-0.5">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={cart.length === 0}
+                      onClick={() => handleCheckout("cash")}
+                      className="flex-1 rounded-xl text-xs h-9 border-border hover:bg-muted font-bold text-foreground flex items-center justify-center gap-1.5"
+                      title="Si le client paie en espèces directement au comptoir"
+                    >
+                      <Banknote className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Espèces comptoir</span>
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={cart.length === 0 || isGeneratingPayment}
+                      onClick={handleInitiateBictorysSale}
+                      className="rounded-xl text-xs h-9 px-3 border-border hover:bg-muted font-bold text-foreground flex items-center justify-center gap-1.5"
+                      title="Afficher le QR code pour scan sur place"
+                    >
+                      <QrCode className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <span>QR Bictorys</span>
+                    </Button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
@@ -1026,7 +1193,15 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                       {sale.customerName}
                     </td>
                     <td className="py-4 px-4">
-                      <PaymentMethodBadge method={sale.paymentMethod} />
+                      <div className="flex flex-col gap-1 items-start">
+                        <PaymentMethodBadge method={sale.paymentMethod} />
+                        {sale.status === "sent" && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                            En attente règlement
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 px-4 text-right text-xs font-mono text-muted-foreground">
                       {sale.items.length} art.
@@ -1047,6 +1222,19 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                         >
                           <MessageCircle className="w-3.5 h-3.5 fill-current" />
                           <span className="hidden sm:inline">WhatsApp</span>
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://saas-facturation-ughf.vercel.app";
+                            window.open(`${baseUrl}/pay/ticket/${sale.saleNumber}`, "_blank");
+                          }}
+                          className="rounded-xl h-7 px-2.5 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                          title="Ouvrir la page de paiement client"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Lien</span>
                         </Button>
                         <Button
                           size="sm"
@@ -1430,6 +1618,97 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
               <CheckCircle2 className="w-4 h-4" />
               <span>Confirmer l'encaissement & Valider le ticket</span>
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Confirmation Envoi Lien WhatsApp Automatique */}
+      <Dialog open={whatsAppModalOpen} onOpenChange={setWhatsAppModalOpen}>
+        <DialogContent className="sm:max-w-md bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="text-base font-bold flex items-center gap-2 text-foreground">
+              <div className="w-8 h-8 rounded-full bg-[#25D366]/20 text-[#25D366] flex items-center justify-center shrink-0">
+                <MessageCircle className="w-4 h-4 fill-current" />
+              </div>
+              <span>Lien WhatsApp envoyé avec succès !</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-4 py-2">
+            <div className="p-3.5 rounded-2xl bg-muted/60 border border-border flex flex-col gap-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Commande N°</span>
+                <span className="font-mono font-bold text-foreground">{activePendingTicket?.saleNumber}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Client</span>
+                <span className="font-semibold text-foreground">{activePendingTicket?.customerName}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-muted-foreground">Numéro WhatsApp</span>
+                <span className="font-mono font-bold text-foreground">{activePendingTicket?.customerPhone || "Non spécifié"}</span>
+              </div>
+              <div className="flex justify-between items-center text-sm font-bold border-t border-border pt-2">
+                <span>Total à encaisser</span>
+                <span className="text-primary font-mono text-base">{activePendingTicket ? formatFCFA(activePendingTicket.total) : ""}</span>
+              </div>
+            </div>
+
+            {/* Reassurance Banner Validation 100% Automatique */}
+            <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-start gap-2.5">
+              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                  Validation 100% Automatique via Bictorys
+                </span>
+                <p className="text-[11px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                  Le client peut régler sur le lien par Wave, Orange Money, Free Money ou Carte Bancaire. Dès son paiement confirmé, le ticket passe en <strong>PAYÉ</strong> automatiquement par webhook sans intervention de votre part !
+                </p>
+              </div>
+            </div>
+
+            {/* Link Preview & Copy */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-muted-foreground">Lien de paiement envoyé au client :</label>
+              <div className="flex items-center gap-2">
+                <Input
+                  readOnly
+                  value={activePendingTicket?.url || ""}
+                  className="h-9 text-xs font-mono bg-background"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => activePendingTicket?.url && handleCopyText(activePendingTicket.url)}
+                  className="h-9 px-3 text-xs gap-1"
+                >
+                  {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedLink ? "Copié !" : "Copier"}</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 pt-2 border-t border-border">
+              {activePendingTicket?.url && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => window.open(activePendingTicket.url, "_blank")}
+                  className="flex-1 text-xs gap-1.5 h-10 border-primary/30 text-primary hover:bg-primary/5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Tester page client</span>
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={() => setWhatsAppModalOpen(false)}
+                className="flex-1 text-xs font-bold h-10 bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                Nouvelle vente
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

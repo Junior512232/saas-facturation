@@ -109,7 +109,10 @@ export interface Sale {
   saleNumber: string;
   clientId?: string;
   customerName: string;
-  paymentMethod: "cash" | "wave" | "om" | "card" | "bank_transfer" | "bictorys";
+  customerPhone?: string;
+  paymentMethod: "cash" | "wave" | "om" | "card" | "bank_transfer" | "bictorys" | "link" | "whatsapp";
+  status?: "paid" | "sent";
+  paymentUrl?: string;
   subtotal: number;
   taxAmount: number;
   total: number;

@@ -142,7 +142,7 @@ export async function getPublicInvoiceDetails(invoiceId: string) {
     const bankRib = profile?.bank_rib || cfg.bankRib || "";
 
     const paymentMethods = {
-      hasBictorys: (cfg.enableBictorys !== false) && hasBictorysKey,
+      hasBictorys: cfg.enableBictorys !== false,
       wave: {
         enabled: cfg.enableWaveDirect !== false && Boolean(waveNum),
         number: waveNum,
@@ -479,7 +479,19 @@ export async function initiateBictorysPayment({
       rawApiKey = process.env.BICTORYS_PLATFORM_API_KEY || process.env.BICTORYS_API_KEY || null;
     }
 
-    const paymentReference = `INV-${invoice.invoice_number}-${Date.now().toString().slice(-6)}`;
+    const isTicket = 
+      invoice.invoice_number?.startsWith("VTE-") || 
+      invoice.invoice_number?.startsWith("TICK-") || 
+      Boolean(invoice.notes?.toLowerCase().includes("ticket"));
+    
+    const redirectPath = isTicket 
+      ? `/pay/ticket/${invoice.invoice_number || invoice.id}` 
+      : `/pay/${invoice.id}`;
+
+    const paymentReference = isTicket
+      ? `TICKET-${invoice.invoice_number}-${Date.now().toString().slice(-6)}`
+      : `INV-${invoice.invoice_number}-${Date.now().toString().slice(-6)}`;
+
     // afro.tools Gotcha: les URL de redirection doivent impérativement être en HTTPS
     let baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://saas-facturation-ughf.vercel.app";
     if (baseUrl.startsWith("http://")) {
@@ -491,7 +503,7 @@ export async function initiateBictorysPayment({
     if (!rawApiKey) {
       return {
         success: true,
-        paymentUrl: `${baseUrl}/pay/${invoice.id}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
+        paymentUrl: `${baseUrl}${redirectPath}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
         paymentReference,
         simulated: true,
       };
@@ -507,23 +519,24 @@ export async function initiateBictorysPayment({
       paymentReference: paymentReference,
       orderDetails: [
         {
-          description: description || `Règlement facture ${invoice.invoice_number}`,
+          description: description || (isTicket ? `Ticket de caisse ${invoice.invoice_number}` : `Règlement facture ${invoice.invoice_number}`),
           amount: Math.round(amount),
         },
       ],
       customerObject: formatCustomerObject({
-        name: customerName || "Client",
+        name: customerName || (isTicket ? "Client de passage" : "Client"),
         email: customerEmail,
         phone: customerPhone,
         country: "SN",
       }),
-      successRedirectUrl: `${baseUrl}/pay/${invoice.id}?success=true&ref=${paymentReference}`,
-      errorRedirectUrl: `${baseUrl}/pay/${invoice.id}?error=true`,
+      successRedirectUrl: `${baseUrl}${redirectPath}?success=true&ref=${paymentReference}`,
+      errorRedirectUrl: `${baseUrl}${redirectPath}?error=true`,
       metadata: {
         invoiceId: invoice.id,
         invoiceNumber: invoice.invoice_number,
+        saleNumber: invoice.invoice_number,
         merchantId: invoice.profile_id,
-        type: "invoice",
+        type: isTicket ? "pos_sale" : "invoice",
       },
     };
 
@@ -569,7 +582,7 @@ export async function initiateBictorysPayment({
       console.warn("Basculement vers la simulation sandbox Bictorys (mode test détecté)");
       return {
         success: true,
-        paymentUrl: `${baseUrl}/pay/${invoice.id}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
+        paymentUrl: `${baseUrl}${redirectPath}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
         paymentReference,
         simulated: true,
       };
@@ -593,7 +606,7 @@ export async function initiateBictorysPayment({
       }
       return {
         success: true,
-        paymentUrl: `${baseUrl}/pay/${invoice.id}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
+        paymentUrl: `${baseUrl}${redirectPath}?sandbox_pay=true&ref=${paymentReference}&amount=${Math.round(amount)}${paymentType ? `&method=${paymentType}` : ""}`,
         paymentReference,
         simulated: true,
       };
@@ -807,6 +820,7 @@ export async function createPosSaleInvoice(saleData: {
   customerName?: string;
   customerPhone?: string;
   paymentMethod?: string;
+  status?: "paid" | "sent";
   subtotal: number;
   taxAmount: number;
   total: number;
@@ -840,7 +854,10 @@ export async function createPosSaleInvoice(saleData: {
       profileId = adminProfile.id;
     }
 
-    const isPaid = saleData.paymentMethod !== "bictorys";
+    // Si le statut est explicite, l'utiliser. Sinon, seule la caisse espèces immédiate est "paid" par défaut
+    const finalStatus = saleData.status 
+      ? saleData.status 
+      : (saleData.paymentMethod === "cash" ? "paid" : "sent");
 
     // 1. Insertion de la facture / ticket
     const { data: invoice, error } = await supabaseAdmin
@@ -849,7 +866,7 @@ export async function createPosSaleInvoice(saleData: {
         profile_id: profileId,
         client_id: saleData.clientId || null,
         invoice_number: saleData.saleNumber,
-        status: isPaid ? "paid" : "sent",
+        status: finalStatus,
         issue_date: new Date().toISOString().split("T")[0],
         due_date: new Date().toISOString().split("T")[0],
         subtotal: saleData.subtotal,

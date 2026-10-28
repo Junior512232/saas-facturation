@@ -89,12 +89,12 @@ export default function PublicTicketPayPage() {
       if (res.success && res.data) {
         setTicket(res.data);
         const pm = res.data.paymentMethods;
-        if (pm?.wave?.enabled) {
+        if (pm?.hasBictorys !== false) {
+          setSelectedMethod("gateway");
+        } else if (pm?.wave?.enabled) {
           setSelectedMethod("wave");
         } else if (pm?.cash?.enabled) {
           setSelectedMethod("cash");
-        } else if (pm?.hasBictorys) {
-          setSelectedMethod("gateway");
         }
       } else {
         // Essayer aussi de chercher dans le cache local (si même machine)
@@ -427,80 +427,149 @@ Pouvez-vous confirmer le bon enregistrement de ce règlement ? Merci !`;
             Choisissez comment vous souhaitez régler ce ticket :
           </p>
 
-          {/* Sélecteur de méthode (Caisse vs Wave vs OM vs Bictorys) */}
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("cash")}
-              className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border transition-all ${
-                selectedMethod === "cash"
-                  ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm"
-                  : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
-              }`}
-            >
-              <Banknote className="w-3.5 h-3.5" />
-              <span>Caisse (Espèces)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("wave")}
-              className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border transition-all ${
-                selectedMethod === "wave"
-                  ? "bg-[#1dc3f7]/20 border-[#1dc3f7] text-[#38bdf8] shadow-sm"
-                  : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
-              }`}
-            >
-              <WaveLogo className="w-3.5 h-3.5" />
-              <span>Wave Direct</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedMethod("om")}
-              className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border transition-all ${
-                selectedMethod === "om"
-                  ? "bg-[#ff7900]/20 border-[#ff7900] text-[#fb923c] shadow-sm"
-                  : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
-              }`}
-            >
-              <OrangeMoneyLogo className="w-3.5 h-3.5" />
-              <span>Orange Money</span>
-            </button>
-
+          {/* Sélecteur de méthode (Bictorys mis en avant en premier + Wave, OM, Caisse) */}
+          <div className="flex flex-col gap-2">
+            {/* 1. BICTORYS EN LIGNE - EN TÊTE AVEC VALIDATION AUTOMATIQUE */}
             <button
               type="button"
               onClick={() => setSelectedMethod("gateway")}
-              className={`flex items-center justify-center gap-1.5 p-2.5 rounded-xl font-bold text-xs border transition-all ${
+              className={`w-full flex items-center justify-between p-3 rounded-xl font-bold text-xs border transition-all ${
                 selectedMethod === "gateway"
-                  ? "bg-primary/20 border-primary text-primary shadow-sm"
-                  : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
+                  ? "bg-primary/20 border-primary text-primary shadow-md ring-1 ring-primary/40"
+                  : "bg-slate-900/60 border-slate-700 text-slate-300 hover:text-white hover:border-slate-600"
               }`}
             >
-              <CreditCard className="w-3.5 h-3.5" />
-              <span>Bictorys en ligne</span>
+              <div className="flex items-center gap-2.5 text-left">
+                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <CreditCard className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-extrabold text-white text-xs">Bictorys en ligne</span>
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      ⚡ 100% Automatique
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-normal block">
+                    Wave • Orange Money • Free Money • Carte CB
+                  </span>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 shrink-0 text-primary" />
             </button>
+
+            {/* Autres méthodes (Directes & Caisse) */}
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("wave")}
+                className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl font-bold text-[11px] border transition-all ${
+                  selectedMethod === "wave"
+                    ? "bg-[#1dc3f7]/20 border-[#1dc3f7] text-[#38bdf8] shadow-sm"
+                    : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
+                }`}
+              >
+                <WaveLogo className="w-4 h-4" />
+                <span>Wave Direct</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("om")}
+                className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl font-bold text-[11px] border transition-all ${
+                  selectedMethod === "om"
+                    ? "bg-[#ff7900]/20 border-[#ff7900] text-[#fb923c] shadow-sm"
+                    : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
+                }`}
+              >
+                <OrangeMoneyLogo className="w-4 h-4" />
+                <span>Orange M.</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedMethod("cash")}
+                className={`flex flex-col items-center justify-center gap-1 p-2 rounded-xl font-bold text-[11px] border transition-all ${
+                  selectedMethod === "cash"
+                    ? "bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-sm"
+                    : "bg-slate-900/60 border-slate-700 text-slate-400 hover:text-white"
+                }`}
+              >
+                <Banknote className="w-4 h-4" />
+                <span>Caisse</span>
+              </button>
+            </div>
           </div>
 
           {/* DÉTAIL SELON LE MODE CHOISI */}
 
-          {/* 1. CAISSE / ESPÈCES */}
-          {selectedMethod === "cash" && (
-            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 flex flex-col gap-3">
-              <div className="flex items-center gap-2">
-                <Banknote className="w-4 h-4 text-emerald-400" />
-                <span className="text-xs font-bold text-white">Règlement au comptoir de caisse</span>
+          {/* 1. PASSERELLE BICTORYS (AUTOMATIQUE) */}
+          {selectedMethod === "gateway" && (
+            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-primary/30 flex flex-col gap-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <div className="flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xs font-bold text-white">Validation 100% Automatique</span>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                  Sans intervention du commerçant
+                </span>
               </div>
+
               <p className="text-[11px] text-slate-300 leading-relaxed">
-                Remettez <strong>{formatFCFA(ticket.amount)}</strong> directement au caissier en présentant le ticket <strong>{ticket.number}</strong>.
+                Payez en 1 clic : dès confirmation, votre ticket est validé instantanément par webhook et votre reçu officiel est généré.
               </p>
+
+              {/* Raccourcis directs Mobile Money Bictorys */}
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => handlePayment("wave_money")}
+                  className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-[#1dc3f7] flex flex-col items-center gap-1 transition-all active:scale-95"
+                >
+                  <WaveLogo className="w-5 h-5" />
+                  <span className="text-[10px] font-bold text-slate-200">Wave Auto</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => handlePayment("orange_money")}
+                  className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-[#ff7900] flex flex-col items-center gap-1 transition-all active:scale-95"
+                >
+                  <OrangeMoneyLogo className="w-5 h-5" />
+                  <span className="text-[10px] font-bold text-slate-200">OM Auto</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={isProcessing}
+                  onClick={() => handlePayment("card")}
+                  className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-cyan-400 flex flex-col items-center gap-1 transition-all active:scale-95"
+                >
+                  <CreditCard className="w-5 h-5 text-cyan-400" />
+                  <span className="text-[10px] font-bold text-slate-200">Carte CB</span>
+                </button>
+              </div>
+
+              {/* Bouton principal Bictorys Guichet hébergé */}
               <Button
                 size="sm"
-                onClick={() => handleOpenDeclareModal("cash")}
-                className="w-full h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
+                disabled={isProcessing}
+                onClick={() => handlePayment("hosted")}
+                className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2"
               >
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Confirmer mon règlement à la caisse</span>
+                {isProcessing ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Redirection sécurisée Bictorys...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    <span>Payer {formatFCFA(ticket.amount)} en ligne</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
               </Button>
             </div>
           )}
@@ -579,37 +648,23 @@ Pouvez-vous confirmer le bon enregistrement de ce règlement ? Merci !`;
             </div>
           )}
 
-          {/* 4. PASSERELLE BICTORYS */}
-          {selectedMethod === "gateway" && (
-            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-primary/30 flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-bold text-white">Validation automatique</span>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
-                  afro.tools
-                </span>
+          {/* 4. CAISSE / ESPÈCES */}
+          {selectedMethod === "cash" && (
+            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-700/80 flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <Banknote className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-white">Règlement au comptoir de caisse</span>
               </div>
-
+              <p className="text-[11px] text-slate-300 leading-relaxed">
+                Remettez <strong>{formatFCFA(ticket.amount)}</strong> directement au caissier en présentant le ticket <strong>{ticket.number}</strong>.
+              </p>
               <Button
                 size="sm"
-                disabled={isProcessing}
-                onClick={() => handlePayment("hosted")}
-                className="w-full h-10 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs rounded-xl shadow-lg flex items-center justify-center gap-2"
+                onClick={() => handleOpenDeclareModal("cash")}
+                className="w-full h-9 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
               >
-                {isProcessing ? (
-                  <>
-                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    <span>Redirection Bictorys...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4" />
-                    <span>Payer {formatFCFA(ticket.amount)} en ligne</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                )}
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Confirmer mon règlement à la caisse</span>
               </Button>
             </div>
           )}
@@ -621,7 +676,7 @@ Pouvez-vous confirmer le bon enregistrement de ce règlement ? Merci !`;
             className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] font-bold text-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
           >
             <MessageCircle className="w-4 h-4 fill-current" />
-            <span>Envoyer au caissier sur WhatsApp</span>
+            <span>Envoyer un message au caissier sur WhatsApp</span>
           </button>
         </div>
       )}
