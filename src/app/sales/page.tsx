@@ -124,9 +124,13 @@ export default function SalesPage() {
     const paymentLinkSection = `\n🔗 *Consulter ou régler votre ticket en ligne :*\n${paymentLink}\n`;
 
     const methodLabel = sale.paymentMethod === "bictorys"
-      ? "BICTORYS (WAVE / ORANGE MONEY / CB)"
+      ? "BICTORYS (WAVE / OM / CB EN LIGNE)"
+      : sale.paymentMethod === "wave"
+      ? "WAVE DIRECT (CAISSE)"
+      : sale.paymentMethod === "om"
+      ? "ORANGE MONEY DIRECT (CAISSE)"
       : sale.paymentMethod === "cash"
-      ? "ESPÈCES"
+      ? "ESPÈCES (CAISSE)"
       : (sale.paymentMethod || "").toUpperCase();
 
     const message = 
@@ -694,6 +698,83 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                   Moyen de règlement
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
+                  {/* Espèces Caisse */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("cash")}
+                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
+                      paymentMethod === "cash"
+                        ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm ring-2 ring-emerald-500/30"
+                        : "border-border hover:bg-muted/60 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-600">
+                        <Banknote className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                        Caisse
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs block text-foreground">Espèces</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">Billets & Rendu</span>
+                    </div>
+                  </button>
+
+                  {/* Wave Direct Caisse */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("wave")}
+                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
+                      paymentMethod === "wave"
+                        ? "border-[#1dc3f7] bg-[#1dc3f7]/10 text-[#007da3] dark:text-[#38bdf8] shadow-sm ring-2 ring-[#1dc3f7]/30"
+                        : "border-border hover:bg-muted/60 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="w-7 h-7 rounded-lg bg-[#1dc3f7]/15 flex items-center justify-center">
+                        <WaveLogo className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#1dc3f7] text-white">
+                        Direct
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs block text-foreground">Wave Direct</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">
+                        {companySettings?.waveNumber || "Numéro Wave"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Orange Money Direct Caisse */}
+                  <button
+                    type="button"
+                    onClick={() => setPaymentMethod("om")}
+                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
+                      paymentMethod === "om"
+                        ? "border-[#ff7900] bg-[#ff7900]/10 text-[#ea580c] dark:text-[#fb923c] shadow-sm ring-2 ring-[#ff7900]/30"
+                        : "border-border hover:bg-muted/60 text-muted-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="w-7 h-7 rounded-lg bg-[#ff7900]/15 flex items-center justify-center">
+                        <OrangeMoneyLogo className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-[#ff7900] text-white">
+                        Direct
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-extrabold text-xs block text-foreground">Orange Money</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">
+                        {companySettings?.omNumber || "Numéro OM"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Passerelle Bictorys */}
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("bictorys")}
@@ -712,34 +793,43 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                       </span>
                     </div>
                     <div>
-                      <span className="font-extrabold text-xs block text-foreground">Paiement Bictorys</span>
-                      <span className="text-[10px] text-muted-foreground font-medium block">Wave • OM • Free • CB</span>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("cash")}
-                    className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all relative overflow-hidden ${
-                      paymentMethod === "cash"
-                        ? "border-emerald-600 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 shadow-sm ring-2 ring-emerald-500/30"
-                        : "border-border hover:bg-muted/60 text-muted-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between w-full">
-                      <div className="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-600">
-                        <Banknote className="w-4 h-4" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded bg-emerald-600 text-white">
-                        Comptoir
-                      </span>
-                    </div>
-                    <div>
-                      <span className="font-extrabold text-xs block text-foreground">Espèces</span>
-                      <span className="text-[10px] text-muted-foreground font-medium block">Billets & Rendu</span>
+                      <span className="font-extrabold text-xs block text-foreground">Bictorys en ligne</span>
+                      <span className="text-[10px] text-muted-foreground font-medium block">Wave • OM • CB</span>
                     </div>
                   </button>
                 </div>
+
+                {/* If Wave Direct : Info encaissement */}
+                {paymentMethod === "wave" && (
+                  <div className="p-3 rounded-xl bg-[#1dc3f7]/5 border border-[#1dc3f7]/25 flex items-center justify-between text-xs mt-0.5">
+                    <div className="flex items-center gap-2">
+                      <WaveLogo className="w-4 h-4" />
+                      <span className="text-muted-foreground">Numéro Wave boutique :</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {companySettings?.waveNumber || user?.phone || "+221 77 123 45 67"}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#007da3] dark:text-[#38bdf8] bg-[#1dc3f7]/15 px-2 py-0.5 rounded-full">
+                      0% Commission
+                    </span>
+                  </div>
+                )}
+
+                {/* If Orange Money Direct : Info encaissement */}
+                {paymentMethod === "om" && (
+                  <div className="p-3 rounded-xl bg-[#ff7900]/5 border border-[#ff7900]/25 flex items-center justify-between text-xs mt-0.5">
+                    <div className="flex items-center gap-2">
+                      <OrangeMoneyLogo className="w-4 h-4" />
+                      <span className="text-muted-foreground">Orange Money boutique :</span>
+                      <span className="font-mono font-bold text-foreground">
+                        {companySettings?.omNumber || "+221 77 890 12 34"} {companySettings?.omMerchantCode ? `(${companySettings.omMerchantCode})` : ""}
+                      </span>
+                    </div>
+                    <span className="text-[10px] font-bold text-[#ea580c] bg-[#ff7900]/15 px-2 py-0.5 rounded-full">
+                      Caisse directe
+                    </span>
+                  </div>
+                )}
 
                 {/* If Bictorys : Reassurance & Channel badges */}
                 {paymentMethod === "bictorys" && (
@@ -862,6 +952,24 @@ _Certifié conforme par iziFlow POS • www.iziflow.sn_`;
                       <span>Générer QR & Lien Bictorys ({formatFCFA(total)})</span>
                     </>
                   )}
+                </Button>
+              ) : paymentMethod === "wave" ? (
+                <Button
+                  disabled={cart.length === 0}
+                  onClick={() => handleCheckout("wave")}
+                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-[#007da3] hover:bg-[#006a8a] text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <WaveLogo className="w-5 h-5 shrink-0" />
+                  <span>Valider l'encaissement Wave Direct ({formatFCFA(total)})</span>
+                </Button>
+              ) : paymentMethod === "om" ? (
+                <Button
+                  disabled={cart.length === 0}
+                  onClick={() => handleCheckout("om")}
+                  className="w-full rounded-2xl py-3.5 text-sm font-bold bg-[#ea580c] hover:bg-[#c2410c] text-white shadow-md active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                >
+                  <OrangeMoneyLogo className="w-5 h-5 shrink-0" />
+                  <span>Valider l'encaissement Orange Money ({formatFCFA(total)})</span>
                 </Button>
               ) : (
                 <Button
