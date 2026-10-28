@@ -44,6 +44,16 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS use_stamp_on_documents BOOL
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS use_signature_on_documents BOOLEAN DEFAULT TRUE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bictorys_api_key TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bictorys_webhook_secret TEXT;
+-- Moyens de paiement directs (Sénégal : Wave, Orange Money, RIB, Cash)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS wave_number TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS wave_merchant_id TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS om_number TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS om_merchant_code TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bank_name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bank_account_name TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS bank_rib TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS payment_instructions TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS payment_methods_config JSONB DEFAULT '{}'::jsonb;
 
 
 -- Clients table

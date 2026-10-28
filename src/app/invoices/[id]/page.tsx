@@ -279,11 +279,21 @@ export default function InvoiceDetailPage() {
           <div className="w-full md:w-1/2 print:w-1/2 flex flex-col justify-between">
             <div>
               {invoice.notes && (
-                <div className="mb-6">
-                  <p className="text-sm font-semibold text-muted-foreground mb-2 print:text-gray-500">Notes</p>
-                  <p className="text-sm text-foreground bg-muted/30 p-4 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 print:text-black">
+                <div className="mb-4">
+                  <p className="text-sm font-semibold text-muted-foreground mb-1.5 print:text-gray-500">Notes & Conditions</p>
+                  <p className="text-xs text-foreground bg-muted/30 p-3 rounded-xl border border-border/50 print:bg-gray-50 print:border-gray-200 print:text-black">
                     {invoice.notes}
                   </p>
+                </div>
+              )}
+
+              {(companySettings?.waveNumber || companySettings?.omNumber || companySettings?.bankRib || companySettings?.paymentInstructions) && (
+                <div className="mb-4 text-xs text-muted-foreground p-3.5 rounded-xl bg-muted/20 border border-border/50 print:bg-gray-50 print:border-gray-200">
+                  <p className="font-bold text-foreground print:text-black mb-1">Modalités de règlement :</p>
+                  {companySettings.waveNumber && <p>• <strong>Wave Direct :</strong> {companySettings.waveNumber}</p>}
+                  {companySettings.omNumber && <p>• <strong>Orange Money :</strong> {companySettings.omNumber} {companySettings.omMerchantCode ? `(Code Marchand : ${companySettings.omMerchantCode})` : ""}</p>}
+                  {companySettings.bankRib && <p>• <strong>RIB ({companySettings.bankName || "Banque"}) :</strong> {companySettings.bankRib}</p>}
+                  {companySettings.paymentInstructions && <p className="italic text-[11px] mt-1">{companySettings.paymentInstructions}</p>}
                 </div>
               )}
             </div>

@@ -636,6 +636,18 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
             companySignatoryName: profileData.company_signatory_name || prev?.companySignatoryName || "La Direction",
             useStampOnDocuments: profileData.use_stamp_on_documents !== false,
             useSignatureOnDocuments: profileData.use_signature_on_documents !== false,
+            waveNumber: profileData.wave_number || (profileData as any).payment_methods_config?.waveNumber || prev?.waveNumber,
+            waveMerchantId: profileData.wave_merchant_id || (profileData as any).payment_methods_config?.waveMerchantId || prev?.waveMerchantId,
+            enableWaveDirect: (profileData as any).payment_methods_config?.enableWaveDirect !== false,
+            omNumber: profileData.om_number || (profileData as any).payment_methods_config?.omNumber || prev?.omNumber,
+            omMerchantCode: profileData.om_merchant_code || (profileData as any).payment_methods_config?.omMerchantCode || prev?.omMerchantCode,
+            enableOmDirect: (profileData as any).payment_methods_config?.enableOmDirect !== false,
+            bankName: profileData.bank_name || (profileData as any).payment_methods_config?.bankName || prev?.bankName,
+            bankAccountName: profileData.bank_account_name || (profileData as any).payment_methods_config?.bankAccountName || prev?.bankAccountName,
+            bankRib: profileData.bank_rib || (profileData as any).payment_methods_config?.bankRib || prev?.bankRib,
+            enableBankTransfer: (profileData as any).payment_methods_config?.enableBankTransfer !== false,
+            enableCash: (profileData as any).payment_methods_config?.enableCash ?? true,
+            paymentInstructions: profileData.payment_instructions || (profileData as any).payment_methods_config?.paymentInstructions || prev?.paymentInstructions,
           }));
         }
       } catch {}
@@ -871,6 +883,14 @@ export const AppDataProvider = ({ children }: { children: ReactNode }) => {
             ...(settings.companySignatoryName !== undefined && { company_signatory_name: settings.companySignatoryName }),
             ...(settings.useStampOnDocuments !== undefined && { use_stamp_on_documents: settings.useStampOnDocuments }),
             ...(settings.useSignatureOnDocuments !== undefined && { use_signature_on_documents: settings.useSignatureOnDocuments }),
+            ...(settings.waveNumber !== undefined && { wave_number: settings.waveNumber }),
+            ...(settings.waveMerchantId !== undefined && { wave_merchant_id: settings.waveMerchantId }),
+            ...(settings.omNumber !== undefined && { om_number: settings.omNumber }),
+            ...(settings.omMerchantCode !== undefined && { om_merchant_code: settings.omMerchantCode }),
+            ...(settings.bankName !== undefined && { bank_name: settings.bankName }),
+            ...(settings.bankAccountName !== undefined && { bank_account_name: settings.bankAccountName }),
+            ...(settings.bankRib !== undefined && { bank_rib: settings.bankRib }),
+            ...(settings.paymentInstructions !== undefined && { payment_instructions: settings.paymentInstructions }),
           })
           .eq("id", session.user.id);
       } catch {}

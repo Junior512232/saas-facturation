@@ -25,6 +25,15 @@ export interface Database {
           bictorys_webhook_secret?: string | null
           cinetpay_site_id: string | null
           cinetpay_apikey: string | null
+          wave_number?: string | null
+          wave_merchant_id?: string | null
+          om_number?: string | null
+          om_merchant_code?: string | null
+          bank_name?: string | null
+          bank_account_name?: string | null
+          bank_rib?: string | null
+          payment_instructions?: string | null
+          payment_methods_config?: Json | null
           created_at: string | null
           updated_at: string | null
         }
@@ -43,6 +52,15 @@ export interface Database {
           bictorys_webhook_secret?: string | null
           cinetpay_site_id?: string | null
           cinetpay_apikey?: string | null
+          wave_number?: string | null
+          wave_merchant_id?: string | null
+          om_number?: string | null
+          om_merchant_code?: string | null
+          bank_name?: string | null
+          bank_account_name?: string | null
+          bank_rib?: string | null
+          payment_instructions?: string | null
+          payment_methods_config?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }
@@ -61,6 +79,15 @@ export interface Database {
           bictorys_webhook_secret?: string | null
           cinetpay_site_id?: string | null
           cinetpay_apikey?: string | null
+          wave_number?: string | null
+          wave_merchant_id?: string | null
+          om_number?: string | null
+          om_merchant_code?: string | null
+          bank_name?: string | null
+          bank_account_name?: string | null
+          bank_rib?: string | null
+          payment_instructions?: string | null
+          payment_methods_config?: Json | null
           created_at?: string | null
           updated_at?: string | null
         }

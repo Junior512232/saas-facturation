@@ -88,7 +88,7 @@ export async function getPublicInvoiceDetails(invoiceId: string) {
     if (isUuid) {
       const { data, error } = await supabaseAdmin
         .from("invoices")
-        .select("*, clients(name, email, phone), invoice_items(*), profiles(company_name, ninea, phone, email)")
+        .select("*, clients(name, email, phone), invoice_items(*), profiles(*)")
         .eq("id", invoiceId)
         .maybeSingle();
 
@@ -101,7 +101,7 @@ export async function getPublicInvoiceDetails(invoiceId: string) {
     if (!invoice) {
       const { data, error } = await supabaseAdmin
         .from("invoices")
-        .select("*, clients(name, email, phone), invoice_items(*), profiles(company_name, ninea, phone, email)")
+        .select("*, clients(name, email, phone), invoice_items(*), profiles(*)")
         .eq("invoice_number", invoiceId)
         .maybeSingle();
 
@@ -134,6 +134,36 @@ export async function getPublicInvoiceDetails(invoiceId: string) {
 
     const clientData = invoice.clients as any;
     const profile = invoice.profiles as any;
+    const cfg = (profile?.payment_methods_config || {}) as Record<string, any>;
+
+    const hasBictorysKey = Boolean(profile?.bictorys_api_key || profile?.cinetpay_apikey);
+    const waveNum = profile?.wave_number || cfg.waveNumber || profile?.phone || "";
+    const omNum = profile?.om_number || cfg.omNumber || profile?.phone || "";
+    const bankRib = profile?.bank_rib || cfg.bankRib || "";
+
+    const paymentMethods = {
+      hasBictorys: (cfg.enableBictorys !== false) && hasBictorysKey,
+      wave: {
+        enabled: cfg.enableWaveDirect !== false && Boolean(waveNum),
+        number: waveNum,
+        merchantId: profile?.wave_merchant_id || cfg.waveMerchantId || "",
+      },
+      orangeMoney: {
+        enabled: cfg.enableOmDirect !== false && Boolean(omNum || profile?.om_merchant_code || cfg.omMerchantCode),
+        number: omNum,
+        merchantCode: profile?.om_merchant_code || cfg.omMerchantCode || "",
+      },
+      bankTransfer: {
+        enabled: cfg.enableBankTransfer !== false && Boolean(bankRib),
+        bankName: profile?.bank_name || cfg.bankName || "Banque au Sénégal",
+        accountName: profile?.bank_account_name || cfg.bankAccountName || profile?.company_name || "Entreprise",
+        rib: bankRib,
+      },
+      cash: {
+        enabled: cfg.enableCash ?? true,
+      },
+      instructions: profile?.payment_instructions || cfg.paymentInstructions || "Indiquez votre numéro de facture en référence lors de votre transfert.",
+    };
 
     const formattedInvoice = {
       id: invoice.id,
@@ -151,6 +181,7 @@ export async function getPublicInvoiceDetails(invoiceId: string) {
       status: invoice.status,
       notes: invoice.notes,
       items,
+      paymentMethods,
       merchant: {
         name: profile?.company_name || "iziFlow SARL",
         email: profile?.email || "contact@iziflow.sn",
@@ -292,6 +323,96 @@ export async function confirmPublicInvoicePayment({
     return { success: false, error: error.message };
   }
 }
+
+/**
+ * Déclare un règlement direct effectué par le client (Wave direct, Orange Money direct, Virement RIB, Espèces)
+ * Ajoute la trace dans les notes de facture et informe l'entreprise
+ */
+export async function declareDirectPayment({
+  invoiceId,
+  method,
+  reference,
+  senderPhone,
+  senderName,
+  notes,
+}: {
+  invoiceId: string;
+  method: "wave" | "orange_money" | "bank_transfer" | "cash";
+  reference?: string;
+  senderPhone?: string;
+  senderName?: string;
+  notes?: string;
+}) {
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(invoiceId);
+    let invoice: any = null;
+
+    if (isUuid) {
+      const { data } = await supabaseAdmin
+        .from("invoices")
+        .select("id, status, notes, total, invoice_number, profile_id")
+        .eq("id", invoiceId)
+        .maybeSingle();
+      invoice = data;
+    }
+
+    if (!invoice) {
+      const { data } = await supabaseAdmin
+        .from("invoices")
+        .select("id, status, notes, total, invoice_number, profile_id")
+        .eq("invoice_number", invoiceId)
+        .maybeSingle();
+      invoice = data;
+    }
+
+    if (!invoice) {
+      return { success: false, error: "Facture introuvable." };
+    }
+
+    const timestamp = new Date().toLocaleString("fr-FR");
+    const methodLabels: Record<string, string> = {
+      wave: "Wave Direct",
+      orange_money: "Orange Money Direct",
+      bank_transfer: "Virement Bancaire (RIB)",
+      cash: "Règlement Espèces / Livraison",
+    };
+
+    const paymentLine = `\n[${timestamp}] Déclaration de paiement ${methodLabels[method] || method} : Réf : ${reference || "N/A"}${senderPhone ? ` | Tél : ${senderPhone}` : ""}${senderName ? ` | Payeur : ${senderName}` : ""}${notes ? ` | Consignes : ${notes}` : ""}`;
+    const updatedNotes = ((invoice.notes || "") + paymentLine).trim();
+
+    // Mettre à jour les notes
+    await supabaseAdmin
+      .from("invoices")
+      .update({
+        notes: updatedNotes,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", invoice.id);
+
+    // Enregistrer également une trace dans payments en statut 'pending'
+    try {
+      await supabaseAdmin.from("payments").insert({
+        invoice_id: invoice.id,
+        profile_id: invoice.profile_id,
+        amount: invoice.total,
+        payment_method: methodLabels[method] || method,
+        transaction_id: reference || `DECL-${Date.now()}`,
+        status: "pending",
+      });
+    } catch (e) {
+      console.warn("Avertissement table payments insert pending:", e);
+    }
+
+    return {
+      success: true,
+      message: "Votre déclaration de paiement a été envoyée à l'entreprise avec succès.",
+    };
+  } catch (err: any) {
+    console.error("Erreur declareDirectPayment:", err);
+    return { success: false, error: err.message || "Erreur lors de la déclaration du paiement." };
+  }
+}
+
 
 /**
  * Initialise un paiement Bictorys pour une facture client

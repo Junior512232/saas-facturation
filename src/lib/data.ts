@@ -137,6 +137,19 @@ export interface CompanySettings {
   companySignatoryName?: string;
   useStampOnDocuments: boolean;
   useSignatureOnDocuments: boolean;
+  // Moyens de paiement directs (Sénégal)
+  waveNumber?: string;
+  waveMerchantId?: string;
+  enableWaveDirect?: boolean;
+  omNumber?: string;
+  omMerchantCode?: string;
+  enableOmDirect?: boolean;
+  bankName?: string;
+  bankAccountName?: string;
+  bankRib?: string;
+  enableBankTransfer?: boolean;
+  enableCash?: boolean;
+  paymentInstructions?: string;
 }
 
 // ─── Extension Paie & RH ──────────────────────────────────────────────────────
